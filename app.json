@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Dusmint Partner (Seller)",
+    "slug": "dusmint-vendor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.dusmint.vendor"
+    }
+  }
+}
