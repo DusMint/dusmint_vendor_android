@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Colors } from '../theme/colors';
 
-export type RoundButtonType = 'bgPrimary' | 'textPrimary' | 'outline';
+export type RoundButtonType = 'bgPrimary' | 'textPrimary' | 'outline' | 'orange';
 
 export interface RoundButtonProps {
   title: string;
