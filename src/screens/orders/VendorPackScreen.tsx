@@ -6,6 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  Image,
   Alert,
 } from 'react-native';
 import { Colors, Typography, Spacing, BorderRadius, RoundButton, TrustBadge } from '@dusmint/ui';
@@ -44,7 +45,11 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backArrow}>←</Text>
+          <Image
+            source={require('../../../assets/img/btn_back.png')}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
         <View>
           <Text style={styles.headerTitle}>Pack & Verify Order</Text>
@@ -129,23 +134,23 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.white,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
   },
   backBtn: {
     paddingRight: Spacing.md,
   },
-  backArrow: {
-    fontSize: 22,
-    color: Colors.textPrimary,
+  backIcon: {
+    width: 20,
+    height: 20,
   },
   headerTitle: {
     fontFamily: Typography.fontFamily.headingBold,
