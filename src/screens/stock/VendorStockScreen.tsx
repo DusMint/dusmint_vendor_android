@@ -13,7 +13,6 @@ import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@dusmint/ui'
 interface StockItem {
   id: string;
   nameEn: string;
-  nameHi: string;
   unit: string;
   currentPrice: number;
   mandiMin: number;
@@ -25,7 +24,6 @@ const initialItems: StockItem[] = [
   {
     id: 'item-1',
     nameEn: 'Fresh Desi Tomato (Hybrid)',
-    nameHi: 'ताजा टमाटर (हाइब्रिड)',
     unit: '1 kg',
     currentPrice: 32,
     mandiMin: 25,
@@ -34,8 +32,7 @@ const initialItems: StockItem[] = [
   },
   {
     id: 'item-2',
-    nameEn: 'Indore Jyoti Potato (Aloo)',
-    nameHi: 'इंदौर ज्योति आलू',
+    nameEn: 'Indore Jyoti Potato',
     unit: '1 kg',
     currentPrice: 28,
     mandiMin: 22,
@@ -44,8 +41,7 @@ const initialItems: StockItem[] = [
   },
   {
     id: 'item-3',
-    nameEn: 'Nashik Red Onion (Pyaaz)',
-    nameHi: 'लाल प्याज (नासिक)',
+    nameEn: 'Nashik Red Onion',
     unit: '1 kg',
     currentPrice: 35,
     mandiMin: 30,
@@ -55,7 +51,6 @@ const initialItems: StockItem[] = [
   {
     id: 'item-4',
     nameEn: 'Fresh Palak (Spinach Bunch)',
-    nameHi: 'ताजा पालक की गड्डी',
     unit: '250 g',
     currentPrice: 15,
     mandiMin: 12,
@@ -130,12 +125,12 @@ export const VendorStockScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.white,
   },
   header: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.divider,
   },
