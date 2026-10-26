@@ -1,12 +1,22 @@
 {
   "expo": {
-    "name": "Dusmint Partner (Seller)",
+    "name": "Dusmint Partner",
     "slug": "dusmint-vendor",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D6938"
+    },
     "android": {
-      "package": "com.dusmint.vendor"
+      "package": "com.dusmint.vendor",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0D6938"
+      }
     }
   }
 }
