@@ -1,11 +1,11 @@
 import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Text } from 'react-native';
-import { Colors, Typography } from '@dusmint/ui';
+import { Colors } from '@dusmint/ui';
 import { VendorOrdersScreen } from './src/screens/orders/VendorOrdersScreen';
 import { VendorPackScreen } from './src/screens/orders/VendorPackScreen';
 import { VendorStockScreen } from './src/screens/stock/VendorStockScreen';
@@ -20,18 +20,19 @@ function VendorTabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.secondary,
+        tabBarInactiveTintColor: Colors.placeholder,
         tabBarStyle: {
-          height: 60,
+          height: 64,
           paddingBottom: 8,
-          paddingTop: 6,
-          backgroundColor: Colors.cardBackground,
+          paddingTop: 8,
+          backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
-          borderTopColor: Colors.divider,
+          borderTopColor: '#EEEEEE',
+          elevation: 6,
         },
         tabBarLabelStyle: {
-          fontFamily: Typography.fontFamily.heading,
-          fontSize: 11,
+          fontSize: 12,
+          fontWeight: '600',
         },
       }}
     >
@@ -40,15 +41,33 @@ function VendorTabs() {
         component={VendorOrdersScreen}
         options={{
           tabBarLabel: 'Orders',
-          tabBarIcon: () => <Text style={{ fontSize: 20 }}>📋</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Image
+              source={require('./assets/img/tab_home.png')}
+              style={[
+                styles.tabIcon,
+                { tintColor: focused ? Colors.primary : Colors.placeholder },
+              ]}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tab.Screen
         name="VendorStock"
         component={VendorStockScreen}
         options={{
-          tabBarLabel: 'Stock & Mandi',
-          tabBarIcon: () => <Text style={{ fontSize: 20 }}>🥦</Text>,
+          tabBarLabel: 'Menu & Stock',
+          tabBarIcon: ({ color, focused }) => (
+            <Image
+              source={require('./assets/img/tab_menu.png')}
+              style={[
+                styles.tabIcon,
+                { tintColor: focused ? Colors.primary : Colors.placeholder },
+              ]}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -56,7 +75,16 @@ function VendorTabs() {
         component={VendorEarningsScreen}
         options={{
           tabBarLabel: 'Earnings',
-          tabBarIcon: () => <Text style={{ fontSize: 20 }}>💰</Text>,
+          tabBarIcon: ({ color, focused }) => (
+            <Image
+              source={require('./assets/img/more_payment.png')}
+              style={[
+                styles.tabIcon,
+                { tintColor: focused ? Colors.primary : Colors.placeholder },
+              ]}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -76,3 +104,10 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabIcon: {
+    width: 22,
+    height: 22,
+  },
+});

@@ -92,7 +92,6 @@ export const VendorStockScreen: React.FC = () => {
           >
             <View style={styles.infoCol}>
               <Text style={styles.itemName}>{item.nameEn}</Text>
-              <Text style={styles.itemVernacular}>{item.nameHi}</Text>
               <Text style={styles.itemUnit}>Unit: {item.unit}</Text>
 
               {/* Mandi Rate Comparison */}

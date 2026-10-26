@@ -77,12 +77,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({
         <Text style={styles.title} numberOfLines={1}>
           {nameEn}
         </Text>
-        {nameHi ? (
-          <Text style={styles.vernacularTitle} numberOfLines={1}>
-            {nameHi}
-          </Text>
-        ) : null}
-
         <Text style={styles.unitText}>{unit}</Text>
 
         {/* Price & Action Row */}
