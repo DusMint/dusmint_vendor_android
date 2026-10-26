@@ -1,49 +1,39 @@
 /**
- * Dusmint Design System - Color Palette
- * Defined in design.md & tech.md
- * Tailored for clarity, high contrast, and trust on budget Android screens.
+ * Food Delivery / Dusmint Design System - Exact Sample App Color Palette
+ * Replicated from sample_app/lib/common/color_extension.dart
  */
 export const Colors = {
-  // Brand Primaries
-  primary: '#0D6938',         // Dusmint Forest Green (Primary Brand)
-  primaryLight: '#1B824C',    // Vibrant Leaf Green
-  primaryDark: '#074824',     // Deep Spruce
-  accentMint: '#2ECC71',      // Fresh Mint Accent
+  // Brand Primary (Orange from sample_app: 0xffFC6011)
+  primary: '#FC6011',
+  primaryLight: '#FF7A38',
+  primaryDark: '#E04E00',
 
-  // High-Energy Action Color (inherited from sample_app & design.md)
-  orange: '#FC6011',          // Warm Amber Orange (CTAs, Discounts, Alerts)
-  orangeLight: '#FF7A38',
-
-  // Secondary & Functional
-  secondary: '#7C7D7E',       // Cool Grey
-  placeholder: '#B6B7B7',     // Text placeholder
-  border: '#E8E8E8',          // Clean border line
-  divider: '#F2F2F2',
-
-  // Semantic
-  success: '#10B981',         // Verified badge, completed order
-  warning: '#F59E0B',         // Pending verification, low stock
-  error: '#EF4444',           // Validation error, rejection
-  info: '#3B82F6',
-
-  // Surfaces & Backgrounds
-  background: '#FFFFFF',      // App background
-  surfaceCream: '#FBF9F5',    // Warm organic cream
-  cardBackground: '#FFFFFF',
-  surfaceLightGrey: '#F6F6F6',
-
-  // Typography
-  textPrimary: '#1F2937',     // Charcoal heading/body
-  textSecondary: '#6B7280',   // Subtitle, muted descriptions
+  // Text Colors
+  primaryText: '#4A4B4D',
+  secondaryText: '#7C7D7E',
+  textPrimary: '#4A4B4D',
+  textSecondary: '#7C7D7E',
   textWhite: '#FFFFFF',
 
-  // Badge Specifics
-  trustBadgeBg: '#E8F5E9',
-  trustBadgeText: '#1B5E20',
-  slotBadgeMorningBg: '#FEF3C7',
-  slotBadgeMorningText: '#92400E',
-  slotBadgeEveningBg: '#E0E7FF',
-  slotBadgeEveningText: '#3730A3',
+  // Input Fields & Surfaces
+  textfield: '#F2F2F2',
+  placeholder: '#B6B7B7',
+  white: '#FFFFFF',
+  background: '#FFFFFF',
+  cardBackground: '#FFFFFF',
+  surfaceLightGrey: '#F6F6F6',
+  divider: '#F2F2F2',
+  border: '#E8E8E8',
+
+  // Social Login Colors
+  facebook: '#367FC0',
+  google: '#DD4B39',
+
+  // Status & Semantic
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
 } as const;
 
 export type ColorType = typeof Colors;

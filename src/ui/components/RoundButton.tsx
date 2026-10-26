@@ -8,10 +8,8 @@ import {
   TextStyle,
 } from 'react-native';
 import { Colors } from '../theme/colors';
-import { Typography } from '../theme/typography';
-import { BorderRadius } from '../theme/spacing';
 
-export type RoundButtonType = 'bgPrimary' | 'textPrimary' | 'outline' | 'orange';
+export type RoundButtonType = 'bgPrimary' | 'textPrimary' | 'outline';
 
 export interface RoundButtonProps {
   title: string;
@@ -28,28 +26,24 @@ export const RoundButton: React.FC<RoundButtonProps> = ({
   title,
   onPress,
   type = 'bgPrimary',
-  fontSize = Typography.fontSize.base,
+  fontSize = 16,
   loading = false,
   disabled = false,
   style,
   textStyle,
 }) => {
-  const isOutline = type === 'outline';
-  const isText = type === 'textPrimary';
-  const isOrange = type === 'orange';
+  const isOutline = type === 'outline' || type === 'textPrimary';
 
   const getBackgroundColor = () => {
     if (disabled) return Colors.placeholder;
-    if (isOutline || isText) return 'transparent';
-    if (isOrange) return Colors.orange;
+    if (isOutline) return Colors.white;
     return Colors.primary;
   };
 
   const getTextColor = () => {
-    if (disabled) return Colors.textWhite;
+    if (disabled) return Colors.white;
     if (isOutline) return Colors.primary;
-    if (isText) return Colors.primary;
-    return Colors.textWhite;
+    return Colors.white;
   };
 
   return (
@@ -90,14 +84,14 @@ export const RoundButton: React.FC<RoundButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     height: 56,
-    borderRadius: BorderRadius.roundButton,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
     width: '100%',
   },
   text: {
-    fontFamily: Typography.fontFamily.heading,
+    fontWeight: '600',
     textAlign: 'center',
   },
 });

@@ -8,8 +8,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Colors } from '../theme/colors';
-import { Typography } from '../theme/typography';
-import { BorderRadius, Spacing } from '../theme/spacing';
 
 export interface RoundTextFieldProps extends TextInputProps {
   hintText: string;
@@ -58,37 +56,34 @@ export const RoundTextField: React.FC<RoundTextFieldProps> = ({
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
-    marginVertical: Spacing.sm,
+    marginVertical: 8,
   },
   container: {
     height: 56,
-    backgroundColor: Colors.surfaceLightGrey,
-    borderRadius: BorderRadius.roundButton,
+    backgroundColor: Colors.textfield,
+    borderRadius: 28,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    paddingHorizontal: 20,
   },
   containerError: {
+    borderWidth: 1,
     borderColor: Colors.error,
-    backgroundColor: '#FEF2F2',
   },
   iconContainer: {
-    marginRight: Spacing.sm,
+    marginRight: 10,
   },
   input: {
     flex: 1,
     height: '100%',
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.base,
-    color: Colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.primaryText,
   },
   errorText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
+    fontSize: 12,
     color: Colors.error,
     marginTop: 4,
-    marginLeft: Spacing.base,
+    marginLeft: 20,
   },
 });
