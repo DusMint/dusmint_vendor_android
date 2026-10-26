@@ -1,0 +1,60 @@
+{
+  "app_name": "Dusmint",
+  "tagline": "Full weight, fair price, on time, every time",
+  "auth": {
+    "welcome": "Welcome to Dusmint",
+    "enter_phone": "Enter your mobile number",
+    "otp_sent_to": "Enter the 4-digit code sent to",
+    "send_otp": "Send OTP",
+    "verify_otp": "Verify & Continue",
+    "resend_otp": "Resend OTP",
+    "terms_notice": "By continuing, you agree to Dusmint's Terms of Service and Privacy Policy"
+  },
+  "home": {
+    "deliver_to": "Delivering to",
+    "change": "Change",
+    "slots_today": "Today's Delivery Slots",
+    "categories": "Shop by Category",
+    "anchor_vendors": "Trusted Neighbourhood Vendors",
+    "mandi_rates": "Today's Mandi Price Assurance",
+    "search_placeholder": "Search fresh vegetables, fruits, dairy..."
+  },
+  "cart": {
+    "title": "My Cart",
+    "items_count": "Items",
+    "empty_cart": "Your cart is empty",
+    "subtotal": "Item Total",
+    "delivery_fee": "Delivery Fee",
+    "free_delivery": "FREE",
+    "to_pay": "Total Amount",
+    "substitution": "If an item is out of stock:",
+    "replace_similar": "Replace with similar fresh item",
+    "remove_item": "Remove and refund immediately",
+    "proceed_to_slot": "Select Slot & Checkout"
+  },
+  "slots": {
+    "select_slot": "Choose Delivery Window",
+    "morning_title": "Morning Slot (7 AM - 10 AM)",
+    "evening_title": "Evening Slot (5 PM - 8 PM)",
+    "guarantee_note": "100% on-time guarantee. Delay triggers free delivery credit."
+  },
+  "payment": {
+    "payment_method": "Payment Method",
+    "upi_intent": "Pay via UPI (GPay, PhonePe, Paytm)",
+    "upi_on_delivery": "UPI on Doorstep (Scan & Pay Rider)",
+    "uod_locked_msg": "UPI on Doorstep unlocks after your first 3 successful orders.",
+    "place_order": "Confirm & Place Order"
+  },
+  "orders": {
+    "my_orders": "My Orders",
+    "active_orders": "Active Orders",
+    "past_orders": "Past Orders",
+    "status_placed": "Order Placed",
+    "status_packing": "Vendor Packing (Scale Verified)",
+    "status_out": "Rider Out for Delivery",
+    "status_delivered": "Delivered",
+    "delivery_otp_label": "Share OTP with Rider",
+    "scan_seal_btn": "Scan Seal QR to Open Bag",
+    "report_problem": "Report Quality / Weight Issue"
+  }
+}
