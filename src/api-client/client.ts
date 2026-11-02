@@ -10,13 +10,17 @@ import {
   CreateOrderPayload,
   OrderSummary,
   QualityClaimPayload,
+  VendorProfileInfo,
+  VendorOrderPart,
+  VendorStockItem,
+  VendorEarningsData,
 } from './types';
 
 export class DusmintApiClient {
   private client: AxiosInstance;
   private authToken: string | null = null;
 
-  constructor(baseURL: string = 'http://localhost:3000/api/v1') {
+  constructor(baseURL: string = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000/api/v1') {
     this.client = axios.create({
       baseURL,
       timeout: 10000,
@@ -38,7 +42,7 @@ export class DusmintApiClient {
   }
 
   // --- Auth & Profile ---
-  async sendPhoneOtp(phone: string): Promise<{ success: boolean; message: string }> {
+  async sendPhoneOtp(phone: string): Promise<{ success: boolean; message: string; devOtp?: string }> {
     const res = await this.client.post('/auth/otp/send', { phone });
     return res.data;
   }
@@ -125,6 +129,51 @@ export class DusmintApiClient {
 
   async submitQualityClaim(payload: QualityClaimPayload): Promise<{ claimId: string; status: string; decision: string }> {
     const res = await this.client.post('/claims', payload);
+    return res.data;
+  }
+
+  // ==========================================
+  // --- Merchant / Vendor Specific APIs ---
+  // ==========================================
+  async getVendorList(): Promise<VendorProfileInfo[]> {
+    const res = await this.client.get('/vendor/list');
+    return res.data;
+  }
+
+  async getVendorOrders(vendorId?: string): Promise<VendorOrderPart[]> {
+    const res = await this.client.get('/vendor/orders', {
+      params: vendorId ? { vendorId } : undefined,
+    });
+    return res.data;
+  }
+
+  async packOrderPart(
+    partId: string,
+    payload: { sealQr: string; packedWeightGrams?: number }
+  ): Promise<{ success: boolean; partId: string; status: string; message: string }> {
+    const res = await this.client.post(`/vendor/orders/${partId}/pack`, payload);
+    return res.data;
+  }
+
+  async getVendorStock(vendorId?: string): Promise<VendorStockItem[]> {
+    const res = await this.client.get('/vendor/stock', {
+      params: vendorId ? { vendorId } : undefined,
+    });
+    return res.data;
+  }
+
+  async updateVendorStock(
+    itemId: string,
+    payload: { inStock?: boolean; price?: number }
+  ): Promise<{ success: boolean }> {
+    const res = await this.client.put(`/vendor/stock/${itemId}`, payload);
+    return res.data;
+  }
+
+  async getVendorEarnings(vendorId?: string): Promise<VendorEarningsData> {
+    const res = await this.client.get('/vendor/earnings', {
+      params: vendorId ? { vendorId } : undefined,
+    });
     return res.data;
   }
 }

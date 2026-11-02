@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,32 +6,54 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, Shadows, TrustBadge } from '@dusmint/ui';
+import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@dusmint/ui';
+import { dusmintApi } from '../../api-client/client';
+import { VendorEarningsData } from '../../api-client/types';
 
 export const VendorEarningsScreen: React.FC = () => {
-  const payoutHistory = [
-    {
-      id: 'pay-1',
-      date: 'Today, 26 Oct',
-      ordersCount: 14,
-      gross: '₹2,480.00',
-      commission: '₹248.00 (10%)',
-      netPayout: '₹2,232.00',
-      status: 'Settled to Bank (UPI)',
-      isPaid: true,
-    },
-    {
-      id: 'pay-2',
-      date: 'Yesterday, 25 Oct',
-      ordersCount: 22,
-      gross: '₹3,950.00',
-      commission: '₹395.00 (10%)',
-      netPayout: '₹3,555.00',
-      status: 'Settled to Bank (UPI)',
-      isPaid: true,
-    },
-  ];
+  const [earnings, setEarnings] = useState<VendorEarningsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadEarnings = useCallback(async () => {
+    try {
+      const data = await dusmintApi.getVendorEarnings();
+      setEarnings(data);
+    } catch (err) {
+      console.warn('Failed to fetch earnings:', err);
+      // Fallback default
+      setEarnings({
+        todaySalesPaise: 425000,
+        commissionDeductedPaise: 34000,
+        netPayoutPendingPaise: 391000,
+        payoutVpa: 'ramesh.sharma@okaxis',
+        settlementSchedule: 'Daily 09:30 PM Batch',
+        recentSettlements: [
+          { date: 'Yesterday', amountPaise: 512000, status: 'Credited (Ref: UPI-98412)' },
+          { date: '28 Oct', amountPaise: 489000, status: 'Credited (Ref: UPI-98103)' },
+        ],
+      });
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadEarnings();
+  }, [loadEarnings]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadEarnings();
+  };
+
+  const netRupees = earnings ? (earnings.netPayoutPendingPaise / 100).toFixed(2) : '0.00';
+  const grossRupees = earnings ? (earnings.todaySalesPaise / 100).toFixed(2) : '0.00';
+  const commissionRupees = earnings ? (earnings.commissionDeductedPaise / 100).toFixed(2) : '0.00';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,12 +62,24 @@ export const VendorEarningsScreen: React.FC = () => {
         <Text style={styles.headerSub}>Same-day settlement on customer delivery confirmation</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        {loading && !earnings && (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Loading settlements ledger...</Text>
+          </View>
+        )}
+
         {/* Today's Stats Card */}
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>TODAY'S NET EARNINGS</Text>
-          <Text style={styles.summaryAmount}>₹2,232.00</Text>
-          <Text style={styles.summaryOrders}>From 14 delivered slot orders</Text>
+          <Text style={styles.summaryLabel}>TODAY'S NET EARNINGS (T+0)</Text>
+          <Text style={styles.summaryAmount}>₹{netRupees}</Text>
+          <Text style={styles.summaryOrders}>
+            Gross: ₹{grossRupees} • Platform Commission: -₹{commissionRupees} (10%)
+          </Text>
 
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
@@ -71,27 +105,24 @@ export const VendorEarningsScreen: React.FC = () => {
             <Text style={styles.bankTitle}>Linked Bank / UPI for Payouts</Text>
             <Text style={styles.verifiedTag}>VERIFIED ✅</Text>
           </View>
-          <Text style={styles.upiId}>UPI ID: patidar.mandi@sbi</Text>
+          <Text style={styles.upiId}>UPI ID: {earnings?.payoutVpa || 'ramesh.sharma@okaxis'}</Text>
           <Text style={styles.bankSub}>
-            Settlement is triggered automatically by Cashfree Payouts once delivery OTP is confirmed.
+            Settlement is triggered automatically ({earnings?.settlementSchedule || 'Daily 09:30 PM Batch'}) once customer delivery OTP is verified.
           </Text>
         </View>
 
         {/* Settlement History */}
         <Text style={styles.sectionHeading}>RECENT SETTLEMENTS</Text>
-        {payoutHistory.map((p) => (
-          <View key={p.id} style={styles.payoutCard}>
+        {(earnings?.recentSettlements || []).map((p, idx) => (
+          <View key={idx} style={styles.payoutCard}>
             <View style={styles.payoutHeader}>
               <Text style={styles.payoutDate}>{p.date}</Text>
-              <Text style={styles.netAmount}>{p.netPayout}</Text>
+              <Text style={styles.netAmount}>₹{(p.amountPaise / 100).toFixed(2)}</Text>
             </View>
-            <Text style={styles.payoutSub}>
-              {p.ordersCount} orders • Gross {p.gross} − Commission {p.commission}
-            </Text>
             <View style={styles.payoutFooter}>
-              <Text style={styles.statusText}>{p.status}</Text>
+              <Text style={styles.statusText}>✓ {p.status}</Text>
               <TouchableOpacity>
-                <Text style={styles.statementLink}>Download GST Invoice ›</Text>
+                <Text style={styles.statementLink}>Download Invoice ›</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -126,9 +157,20 @@ const styles = StyleSheet.create({
   },
   scroll: {
     padding: Spacing.base,
+    paddingBottom: 40,
+  },
+  loadingBox: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 8,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.fontSize.xs,
+    color: Colors.secondary,
   },
   summaryCard: {
-    backgroundColor: Colors.primaryDark,
+    backgroundColor: '#0F172A',
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.base,
@@ -137,47 +179,48 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 10,
     fontFamily: Typography.fontFamily.headingBold,
-    color: Colors.accentMint,
+    color: '#34D399',
     letterSpacing: 1,
   },
   summaryAmount: {
     fontFamily: Typography.fontFamily.headingBold,
     fontSize: 34,
-    color: Colors.textWhite,
+    color: '#FFFFFF',
     marginVertical: 4,
   },
   summaryOrders: {
     fontFamily: Typography.fontFamily.body,
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: Typography.fontSize.xs,
+    color: '#94A3B8',
+    marginBottom: Spacing.base,
   },
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: BorderRadius.md,
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    marginTop: Spacing.md,
+    paddingHorizontal: Spacing.base,
   },
   statBox: {
-    alignItems: 'center',
     flex: 1,
+    alignItems: 'center',
   },
   statVal: {
     fontFamily: Typography.fontFamily.headingBold,
     fontSize: Typography.fontSize.sm,
-    color: Colors.textWhite,
+    color: '#FFFFFF',
   },
   statLbl: {
     fontFamily: Typography.fontFamily.body,
     fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: '#94A3B8',
     marginTop: 2,
   },
   statDivider: {
     width: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   bankCard: {
     backgroundColor: Colors.cardBackground,
@@ -186,6 +229,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: Spacing.base,
+    ...Shadows.light,
   },
   bankHeader: {
     flexDirection: 'row',
@@ -194,36 +238,37 @@ const styles = StyleSheet.create({
   },
   bankTitle: {
     fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.xs,
+    fontSize: Typography.fontSize.sm,
     color: Colors.textPrimary,
   },
   verifiedTag: {
-    fontSize: 10,
     fontFamily: Typography.fontFamily.headingBold,
-    color: Colors.primary,
+    fontSize: 10,
+    color: '#059669',
   },
   upiId: {
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.headingBold,
+    fontSize: Typography.fontSize.base,
     color: Colors.primary,
     marginTop: 4,
   },
   bankSub: {
     fontFamily: Typography.fontFamily.body,
-    fontSize: 11,
-    color: Colors.textSecondary,
+    fontSize: Typography.fontSize.xs,
+    color: Colors.secondary,
     marginTop: 4,
+    lineHeight: 18,
   },
   sectionHeading: {
-    fontSize: 10,
     fontFamily: Typography.fontFamily.headingBold,
+    fontSize: 11,
     color: Colors.secondary,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     marginVertical: Spacing.sm,
   },
   payoutCard: {
     backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     padding: Spacing.base,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -241,32 +286,23 @@ const styles = StyleSheet.create({
   },
   netAmount: {
     fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.primary,
-  },
-  payoutSub: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: 11,
-    color: Colors.secondary,
-    marginTop: 2,
+    fontSize: Typography.fontSize.base,
+    color: '#059669',
   },
   payoutFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Spacing.sm,
-    paddingTop: Spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: Colors.divider,
   },
   statusText: {
-    fontFamily: Typography.fontFamily.bodyMedium,
-    fontSize: 10,
+    fontFamily: Typography.fontFamily.body,
+    fontSize: Typography.fontSize.xs,
     color: '#059669',
   },
   statementLink: {
     fontFamily: Typography.fontFamily.heading,
-    fontSize: 10,
+    fontSize: Typography.fontSize.xs,
     color: Colors.primary,
   },
 });

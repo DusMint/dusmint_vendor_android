@@ -153,3 +153,58 @@ export interface QualityClaimPayload {
   proofPhotoUrl: string;
   customerRemarks?: string;
 }
+
+// --- Vendor Operations Types ---
+export interface VendorProfileInfo {
+  id: string;
+  name: string;
+  owner_name?: string;
+  owner_phone?: string;
+  category: string;
+  cluster_id?: string;
+  is_open?: boolean;
+  score?: number;
+  commission_pct?: number;
+}
+
+export interface VendorOrderItem {
+  id: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  pricePaise: number;
+}
+
+export interface VendorOrderPart {
+  partId: string;
+  orderId: string;
+  orderCode: string;
+  status: 'pending' | 'accepted' | 'packing' | 'ready' | 'picked_up' | 'delivered';
+  slotTime: string;
+  subtotalPaise: number;
+  packedWeightGrams?: number | null;
+  sealQr?: string | null;
+  createdAt?: string;
+  items: VendorOrderItem[];
+}
+
+export interface VendorStockItem {
+  id: string;
+  nameEn: string;
+  nameHi?: string;
+  category: string;
+  unit: string;
+  pricePaise: number;
+  mrpPaise?: number;
+  isInStock: boolean;
+  photoUrl?: string;
+}
+
+export interface VendorEarningsData {
+  todaySalesPaise: number;
+  commissionDeductedPaise: number;
+  netPayoutPendingPaise: number;
+  payoutVpa: string;
+  settlementSchedule: string;
+  recentSettlements: { date: string; amountPaise: number; status: string }[];
+}
