@@ -3,18 +3,19 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Switch,
   ActivityIndicator,
   RefreshControl,
   Alert,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@dusmint/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 
 export const VendorStockScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [items, setItems] = useState<VendorStockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,7 +90,6 @@ export const VendorStockScreen: React.FC = () => {
       await dusmintApi.updateVendorStock(itemId, { inStock: newVal });
     } catch (err) {
       console.warn('Stock update API failed, reverting:', err);
-      // Revert if error
       setItems((prev) =>
         prev.map((item) =>
           item.id === itemId ? { ...item, isInStock: currentVal } : item
@@ -100,8 +100,8 @@ export const VendorStockScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top + 10 : 18 }]}>
         <Text style={styles.headerTitle}>Daily Stock & Mandi Rates</Text>
         <Text style={styles.headerSub}>
           Toggle in-stock items and check real-time availability for customers
@@ -110,11 +110,12 @@ export const VendorStockScreen: React.FC = () => {
 
       <ScrollView
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FC6011']} />}
+        showsVerticalScrollIndicator={false}
       >
         {loading && (
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={Colors.primary} />
+            <ActivityIndicator size="large" color="#FC6011" />
             <Text style={styles.loadingText}>Fetching catalogue items...</Text>
           </View>
         )}
@@ -127,7 +128,7 @@ export const VendorStockScreen: React.FC = () => {
             return (
               <View
                 key={item.id}
-                style={[styles.card, !item.isInStock ? styles.outOfStockCard : null]}
+                style={[styles.card, !item.isInStock && styles.outOfStockCard]}
               >
                 <View style={styles.infoCol}>
                   <Text style={styles.itemName}>{item.nameEn}</Text>
@@ -156,7 +157,7 @@ export const VendorStockScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.statusText,
-                        { color: item.isInStock ? Colors.primary : Colors.secondary },
+                        { color: item.isInStock ? '#047857' : '#94A3B8' },
                       ]}
                     >
                       {item.isInStock ? 'IN STOCK' : 'OUT'}
@@ -164,7 +165,8 @@ export const VendorStockScreen: React.FC = () => {
                     <Switch
                       value={item.isInStock}
                       onValueChange={() => toggleStock(item.id, item.isInStock)}
-                      trackColor={{ false: '#D1D5DB', true: Colors.primary }}
+                      trackColor={{ false: '#E2E8F0', true: '#FED7AA' }}
+                      thumbColor={item.isInStock ? '#FC6011' : '#94A3B8'}
                     />
                   </View>
                 </View>
@@ -172,35 +174,41 @@ export const VendorStockScreen: React.FC = () => {
             );
           })}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.white,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: '#F1F5F9',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 3,
   },
   headerTitle: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.xl,
-    color: Colors.textPrimary,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
   },
   headerSub: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
-    marginTop: 2,
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 3,
+    lineHeight: 16,
   },
   scroll: {
-    padding: Spacing.base,
+    padding: 16,
     paddingBottom: 40,
   },
   loadingBox: {
@@ -209,72 +217,76 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontFamily: Typography.fontFamily.body,
-    color: Colors.secondary,
-    fontSize: Typography.fontSize.xs,
+    color: '#64748B',
+    fontSize: 12,
   },
   card: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    marginBottom: Spacing.sm,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: '#E2E8F0',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    ...Shadows.light,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   outOfStockCard: {
-    opacity: 0.6,
+    opacity: 0.65,
+    backgroundColor: '#FAFAFA',
   },
   infoCol: {
     flex: 1,
     marginRight: 12,
   },
   itemName: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textPrimary,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
   },
   itemVernacular: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textSecondary,
-    marginTop: 1,
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
   },
   itemUnit: {
-    fontFamily: Typography.fontFamily.body,
     fontSize: 11,
-    color: Colors.secondary,
+    color: '#94A3B8',
     marginTop: 4,
   },
   mandiBox: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F1F5F9',
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: 6,
     marginTop: 6,
   },
   mandiText: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.heading,
-    color: '#4B5563',
+    fontWeight: '600',
+    color: '#475569',
   },
   actionCol: {
     alignItems: 'flex-end',
   },
   priceText: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: Colors.primary,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#FC6011',
   },
   mrpText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: 10,
-    color: Colors.secondary,
+    fontSize: 11,
+    color: '#94A3B8',
     textDecorationLine: 'line-through',
+    marginTop: 1,
   },
   switchRow: {
     flexDirection: 'row',
@@ -283,7 +295,8 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.headingBold,
+    fontWeight: '800',
     marginRight: 4,
+    letterSpacing: 0.5,
   },
 });

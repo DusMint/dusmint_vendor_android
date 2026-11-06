@@ -4,18 +4,19 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Image,
   Alert,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, RoundButton } from '@dusmint/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, RoundButton } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 
 export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
   navigation,
   route,
 }) => {
+  const insets = useSafeAreaInsets();
   const { partId, orderCode, items } = route.params || {
     partId: 'sample-part-id',
     orderCode: 'DM-ORDER',
@@ -80,9 +81,13 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top + 8 : 16 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+          activeOpacity={0.7}
+        >
           <Image
             source={require('../../../assets/img/btn_back.png')}
             style={styles.backIcon}
@@ -95,14 +100,17 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Step 1: Scale Bluetooth Live Reading */}
         <View style={styles.card}>
           <View style={styles.stepTitleRow}>
             <Text style={styles.stepNum}>STEP 1 • DIGITAL SCALE READING</Text>
             <View style={styles.bleStatus}>
               <Text style={styles.bleDot}>🟢</Text>
-              <Text style={styles.bleText}>Dusmint Scale Connected (BLE)</Text>
+              <Text style={styles.bleText}>Scale BLE Active</Text>
             </View>
           </View>
 
@@ -115,13 +123,13 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
           {/* Quick Weight Adjuster for Testing */}
           <View style={styles.weightAdjustRow}>
             <TouchableOpacity
-              onPress={() => setLiveScaleWeight(w => Math.max(100, w - 100))}
+              onPress={() => setLiveScaleWeight((w) => Math.max(100, w - 100))}
               style={styles.weightAdjustBtn}
             >
               <Text style={styles.weightAdjustText}>- 100g</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setLiveScaleWeight(w => w + 100)}
+              onPress={() => setLiveScaleWeight((w) => w + 100)}
               style={styles.weightAdjustBtn}
             >
               <Text style={styles.weightAdjustText}>+ 100g</Text>
@@ -150,10 +158,10 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setPhotoTaken(!photoTaken)}
-            style={[styles.boxCta, photoTaken ? styles.boxCtaDone : null]}
+            style={[styles.boxCta, photoTaken && styles.boxCtaDone]}
           >
             <Text style={styles.ctaEmoji}>{photoTaken ? '✅' : '📷'}</Text>
-            <Text style={styles.ctaLabel}>
+            <Text style={[styles.ctaLabel, photoTaken && styles.ctaLabelDone]}>
               {photoTaken ? 'Scale Photo Captured (Tap to Retake)' : 'Take Photo with Camera'}
             </Text>
           </TouchableOpacity>
@@ -173,83 +181,104 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
             style={[styles.boxCta, sealCode ? styles.boxCtaDone : null]}
           >
             <Text style={styles.ctaEmoji}>{sealCode ? '🔒' : '🔍'}</Text>
-            <Text style={styles.ctaLabel}>
+            <Text style={[styles.ctaLabel, sealCode ? styles.ctaLabelDone : null]}>
               {sealCode ? `Seal Attached: #${sealCode}` : 'Scan Tape QR / Barcode'}
             </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* Complete Button */}
-      <View style={styles.bottomBar}>
-        <RoundButton
-          title={submitting ? 'Marking Ready...' : 'Ready for Rider Pickup →'}
+      {/* Complete Button with Safe Area Bottom */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom > 0 ? insets.bottom + 12 : 20 }]}>
+        <TouchableOpacity
+          activeOpacity={0.85}
           onPress={handleMarkReady}
-          loading={submitting}
-        />
+          disabled={submitting}
+          style={[styles.readyBtn, submitting && { opacity: 0.7 }]}
+        >
+          <Text style={styles.readyBtnText}>
+            {submitting ? 'Marking Ready...' : 'Ready for Rider Pickup →'}
+          </Text>
+        </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F8FAFC',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.white,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: '#F1F5F9',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 3,
   },
   backBtn: {
-    paddingRight: Spacing.md,
+    paddingRight: 14,
+    paddingVertical: 4,
   },
   backIcon: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
   },
   headerTitle: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.md,
-    color: Colors.textPrimary,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
   },
   subText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 1,
   },
   scroll: {
-    padding: Spacing.base,
-    paddingBottom: 90,
+    padding: 16,
+    paddingBottom: 100,
   },
   card: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: Spacing.base,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   stepTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   stepNum: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.headingBold,
-    color: Colors.primary,
+    fontWeight: '800',
+    color: '#94A3B8',
     letterSpacing: 0.5,
   },
   bleStatus: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   bleDot: {
     fontSize: 8,
@@ -257,79 +286,80 @@ const styles = StyleSheet.create({
   },
   bleText: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.heading,
-    color: '#059669',
+    fontWeight: '700',
+    color: '#047857',
   },
   cardHeading: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: Colors.textPrimary,
-    marginTop: 4,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4,
   },
   cardDesc: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
-    marginVertical: 6,
-    lineHeight: 18,
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 17,
+    marginBottom: 12,
   },
   scaleDisplay: {
     backgroundColor: '#0F172A',
-    borderRadius: BorderRadius.md,
+    borderRadius: 14,
     paddingVertical: 18,
     alignItems: 'center',
-    marginVertical: Spacing.md,
+    marginVertical: 10,
   },
   scaleValue: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: 48,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 44,
+    fontWeight: '900',
     color: '#34D399',
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   scaleUnit: {
-    fontFamily: Typography.fontFamily.heading,
     fontSize: 11,
+    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 1.5,
     marginTop: 2,
   },
   weightAdjustRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    marginVertical: 8,
+    gap: 8,
   },
   weightAdjustBtn: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginHorizontal: 4,
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   weightAdjustText: {
     fontSize: 12,
-    fontFamily: Typography.fontFamily.headingBold,
+    fontWeight: '700',
     color: '#334155',
   },
   weightTolerance: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
+    fontSize: 11,
+    color: '#64748B',
     textAlign: 'center',
+    marginTop: 6,
   },
   boxCta: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#D1D5DB',
+    borderColor: '#CBD5E1',
     borderStyle: 'dashed',
-    borderRadius: BorderRadius.md,
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F9FAFB',
-    marginTop: Spacing.sm,
   },
   boxCtaDone: {
-    borderColor: '#10B981',
     backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
     borderStyle: 'solid',
   },
   ctaEmoji: {
@@ -337,18 +367,45 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   ctaLabel: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  ctaLabelDone: {
+    color: '#047857',
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: Spacing.base,
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: Colors.divider,
+    borderTopColor: '#F1F5F9',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  readyBtn: {
+    backgroundColor: '#FC6011',
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FC6011',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  readyBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });

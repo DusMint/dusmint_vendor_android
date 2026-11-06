@@ -4,16 +4,17 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@dusmint/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 import { VendorEarningsData } from '../../api-client/types';
 
 export const VendorEarningsScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [earnings, setEarnings] = useState<VendorEarningsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,19 +57,20 @@ export const VendorEarningsScreen: React.FC = () => {
   const commissionRupees = earnings ? (earnings.commissionDeductedPaise / 100).toFixed(2) : '0.00';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top > 0 ? insets.top + 10 : 18 }]}>
         <Text style={styles.headerTitle}>Earnings & Settlements</Text>
         <Text style={styles.headerSub}>Same-day settlement on customer delivery confirmation</Text>
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FC6011']} />}
+        showsVerticalScrollIndicator={false}
       >
         {loading && !earnings && (
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={Colors.primary} />
+            <ActivityIndicator size="large" color="#FC6011" />
             <Text style={styles.loadingText}>Loading settlements ledger...</Text>
           </View>
         )}
@@ -103,7 +105,9 @@ export const VendorEarningsScreen: React.FC = () => {
         <View style={styles.bankCard}>
           <View style={styles.bankHeader}>
             <Text style={styles.bankTitle}>Linked Bank / UPI for Payouts</Text>
-            <Text style={styles.verifiedTag}>VERIFIED ✅</Text>
+            <View style={styles.verifiedTag}>
+              <Text style={styles.verifiedTagText}>VERIFIED ✅</Text>
+            </View>
           </View>
           <Text style={styles.upiId}>UPI ID: {earnings?.payoutVpa || 'ramesh.sharma@okaxis'}</Text>
           <Text style={styles.bankSub}>
@@ -121,42 +125,47 @@ export const VendorEarningsScreen: React.FC = () => {
             </View>
             <View style={styles.payoutFooter}>
               <Text style={styles.statusText}>✓ {p.status}</Text>
-              <TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7}>
                 <Text style={styles.statementLink}>Download Invoice ›</Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.white,
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: '#F1F5F9',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 3,
   },
   headerTitle: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.xl,
-    color: Colors.textPrimary,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
   },
   headerSub: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
-    marginTop: 2,
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 3,
   },
   scroll: {
-    padding: Spacing.base,
+    padding: 16,
     paddingBottom: 40,
   },
   loadingBox: {
@@ -165,54 +174,57 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
+    fontSize: 12,
+    color: '#64748B',
   },
   summaryCard: {
     backgroundColor: '#0F172A',
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.base,
-    ...Shadows.medium,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
   },
   summaryLabel: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.headingBold,
+    fontWeight: '800',
     color: '#34D399',
     letterSpacing: 1,
   },
   summaryAmount: {
-    fontFamily: Typography.fontFamily.headingBold,
+    fontFamily: 'Metropolis-Bold',
     fontSize: 34,
+    fontWeight: '900',
     color: '#FFFFFF',
-    marginVertical: 4,
+    marginVertical: 6,
   },
   summaryOrders: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
+    fontSize: 12,
     color: '#94A3B8',
-    marginBottom: Spacing.base,
+    marginBottom: 16,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.base,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   statBox: {
     flex: 1,
     alignItems: 'center',
   },
   statVal: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   statLbl: {
-    fontFamily: Typography.fontFamily.body,
     fontSize: 10,
     color: '#94A3B8',
     marginTop: 2,
@@ -220,89 +232,107 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   bankCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: Spacing.base,
-    ...Shadows.light,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   bankHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 6,
   },
   bankTitle: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
   },
   verifiedTag: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: 10,
-    color: '#059669',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  verifiedTagText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#047857',
   },
   upiId: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: Colors.primary,
-    marginTop: 4,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FC6011',
+    marginVertical: 4,
   },
   bankSub: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
+    fontSize: 11,
+    color: '#64748B',
+    lineHeight: 16,
     marginTop: 4,
-    lineHeight: 18,
   },
   sectionHeading: {
-    fontFamily: Typography.fontFamily.headingBold,
     fontSize: 11,
-    color: Colors.secondary,
-    letterSpacing: 1,
-    marginVertical: Spacing.sm,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    marginLeft: 2,
   },
   payoutCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.base,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: Spacing.sm,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   payoutHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   payoutDate: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
   },
   netAmount: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: '#059669',
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#047857',
   },
   payoutFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: Spacing.sm,
   },
   statusText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
+    fontSize: 11,
     color: '#059669',
+    fontWeight: '600',
   },
   statementLink: {
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.primary,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FC6011',
   },
 });

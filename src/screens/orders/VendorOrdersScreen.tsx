@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Switch,
   Alert,
@@ -12,11 +11,13 @@ import {
   ActivityIndicator,
   Vibration,
 } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius, RoundButton } from '@dusmint/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors, Typography, Spacing, BorderRadius } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 import { VendorOrderPart, VendorProfileInfo } from '../../api-client/types';
 
 export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'new' | 'packing' | 'ready' | 'done'>('new');
   const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
@@ -95,87 +96,150 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       : doneOrders;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Header with Shop Switcher & Open Toggle */}
-      <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => {
-              if (vendors.length > 1) {
-                const nextIdx = (vendors.findIndex(v => v.id === selectedVendorId) + 1) % vendors.length;
-                setSelectedVendorId(vendors[nextIdx].id);
-              }
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.shopName}>
-                {selectedVendor ? selectedVendor.name : 'Dukaan Orders'}
-              </Text>
-              {vendors.length > 1 && (
-                <Text style={styles.switchPill}>Switch ⇄</Text>
-              )}
+    <View style={styles.container}>
+      {/* Premium Top Bar with Safe Area Inset Protection */}
+      <View style={[styles.headerContainer, { paddingTop: insets.top > 0 ? insets.top + 8 : 16 }]}>
+        <View style={styles.headerTopRow}>
+          {/* Shop Avatar & Info */}
+          <View style={styles.shopSection}>
+            <View style={styles.shopAvatar}>
+              <Text style={styles.shopAvatarEmoji}>🏪</Text>
             </View>
-            <Text style={styles.clusterText}>
-              {selectedVendor?.category ? `Category: ${selectedVendor.category}` : 'Vijay Nagar Cluster'} • Tap to switch
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.shopDetails}>
+              <View style={styles.shopNameRow}>
+                <Text style={styles.shopName} numberOfLines={1}>
+                  {selectedVendor ? selectedVendor.name : 'Mandi Fresh Sabzi'}
+                </Text>
+                {vendors.length > 1 && (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      const nextIdx = (vendors.findIndex(v => v.id === selectedVendorId) + 1) % vendors.length;
+                      setSelectedVendorId(vendors[nextIdx].id);
+                    }}
+                    style={styles.switchChip}
+                  >
+                    <Text style={styles.switchChipText}>⇄ Switch</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
 
-        <View style={styles.toggleBox}>
-          <Text style={[styles.toggleText, { color: isOpen ? Colors.primary : Colors.error }]}>
-            {isOpen ? 'SHOP OPEN' : 'CLOSED'}
-          </Text>
-          <Switch
-            value={isOpen}
-            onValueChange={setIsOpen}
-            trackColor={{ false: '#D1D5DB', true: Colors.primary }}
-          />
-        </View>
-      </View>
+              <View style={styles.clusterRow}>
+                <View style={[styles.statusDot, { backgroundColor: isOpen ? '#10B981' : '#EF4444' }]} />
+                <Text style={styles.clusterText}>
+                  {selectedVendor?.category ? `${selectedVendor.category} Dukaan` : 'Vegetables & Greens'} • Vijay Nagar
+                </Text>
+              </View>
+            </View>
+          </View>
 
-      {/* Filter Tabs */}
-      <View style={styles.tabsRow}>
-        {(
-          [
-            { key: 'new', label: `New (${newOrders.length})` },
-            { key: 'packing', label: `Packing (${packingOrders.length})` },
-            { key: 'ready', label: `Ready (${readyOrders.length})` },
-            { key: 'done', label: `Done (${doneOrders.length})` },
-          ] as const
-        ).map((tab) => {
-          const isChosen = activeTab === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              onPress={() => setActiveTab(tab.key)}
-              style={[styles.tabBtn, isChosen ? styles.tabBtnActive : null]}
+          {/* Online / Offline Pill */}
+          <View
+            style={[
+              styles.onlinePill,
+              {
+                backgroundColor: isOpen ? '#ECFDF5' : '#FEF2F2',
+                borderColor: isOpen ? '#A7F3D0' : '#FECACA',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.onlineText,
+                { color: isOpen ? '#047857' : '#DC2626' },
+              ]}
             >
-              <Text style={[styles.tabText, isChosen ? styles.tabTextActive : null]}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+              {isOpen ? 'OPEN' : 'CLOSED'}
+            </Text>
+            <Switch
+              value={isOpen}
+              onValueChange={setIsOpen}
+              trackColor={{ false: '#FECACA', true: '#A7F3D0' }}
+              thumbColor={isOpen ? '#10B981' : '#EF4444'}
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }], marginLeft: 2 }}
+            />
+          </View>
+        </View>
+
+        {/* Segmented Status Tabs */}
+        <View style={styles.segmentContainer}>
+          {(
+            [
+              { key: 'new', label: 'New', count: newOrders.length },
+              { key: 'packing', label: 'Packing', count: packingOrders.length },
+              { key: 'ready', label: 'Ready', count: readyOrders.length },
+              { key: 'done', label: 'Done', count: doneOrders.length },
+            ] as const
+          ).map((tab) => {
+            const isSelected = activeTab === tab.key;
+            return (
+              <TouchableOpacity
+                key={tab.key}
+                activeOpacity={0.8}
+                onPress={() => setActiveTab(tab.key)}
+                style={[
+                  styles.segmentTab,
+                  isSelected && styles.segmentTabActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentLabel,
+                    isSelected && styles.segmentLabelActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+                <View
+                  style={[
+                    styles.segmentBadge,
+                    isSelected
+                      ? styles.segmentBadgeActive
+                      : tab.key === 'new' && tab.count > 0
+                      ? styles.segmentBadgeAlert
+                      : styles.segmentBadgeInactive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.segmentBadgeText,
+                      isSelected
+                        ? styles.segmentBadgeTextActive
+                        : tab.key === 'new' && tab.count > 0
+                        ? styles.segmentBadgeTextAlert
+                        : styles.segmentBadgeTextInactive,
+                    ]}
+                  >
+                    {tab.count}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
+      {/* Orders ScrollView */}
       <ScrollView
-        contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FC6011']} />}
+        showsVerticalScrollIndicator={false}
       >
         {loading && !refreshing && (
-          <View style={styles.emptyBox}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.emptyText}>Loading vendor orders...</Text>
+          <View style={styles.emptyContainer}>
+            <ActivityIndicator size="large" color="#FC6011" />
+            <Text style={styles.emptySubtitle}>Syncing live store orders...</Text>
           </View>
         )}
 
         {!loading && displayedOrders.length === 0 && (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyIcon}>📦</Text>
-            <Text style={styles.emptyHeading}>No {activeTab} orders right now</Text>
-            <Text style={styles.emptyText}>
-              New customer orders assigned to your shop will chime and show up here instantly.
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyEmoji}>📦</Text>
+            </View>
+            <Text style={styles.emptyTitle}>No {activeTab} orders right now</Text>
+            <Text style={styles.emptySubtitle}>
+              New customer orders assigned to your shop will alert and show up here instantly.
             </Text>
           </View>
         )}
@@ -189,71 +253,120 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
               key={order.partId}
               style={[
                 styles.orderCard,
-                isReady ? styles.readyBorder : null,
+                isReady && styles.orderCardReady,
               ]}
             >
+              {/* Order Card Top Header */}
               <View style={styles.cardHeader}>
                 <View>
-                  <Text style={styles.orderCode}>{order.orderCode}</Text>
-                  <Text style={styles.slotTime}>{order.slotTime}</Text>
+                  <View style={styles.orderIdRow}>
+                    <Text style={styles.orderIdLabel}>ORDER</Text>
+                    <Text style={styles.orderIdCode}>{order.orderCode}</Text>
+                  </View>
+                  <View style={styles.slotRow}>
+                    <Text style={styles.slotIcon}>🕒</Text>
+                    <Text style={styles.slotText}>{order.slotTime || 'Morning Slot • 07:00 - 10:00 AM'}</Text>
+                  </View>
                 </View>
 
                 {isReady ? (
                   <View style={styles.readyBadge}>
+                    <Text style={styles.readyBadgeIcon}>✓</Text>
                     <Text style={styles.readyBadgeText}>SEALED & READY</Text>
                   </View>
                 ) : (
-                  <View style={styles.newAlertBadge}>
-                    <Text style={styles.newAlertText}>🔔 ACTION REQUIRED</Text>
+                  <View style={styles.actionRequiredBadge}>
+                    <Text style={styles.actionRequiredIcon}>⚡</Text>
+                    <Text style={styles.actionRequiredText}>ACTION REQUIRED</Text>
                   </View>
                 )}
               </View>
 
-              {/* Items Checklist */}
-              <View style={styles.checklist}>
-                <Text style={styles.checkTitle}>Items to Pack ({itemCount} total items):</Text>
-                {order.items.map((i, idx) => (
-                  <View key={idx} style={styles.checkItem}>
-                    <Text style={styles.itemBullet}>•</Text>
-                    <Text style={styles.itemName}>
-                      {i.name} ({i.unit}) × {i.quantity}
+              {/* Items List Box */}
+              <View style={styles.itemsBox}>
+                <View style={styles.itemsBoxHeader}>
+                  <Text style={styles.itemsBoxTitle}>Items to Pack ({itemCount} total)</Text>
+                  <Text style={styles.itemsBoxSub}>Weigh before packing</Text>
+                </View>
+
+                {order.items.map((item, idx) => (
+                  <View key={idx} style={styles.itemRow}>
+                    <View style={styles.itemQtyBadge}>
+                      <Text style={styles.itemQtyText}>{item.quantity}x</Text>
+                    </View>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.name}</Text>
+                      <Text style={styles.itemUnit}>{item.unit}</Text>
+                    </View>
+                    <Text style={styles.itemPrice}>
+                      ₹{((item.pricePaise * item.quantity) / 100).toFixed(0)}
                     </Text>
-                    <Text style={styles.itemPrice}>₹{(i.pricePaise * i.quantity / 100).toFixed(0)}</Text>
                   </View>
                 ))}
               </View>
 
-              {/* Scale & Seal Details */}
-              <View style={styles.scaleInfo}>
-                <Text style={styles.scaleTarget}>
-                  {isReady && order.packedWeightGrams
-                    ? `Packed Weight: ${order.packedWeightGrams} g`
-                    : `Est. Items Subtotal: ₹${(order.subtotalPaise / 100).toFixed(0)}`}
-                </Text>
-                <Text style={styles.payout}>
-                  Net Payout: ₹{(order.subtotalPaise * 0.9 / 100).toFixed(0)}
-                </Text>
+              {/* Financial & Net Payout Strip */}
+              <View style={styles.payoutStrip}>
+                <View style={styles.payoutLeft}>
+                  <Text style={styles.subtotalLabel}>Customer Subtotal</Text>
+                  <Text style={styles.subtotalValue}>
+                    ₹{(order.subtotalPaise / 100).toFixed(0)}
+                  </Text>
+                </View>
+                <View style={styles.payoutDivider} />
+                <View style={styles.payoutRight}>
+                  <View style={styles.payoutLabelRow}>
+                    <Text style={styles.payoutLabel}>Your Net Payout</Text>
+                    <View style={styles.instantPill}>
+                      <Text style={styles.instantPillText}>Instant T+0</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.payoutValue}>
+                    ₹{((order.subtotalPaise * 0.9) / 100).toFixed(0)}
+                  </Text>
+                </View>
               </View>
 
+              {/* Tamper Proof Seal Badge if Ready */}
               {isReady && order.sealQr && (
-                <View style={styles.sealInfoRow}>
-                  <Text style={styles.sealLabel}>Tamper-Proof Tape Seal:</Text>
-                  <Text style={styles.sealCode}>{order.sealQr}</Text>
+                <View style={styles.sealStrip}>
+                  <Text style={styles.sealIcon}>🔒</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.sealTitle}>Tamper-Proof Green Seal Tape</Text>
+                    <Text style={styles.sealCode}>Barcode Serial: {order.sealQr}</Text>
+                  </View>
+                  <View style={styles.verifiedChip}>
+                    <Text style={styles.verifiedChipText}>VERIFIED</Text>
+                  </View>
                 </View>
               )}
 
-              {/* Actions */}
+              {/* Action Buttons */}
               {!isReady && (
                 <View style={styles.actionRow}>
                   <TouchableOpacity
-                    onPress={() => Alert.alert('Shortage Notice', 'Item shortage has been marked. Operations team notified.')}
-                    style={styles.rejectBtn}
+                    activeOpacity={0.7}
+                    onPress={() =>
+                      Alert.alert(
+                        'Mark Item Shortage',
+                        'Customer will be refunded and central operations alerted. Are you sure?',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Confirm Shortage',
+                            style: 'destructive',
+                            onPress: () => Alert.alert('Shortage Reported', 'Operations team has been updated.'),
+                          },
+                        ]
+                      )
+                    }
+                    style={styles.itemShortBtn}
                   >
-                    <Text style={styles.rejectText}>Item Short</Text>
+                    <Text style={styles.itemShortBtnText}>⚠️ Item Short</Text>
                   </TouchableOpacity>
 
-                  <RoundButton
-                    title="⚖️ Pack & Weigh on Scale"
+                  <TouchableOpacity
+                    activeOpacity={0.85}
                     onPress={() =>
                       navigation.navigate('VendorPack', {
                         partId: order.partId,
@@ -263,249 +376,509 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                       })
                     }
                     style={styles.packBtn}
-                  />
+                  >
+                    <Text style={styles.packBtnIcon}>⚖️</Text>
+                    <Text style={styles.packBtnText}>Pack & Weigh on Scale</Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
           );
         })}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F8FAFC',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: Colors.white,
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: '#F1F5F9',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  shopSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  shopAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#FFF5F0',
+    borderWidth: 1,
+    borderColor: '#FFE4D6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  shopAvatarEmoji: {
+    fontSize: 22,
+  },
+  shopDetails: {
+    flex: 1,
+  },
+  shopNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   shopName: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: Colors.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+    fontFamily: 'Metropolis-Bold',
+    flexShrink: 1,
   },
-  switchPill: {
-    fontSize: 10,
-    color: Colors.primary,
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 6,
+  switchChip: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 8,
     marginLeft: 6,
-    fontWeight: '700',
   },
-  clusterText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: 11,
-    color: Colors.secondary,
+  switchChipText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  clusterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
   },
-  toggleBox: {
-    alignItems: 'center',
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 5,
   },
-  toggleText: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: 9,
-    marginBottom: 2,
+  clusterText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
   },
-  tabsRow: {
+  onlinePill: {
     flexDirection: 'row',
-    backgroundColor: Colors.cardBackground,
-    paddingHorizontal: Spacing.base,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
-  },
-  tabBtn: {
-    flex: 1,
-    paddingVertical: Spacing.md,
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    paddingLeft: 10,
+    paddingRight: 4,
+    paddingVertical: 4,
+    borderRadius: 22,
+    borderWidth: 1,
   },
-  tabBtnActive: {
-    borderBottomColor: Colors.primary,
+  onlineText: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  tabText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textSecondary,
+  segmentContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    padding: 4,
   },
-  tabTextActive: {
-    fontFamily: Typography.fontFamily.headingBold,
-    color: Colors.primary,
+  segmentTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 9,
   },
-  scroll: {
-    padding: Spacing.base,
-    paddingBottom: 40,
+  segmentTabActive: {
+    backgroundColor: '#FC6011',
+    shadowColor: '#FC6011',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  emptyBox: {
+  segmentLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  segmentLabelActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  segmentBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 10,
+    marginLeft: 4,
+  },
+  segmentBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+  },
+  segmentBadgeInactive: {
+    backgroundColor: '#E2E8F0',
+  },
+  segmentBadgeAlert: {
+    backgroundColor: '#EF4444',
+  },
+  segmentBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  segmentBadgeTextActive: {
+    color: '#FFFFFF',
+  },
+  segmentBadgeTextInactive: {
+    color: '#475569',
+  },
+  segmentBadgeTextAlert: {
+    color: '#FFFFFF',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
     paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  emptyHeading: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.md,
-    color: Colors.textPrimary,
+  emptyEmoji: {
+    fontSize: 32,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
     marginBottom: 6,
   },
-  emptyText: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.secondary,
+  emptySubtitle: {
+    fontSize: 13,
+    color: '#64748B',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   orderCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    marginBottom: Spacing.base,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  readyBorder: {
-    borderColor: '#10B981',
+  orderCardReady: {
+    borderColor: '#A7F3D0',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 12,
   },
-  orderCode: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.base,
-    color: Colors.textPrimary,
+  orderIdRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  slotTime: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
-    marginTop: 2,
-  },
-  newAlertBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  newAlertText: {
-    color: '#B45309',
+  orderIdLabel: {
     fontSize: 10,
-    fontFamily: Typography.fontFamily.headingBold,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+    marginRight: 6,
+  },
+  orderIdCode: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+    fontFamily: 'Metropolis-Bold',
+  },
+  slotRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 3,
+  },
+  slotIcon: {
+    fontSize: 11,
+    marginRight: 4,
+  },
+  slotText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  actionRequiredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  actionRequiredIcon: {
+    fontSize: 11,
+    marginRight: 4,
+    color: '#B45309',
+  },
+  actionRequiredText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.3,
   },
   readyBadge: {
-    backgroundColor: '#D1FAE5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  readyBadgeIcon: {
+    fontSize: 11,
+    fontWeight: '800',
+    marginRight: 4,
+    color: '#047857',
   },
   readyBadgeText: {
-    color: '#065F46',
     fontSize: 10,
-    fontFamily: Typography.fontFamily.headingBold,
+    fontWeight: '800',
+    color: '#047857',
+    letterSpacing: 0.3,
   },
-  checklist: {
-    backgroundColor: Colors.surfaceCream,
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    marginVertical: Spacing.md,
+  itemsBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginBottom: 12,
   },
-  checkTitle: {
-    fontFamily: Typography.fontFamily.heading,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textPrimary,
-    marginBottom: 4,
+  itemsBoxHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
   },
-  checkItem: {
+  itemsBoxTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  itemsBoxSub: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
+    paddingVertical: 4,
   },
-  itemBullet: {
-    marginRight: 6,
-    color: Colors.primary,
+  itemQtyBadge: {
+    backgroundColor: '#FFF5F0',
+    borderWidth: 1,
+    borderColor: '#FFE4D6',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginRight: 8,
   },
-  itemName: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textPrimary,
+  itemQtyText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FC6011',
+  },
+  itemInfo: {
     flex: 1,
   },
-  itemPrice: {
-    fontFamily: Typography.fontFamily.bodyBold,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.textPrimary,
+  itemName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1E293B',
   },
-  scaleInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: Spacing.xs,
-  },
-  scaleTarget: {
-    fontFamily: Typography.fontFamily.body,
-    fontSize: Typography.fontSize.xs,
-    color: Colors.secondary,
-  },
-  payout: {
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.sm,
-    color: Colors.primary,
-  },
-  sealInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginTop: 8,
-  },
-  sealLabel: {
+  itemUnit: {
     fontSize: 11,
-    fontFamily: Typography.fontFamily.body,
-    color: Colors.secondary,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  payoutStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    marginBottom: 14,
+  },
+  payoutLeft: {
+    flex: 1,
+  },
+  subtotalLabel: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  subtotalValue: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+    marginTop: 2,
+  },
+  payoutDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#E2E8F0',
+    marginHorizontal: 12,
+  },
+  payoutRight: {
+    flex: 1.2,
+  },
+  payoutLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  payoutLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#047857',
+  },
+  instantPill: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 6,
+    marginLeft: 5,
+  },
+  instantPillText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  payoutValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#047857',
+    marginTop: 2,
+  },
+  sealStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  sealIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  sealTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#166534',
   },
   sealCode: {
-    fontSize: 11,
-    fontFamily: Typography.fontFamily.headingBold,
-    color: '#111827',
+    fontSize: 10,
+    color: '#15803D',
+    marginTop: 1,
+  },
+  verifiedChip: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  verifiedChipText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#15803D',
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: Spacing.md,
+    gap: 10,
   },
-  rejectBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: BorderRadius.roundButton,
-    backgroundColor: '#FEE2E2',
-    marginRight: 10,
+  itemShortBtn: {
+    flex: 0.38,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  rejectText: {
-    color: Colors.error,
-    fontFamily: Typography.fontFamily.headingBold,
-    fontSize: Typography.fontSize.xs,
+  itemShortBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#DC2626',
   },
   packBtn: {
-    flex: 1,
+    flex: 0.62,
+    flexDirection: 'row',
+    backgroundColor: '#FC6011',
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FC6011',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  packBtnIcon: {
+    fontSize: 15,
+    marginRight: 6,
+  },
+  packBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.2,
   },
 });
