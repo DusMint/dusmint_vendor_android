@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -15,14 +19,33 @@
     "jsx": "react-native",
     "baseUrl": ".",
     "paths": {
-      "@dusmint/ui": ["./src/ui/index"],
-      "@dusmint/ui/*": ["./src/ui/*"],
-      "@dusmint/api-client": ["./src/api-client/index"],
-      "@dusmint/api-client/*": ["./src/api-client/*"],
-      "@dusmint/i18n": ["./src/i18n/index"],
-      "@dusmint/i18n/*": ["./src/i18n/*"],
-      "@/*": ["./src/*"]
+      "@dusmint/ui": [
+        "./src/ui/index"
+      ],
+      "@dusmint/ui/*": [
+        "./src/ui/*"
+      ],
+      "@dusmint/api-client": [
+        "./src/api-client/index"
+      ],
+      "@dusmint/api-client/*": [
+        "./src/api-client/*"
+      ],
+      "@dusmint/i18n": [
+        "./src/i18n/index"
+      ],
+      "@dusmint/i18n/*": [
+        "./src/i18n/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["src/**/*", "App.tsx", "index.js"]
+  "include": [
+    "src/**/*",
+    "App.tsx",
+    "index.js"
+  ],
+  "extends": "expo/tsconfig.base"
 }
