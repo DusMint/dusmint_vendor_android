@@ -12,6 +12,7 @@ import {
   Vibration,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing, BorderRadius } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 import { VendorOrderPart, VendorProfileInfo } from '../../api-client/types';
@@ -54,7 +55,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       const pendingCount = (data || []).filter(o => o.status === 'pending').length;
       if (previousOrderCountRef.current > 0 && pendingCount > previousOrderCountRef.current) {
         Vibration.vibrate([0, 500, 200, 500]);
-        Alert.alert('🔔 NAYI ORDER AAYI HAI!', 'Customer ne naya order place kiya hai. Kripya saman pack karein.');
+        Alert.alert('NEW ORDER RECEIVED', 'Customer has placed a new order. Please pack items.');
       }
       previousOrderCountRef.current = pendingCount;
     } catch (err) {
@@ -103,7 +104,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           {/* Shop Avatar & Info */}
           <View style={styles.shopSection}>
             <View style={styles.shopAvatar}>
-              <Text style={styles.shopAvatarEmoji}>🏪</Text>
+              <Ionicons name="storefront" size={20} color="#FC6011" />
             </View>
             <View style={styles.shopDetails}>
               <View style={styles.shopNameRow}>
@@ -235,7 +236,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         {!loading && displayedOrders.length === 0 && (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyEmoji}>📦</Text>
+              <Ionicons name="cube-outline" size={32} color="#94A3B8" />
             </View>
             <Text style={styles.emptyTitle}>No {activeTab} orders right now</Text>
             <Text style={styles.emptySubtitle}>
@@ -264,19 +265,19 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                     <Text style={styles.orderIdCode}>{order.orderCode}</Text>
                   </View>
                   <View style={styles.slotRow}>
-                    <Text style={styles.slotIcon}>🕒</Text>
+                    <Ionicons name="time-outline" size={13} color="#64748B" style={{ marginRight: 4 }} />
                     <Text style={styles.slotText}>{order.slotTime || 'Morning Slot • 07:00 - 10:00 AM'}</Text>
                   </View>
                 </View>
 
                 {isReady ? (
                   <View style={styles.readyBadge}>
-                    <Text style={styles.readyBadgeIcon}>✓</Text>
+                    <Ionicons name="checkmark-circle" size={13} color="#047857" style={{ marginRight: 4 }} />
                     <Text style={styles.readyBadgeText}>SEALED & READY</Text>
                   </View>
                 ) : (
                   <View style={styles.actionRequiredBadge}>
-                    <Text style={styles.actionRequiredIcon}>⚡</Text>
+                    <Ionicons name="flash" size={12} color="#B45309" style={{ marginRight: 4 }} />
                     <Text style={styles.actionRequiredText}>ACTION REQUIRED</Text>
                   </View>
                 )}
@@ -330,7 +331,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
               {/* Tamper Proof Seal Badge if Ready */}
               {isReady && order.sealQr && (
                 <View style={styles.sealStrip}>
-                  <Text style={styles.sealIcon}>🔒</Text>
+                  <Ionicons name="shield-checkmark" size={18} color="#166534" style={{ marginRight: 8 }} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.sealTitle}>Tamper-Proof Green Seal Tape</Text>
                     <Text style={styles.sealCode}>Barcode Serial: {order.sealQr}</Text>
@@ -362,7 +363,10 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                     }
                     style={styles.itemShortBtn}
                   >
-                    <Text style={styles.itemShortBtnText}>⚠️ Item Short</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="warning-outline" size={13} color="#DC2626" style={{ marginRight: 4 }} />
+                      <Text style={styles.itemShortBtnText}>Item Short</Text>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -377,7 +381,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                     }
                     style={styles.packBtn}
                   >
-                    <Text style={styles.packBtnIcon}>⚖️</Text>
+                    <MaterialCommunityIcons name="scale-balance" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
                     <Text style={styles.packBtnText}>Pack & Weigh on Scale</Text>
                   </TouchableOpacity>
                 </View>

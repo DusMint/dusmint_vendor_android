@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { BorderRadius, Spacing } from '../theme/spacing';
@@ -17,32 +18,41 @@ export const TrustBadge: React.FC<TrustBadgeProps> = ({
   customText,
   style,
 }) => {
+  const renderIcon = (color: string) => {
+    switch (type) {
+      case 'weight_verified':
+        return <MaterialCommunityIcons name="scale-balance" size={14} color={color} style={styles.iconStyle} />;
+      case 'anchor_vendor':
+        return <Ionicons name="shield-checkmark" size={13} color={color} style={styles.iconStyle} />;
+      case 'seal_verified':
+        return <Ionicons name="lock-closed" size={13} color={color} style={styles.iconStyle} />;
+      case 'mandi_rate':
+        return <Ionicons name="trending-down" size={13} color={color} style={styles.iconStyle} />;
+    }
+  };
+
   const getBadgeConfig = () => {
     switch (type) {
       case 'weight_verified':
         return {
-          icon: '⚖️',
           label: customText || '100% Weight Verified',
           bg: '#E8F5E9',
           color: '#1B5E20',
         };
       case 'anchor_vendor':
         return {
-          icon: '⭐',
           label: customText || 'Anchor Vendor',
           bg: '#FEF3C7',
           color: '#B45309',
         };
       case 'seal_verified':
         return {
-          icon: '🔒',
           label: customText || 'Tamper-Evident QR Seal',
           bg: '#E0F2FE',
           color: '#0369A1',
         };
       case 'mandi_rate':
         return {
-          icon: '📊',
           label: customText || 'Direct Mandi Rates',
           bg: '#F3E8FF',
           color: '#7E22CE',
@@ -54,7 +64,7 @@ export const TrustBadge: React.FC<TrustBadgeProps> = ({
 
   return (
     <View style={[styles.badge, { backgroundColor: config.bg }, style]}>
-      <Text style={styles.icon}>{config.icon}</Text>
+      {renderIcon(config.color)}
       <Text style={[styles.text, { color: config.color }]}>{config.label}</Text>
     </View>
   );
@@ -69,8 +79,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.pill,
     alignSelf: 'flex-start',
   },
-  icon: {
-    fontSize: 12,
+  iconStyle: {
     marginRight: 4,
   },
   text: {

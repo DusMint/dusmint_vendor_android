@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { BorderRadius, Spacing, Shadows } from '../theme/spacing';
@@ -60,7 +61,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({
           <Image source={{ uri: photoUrl }} style={styles.image} resizeMode="cover" />
         ) : (
           <View style={styles.placeholderImage}>
-            <Text style={styles.placeholderEmoji}>🥗</Text>
+            <Ionicons name="nutrition-outline" size={28} color={Colors.placeholder} />
           </View>
         )}
         

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 import { VendorEarningsData } from '../../api-client/types';
@@ -95,7 +96,10 @@ export const VendorEarningsScreen: React.FC = () => {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={styles.statVal}>4.9 ★</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.statVal}>4.9 </Text>
+                <Ionicons name="star" size={13} color="#FBBF24" />
+              </View>
               <Text style={styles.statLbl}>Vendor Score</Text>
             </View>
           </View>
@@ -106,7 +110,8 @@ export const VendorEarningsScreen: React.FC = () => {
           <View style={styles.bankHeader}>
             <Text style={styles.bankTitle}>Linked Bank / UPI for Payouts</Text>
             <View style={styles.verifiedTag}>
-              <Text style={styles.verifiedTagText}>VERIFIED ✅</Text>
+              <Ionicons name="checkmark-circle" size={12} color="#047857" style={{ marginRight: 3 }} />
+              <Text style={styles.verifiedTagText}>VERIFIED</Text>
             </View>
           </View>
           <Text style={styles.upiId}>UPI ID: {earnings?.payoutVpa || 'ramesh.sharma@okaxis'}</Text>
@@ -124,7 +129,10 @@ export const VendorEarningsScreen: React.FC = () => {
               <Text style={styles.netAmount}>₹{(p.amountPaise / 100).toFixed(2)}</Text>
             </View>
             <View style={styles.payoutFooter}>
-              <Text style={styles.statusText}>✓ {p.status}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="checkmark-circle" size={13} color="#059669" style={{ marginRight: 4 }} />
+                <Text style={styles.statusText}>{p.status}</Text>
+              </View>
               <TouchableOpacity activeOpacity={0.7}>
                 <Text style={styles.statementLink}>Download Invoice ›</Text>
               </TouchableOpacity>
@@ -259,6 +267,8 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   verifiedTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#ECFDF5',
     paddingHorizontal: 6,
     paddingVertical: 2,

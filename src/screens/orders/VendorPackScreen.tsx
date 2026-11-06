@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, RoundButton } from '@dusmint/ui';
 import { dusmintApi } from '../../api-client/client';
 
@@ -65,7 +66,7 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
 
       setSubmitting(false);
       Alert.alert(
-        'Order Ready for Rider Pickup! 🛵',
+        'Order Ready for Rider Pickup!',
         `Seal #${sealCode} applied successfully.\nWeight: ${liveScaleWeight} g.\nPartner rider has been dispatched for pickup.`,
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
@@ -109,7 +110,7 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
           <View style={styles.stepTitleRow}>
             <Text style={styles.stepNum}>STEP 1 • DIGITAL SCALE READING</Text>
             <View style={styles.bleStatus}>
-              <Text style={styles.bleDot}>🟢</Text>
+              <View style={styles.bleDotView} />
               <Text style={styles.bleText}>Scale BLE Active</Text>
             </View>
           </View>
@@ -160,7 +161,12 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
             onPress={() => setPhotoTaken(!photoTaken)}
             style={[styles.boxCta, photoTaken && styles.boxCtaDone]}
           >
-            <Text style={styles.ctaEmoji}>{photoTaken ? '✅' : '📷'}</Text>
+            <Ionicons
+              name={photoTaken ? "checkmark-circle" : "camera-outline"}
+              size={32}
+              color={photoTaken ? "#047857" : "#334155"}
+              style={{ marginBottom: 6 }}
+            />
             <Text style={[styles.ctaLabel, photoTaken && styles.ctaLabelDone]}>
               {photoTaken ? 'Scale Photo Captured (Tap to Retake)' : 'Take Photo with Camera'}
             </Text>
@@ -180,7 +186,12 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
             onPress={handleScanSeal}
             style={[styles.boxCta, sealCode ? styles.boxCtaDone : null]}
           >
-            <Text style={styles.ctaEmoji}>{sealCode ? '🔒' : '🔍'}</Text>
+            <Ionicons
+              name={sealCode ? "shield-checkmark" : "qr-code-outline"}
+              size={32}
+              color={sealCode ? "#047857" : "#334155"}
+              style={{ marginBottom: 6 }}
+            />
             <Text style={[styles.ctaLabel, sealCode ? styles.ctaLabelDone : null]}>
               {sealCode ? `Seal Attached: #${sealCode}` : 'Scan Tape QR / Barcode'}
             </Text>
@@ -280,9 +291,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
   },
-  bleDot: {
-    fontSize: 8,
-    marginRight: 4,
+  bleDotView: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+    marginRight: 5,
   },
   bleText: {
     fontSize: 10,

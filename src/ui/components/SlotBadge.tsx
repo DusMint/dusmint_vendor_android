@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { Typography } from '../theme/typography';
 import { BorderRadius, Spacing } from '../theme/spacing';
@@ -34,14 +35,13 @@ export const SlotBadge: React.FC<SlotBadgeProps> = ({
         style,
       ]}
     >
-      <Text
-        style={[
-          styles.icon,
-          { color: isSelected ? Colors.textWhite : isMorning ? '#B45309' : '#4338CA' },
-        ]}
-      >
-        {isMorning ? '☀️' : '🌙'}
-      </Text>
+      <View style={styles.iconWrapper}>
+        <Ionicons
+          name={isMorning ? 'sunny-outline' : 'moon-outline'}
+          size={16}
+          color={isSelected ? Colors.textWhite : isMorning ? '#B45309' : '#4338CA'}
+        />
+      </View>
       <View style={styles.textCol}>
         <Text
           style={[
@@ -84,6 +84,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
+  },
+  iconWrapper: {
+    marginRight: Spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   icon: {
     fontSize: 18,
