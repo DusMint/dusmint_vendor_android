@@ -21,6 +21,17 @@ ios/
 .vscode/
 .idea/
 
+# Keystores & credentials
+*.jks
+*.keystore
+*.p8
+*.p12
+*.pem
+
+# Native build artifacts
+*.aab
+*.apk
+
 # OS
 .DS_Store
 Thumbs.db
