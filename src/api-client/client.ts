@@ -20,10 +20,10 @@ export class DusmintApiClient {
   private client: AxiosInstance;
   private authToken: string | null = null;
 
-  constructor(baseURL: string = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3000/api/v1') {
+  constructor(baseURL: string = process.env.EXPO_PUBLIC_API_URL || 'https://dusmint-backend.onrender.com/api/v1') {
     this.client = axios.create({
       baseURL,
-      timeout: 10000,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
       },
