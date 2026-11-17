@@ -155,9 +155,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   boxFocused: {
-    borderColor: '#FC6011',
+    borderColor: '#FF2D6C',
     borderWidth: 2,
-    backgroundColor: '#FFF7ED',
+    backgroundColor: '#FFF1F5',
   },
   boxError: {
     borderColor: '#EF4444',
