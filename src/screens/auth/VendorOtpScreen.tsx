@@ -41,8 +41,8 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
   const handleVerify = useCallback(
     async (codeToVerify?: string) => {
       const code = codeToVerify || otp;
-      if (code.length < 4) {
-        setError('Please enter the complete 4-digit code');
+      if (code.length < 6) {
+        setError('Please enter the complete 6-digit code');
         return;
       }
 
@@ -60,7 +60,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         setLoading(false);
         const serverMsg =
           err?.response?.data?.message ||
-          'Invalid OTP code. Please enter 1234 in development or check SMS.';
+          'Invalid OTP code. Please check the SMS received on your phone.';
         setError(serverMsg);
       }
     },
@@ -81,7 +81,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     } catch {
       setTimer(30);
       setResending(false);
-      Alert.alert('Code Dispatched', 'Use 1234 for dev/fallback login.');
+      Alert.alert('Code Dispatched', 'A new verification code has been sent via SMS.');
     }
   };
 
@@ -113,7 +113,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
             {/* Header Titles */}
             <Text style={styles.title}>Verify Mobile</Text>
             <Text style={styles.subtitle}>
-              Enter the 4-digit verification code sent to
+              Enter the 6-digit verification code sent to
             </Text>
             <View style={styles.phoneRow}>
               <Text style={styles.phoneText}>{phone}</Text>
@@ -126,14 +126,9 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
               </TouchableOpacity>
             </View>
 
-            {/* Dev Mode Notification Badge */}
-            <View style={styles.devBadge}>
-              <Text style={styles.devBadgeText}>⚡ Tip: Use 1234 in dev or real SMS code</Text>
-            </View>
-
-            {/* 4-digit Input Boxes */}
+            {/* 6-digit Input Boxes */}
             <OtpInputBoxes
-              length={4}
+              length={6}
               value={otp}
               onChange={setOtp}
               hasError={Boolean(error)}
@@ -170,9 +165,9 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
 
             {/* Submit Verification Button */}
             <TouchableOpacity
-              style={[styles.verifyButton, otp.length < 4 && styles.verifyButtonDisabled]}
+              style={[styles.verifyButton, otp.length < 6 && styles.verifyButtonDisabled]}
               activeOpacity={0.85}
-              disabled={loading || otp.length < 4}
+              disabled={loading || otp.length < 6}
               onPress={() => handleVerify()}
             >
               {loading ? (
@@ -237,9 +232,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   editPill: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
-    borderColor: '#FED7AA',
+    borderColor: '#BBF7D0',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
@@ -247,22 +242,7 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FC6011',
-  },
-  devBadge: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-  },
-  devBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1D4ED8',
+    color: '#047A36',
   },
   errorBox: {
     flexDirection: 'row',

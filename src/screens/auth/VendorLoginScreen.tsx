@@ -27,23 +27,14 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
   const [error, setError] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
-  const handlePhoneChange = (text: string) => {
-    const digitsOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
-    setPhone(digitsOnly);
-    if (error) setError('');
-  };
-
-  const handleContinue = async () => {
-    if (phone.length < 10) {
-      setError('Please enter a valid 10-digit mobile number');
-      return;
-    }
+  const submitPhone = async (phoneDigits: string) => {
+    if (phoneDigits.length < 10 || loading) return;
 
     Keyboard.dismiss();
     setError('');
     setLoading(true);
 
-    const formattedPhone = `+91${phone}`;
+    const formattedPhone = `+91${phoneDigits}`;
 
     try {
       await dusmintApi.sendPhoneOtp(formattedPhone);
@@ -51,9 +42,27 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
       navigation.navigate('VendorOtp', { phone: formattedPhone });
     } catch {
       setLoading(false);
-      // Even if network blips or dev mode, proceed to OTP screen with dev 1234
+      // Even if network blips or dev mode, proceed to OTP screen
       navigation.navigate('VendorOtp', { phone: formattedPhone });
     }
+  };
+
+  const handlePhoneChange = (text: string) => {
+    const digitsOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
+    setPhone(digitsOnly);
+    if (error) setError('');
+    // Auto-continue as soon as 10 digits are entered
+    if (digitsOnly.length === 10) {
+      submitPhone(digitsOnly);
+    }
+  };
+
+  const handleContinue = () => {
+    if (phone.length < 10) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    submitPhone(phone);
   };
 
   // Riksho-style bottom padding with negative margin to ensure continuous backdrop
@@ -94,9 +103,17 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
               },
             ]}
           >
-            <Text style={styles.sheetTitle}>Partner Login</Text>
-            <Text style={styles.sheetSubtitle}>
-              Enter registered mobile number to manage your Dukaan
+            {/* 1. DusMint Word Logo */}
+            <View style={styles.wordLogoRow}>
+              <Text style={styles.brandWordLogo}>
+                <Text style={styles.brandDus}>dus</Text>
+                <Text style={styles.brandMint}>mint</Text>
+              </Text>
+            </View>
+
+            {/* 2. Unbolded single-line subtext */}
+            <Text style={styles.sheetSubtitle} numberOfLines={1} adjustsFontSizeToFit>
+              Enter your mobile number to get started
             </Text>
 
             <Text style={styles.inputCaption}>MOBILE NUMBER</Text>
@@ -156,7 +173,7 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
             </TouchableOpacity>
 
             <Text style={styles.termsNote}>
-              By continuing, you agree to DusMint's Merchant Terms of Partner Agreement
+              By continuing, you agree to DusMint's Partner Terms of Agreement
             </Text>
           </View>
         </View>
@@ -196,20 +213,28 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
   },
-  sheetTitle: {
-    fontSize: 22,
+  wordLogoRow: {
+    marginBottom: 4,
+  },
+  brandWordLogo: {
+    fontSize: 27,
     fontFamily: 'Metropolis-Bold',
     fontWeight: '800',
+    letterSpacing: -0.6,
+  },
+  brandDus: {
     color: '#0F172A',
-    letterSpacing: -0.5,
+  },
+  brandMint: {
+    color: '#047A36',
   },
   sheetSubtitle: {
     fontSize: 14,
     fontFamily: 'Metropolis-Regular',
-    color: '#64748B',
-    marginTop: 6,
-    lineHeight: 20,
     fontWeight: '400',
+    color: '#64748B',
+    lineHeight: 20,
+    letterSpacing: -0.2,
   },
   inputCaption: {
     fontSize: 11,

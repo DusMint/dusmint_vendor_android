@@ -16,7 +16,7 @@ interface OtpInputBoxesProps {
 }
 
 export const OtpInputBoxes: React.FC<OtpInputBoxesProps> = ({
-  length = 4,
+  length = 6,
   value,
   onChange,
   hasError = false,
@@ -106,7 +106,7 @@ export const OtpInputBoxes: React.FC<OtpInputBoxesProps> = ({
               keyboardType="number-pad"
               maxLength={index === 0 ? length : 1}
               selectTextOnFocus={true}
-              selectionColor="#FC6011"
+              selectionColor="#047A36"
               onFocus={() => setFocusedIndex(index)}
               onBlur={() => setFocusedIndex(-1)}
               accessibilityLabel={`OTP digit ${index + 1}`}
@@ -126,13 +126,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     marginVertical: 18,
   },
   box: {
-    width: 62,
-    height: 66,
-    borderRadius: 18,
+    width: 48,
+    height: 56,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     backgroundColor: '#F8FAFC',
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     textAlign: 'center',
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '800',
     color: '#0F172A',
     padding: 0,
