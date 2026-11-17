@@ -19,7 +19,8 @@ RootStack (Native Stack)
 ├── Tabs (BottomTabNavigator)
 │   ├── VendorOrders (VendorOrdersScreen - live order processing pipeline)
 │   ├── VendorStock (VendorStockScreen - inventory toggle & mandi price check)
-│   └── VendorEarnings (VendorEarningsScreen - T+0 settlements & ledger)
+│   ├── VendorEarnings (VendorEarningsScreen - T+0 settlements & ledger)
+│   └── VendorProfile (VendorProfileScreen - Dukaan profile, UPI, sound & compliance)
 └── VendorPack (VendorPackScreen - BLE scale reading & tamper seal verification)
 ```
 
@@ -27,14 +28,15 @@ RootStack (Native Stack)
 
 ## 2. Complete Screen Directory & Trigger Matrix
 
-Total Core Screens: **4 Operational Screens**
+Total Core Screens: **5 Operational Screens**
 
 | # | Screen Name | File Path | Route Key | Trigger / How It Is Triggered | Transition |
 |---|---|---|---|---|---|
 | 1 | **Orders Pipeline** | `src/screens/orders/VendorOrdersScreen.tsx` | `Tabs > VendorOrders` | Default launch screen (`initialRouteName="VendorOrders"`) | Tab Switch |
 | 2 | **Menu & Stock** | `src/screens/stock/VendorStockScreen.tsx` | `Tabs > VendorStock` | Bottom tab tap on "Menu & Stock" | Tab Switch |
 | 3 | **Earnings & Payouts**| `src/screens/earnings/VendorEarningsScreen.tsx` | `Tabs > VendorEarnings` | Bottom tab tap on "Earnings" | Tab Switch |
-| 4 | **Pack & Weigh Scale** | `src/screens/orders/VendorPackScreen.tsx` | `VendorPack` | Tapping "⚖️ Pack & Weigh on Scale" button on any pending order | Native Stack Push |
+| 4 | **Dukaan Profile** | `src/screens/profile/VendorProfileScreen.tsx` | `Tabs > VendorProfile` | Bottom tab tap on "Profile" | Tab Switch |
+| 5 | **Pack & Weigh Scale** | `src/screens/orders/VendorPackScreen.tsx` | `VendorPack` | Tapping "⚖️ Pack & Weigh on Scale" button on any pending order | Native Stack Push |
 
 ---
 

@@ -60,8 +60,8 @@ export const VendorStockScreen: React.FC = () => {
           },
         ]);
       }
-    } catch (err) {
-      console.warn('Failed to fetch stock items:', err);
+    } catch {
+      // Fallback stock items already set; silently handle offline/dev mode
     } finally {
       setLoading(false);
       setRefreshing(false);
