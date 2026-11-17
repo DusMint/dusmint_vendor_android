@@ -3,8 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
-  Dimensions,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -14,17 +12,16 @@ import {
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
-import { IndiaFlag } from './widgets/IndiaFlag';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Default to Dark Mode like the main screenshot
 
   const handlePhoneChange = (text: string) => {
     const digitsOnly = text.replace(/[^0-9]/g, '').slice(0, 10);
@@ -48,287 +45,355 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
       await dusmintApi.sendPhoneOtp(formattedPhone);
       setLoading(false);
       navigation.navigate('VendorOtp', { phone: formattedPhone });
-    } catch (err: any) {
+    } catch {
       setLoading(false);
-      // Even if network blips or dev mode, proceed to OTP screen with dev 1234
+      // Even if network blips or in dev mode, proceed to OTP screen with dev 1234
       navigation.navigate('VendorOtp', { phone: formattedPhone });
     }
   };
 
-  const bottomPadding = Math.max(insets.bottom, 16);
+  const isFormValid = phone.length === 10;
+
+  // Dynamic Theme Colors
+  const theme = {
+    screenBg: isDarkMode ? '#121214' : '#F4F4F6',
+    cardBg: isDarkMode ? '#1E1E24' : '#FFFFFF',
+    cardBorder: isDarkMode ? '#2E2E36' : '#E8E4EE',
+    inputBorder: isFocused
+      ? '#FF2D6C'
+      : isDarkMode
+      ? '#6A2E46'
+      : '#D897B3',
+    floatingLabelBg: isDarkMode ? '#1E1E24' : '#FFFFFF',
+    floatingLabelColor: isFocused
+      ? '#FF2D6C'
+      : isDarkMode
+      ? '#E05282'
+      : '#A8486E',
+    inputText: isDarkMode ? '#FFFFFF' : '#111827',
+    subtitleColor: isDarkMode ? '#A1A1AA' : '#6B7280',
+    btnDisabledBg: isDarkMode ? '#38232D' : '#D4BFCA',
+    btnDisabledText: isDarkMode ? '#7A4F60' : '#8A6D7C',
+    btnActiveBg: '#FF2D6C',
+    btnActiveText: '#FFFFFF',
+    toggleTextColor: isDarkMode ? '#A1A1AA' : '#6B7280',
+    termsColor: isDarkMode ? '#6B7280' : '#9CA3AF',
+  };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.container}>
-        <StatusBar style="light" />
+    <KeyboardAvoidingView
+      style={[styles.rootContainer, { backgroundColor: theme.screenBg }]}
+      behavior="padding"
+    >
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
 
-        {/* 1. Full-bleed background image with fresh groceries & veggies */}
-        <View style={styles.bgContainer} pointerEvents="none">
-          <Image
-            source={require('../../../assets/images/login_bg.jpg')}
-            style={styles.bgImage}
-            resizeMode="cover"
-          />
-          <View style={styles.bgOverlay} />
-        </View>
-
-        {/* 2. Top DusMint Partner Branding */}
-        <View style={[styles.topBranding, { paddingTop: insets.top + 20 }]}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoBadgeEmoji}>🏪</Text>
-          </View>
-          <Text style={styles.brandTitle}>DusMint Partner</Text>
-          <Text style={styles.brandTagline}>Merchant Order & Delivery Terminal</Text>
-        </View>
-
-        {/* 3. Floating Bottom Sheet Drawer */}
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoid}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={0}
-        >
-          <View style={[styles.sheet, { paddingBottom: bottomPadding }]}>
-            {/* Sheet Handle */}
-            <View style={styles.handleBar} />
-
-            <Text style={styles.sheetTitle}>Partner Login</Text>
-            <Text style={styles.sheetSubtitle}>Enter registered mobile number to manage your Dukaan</Text>
-
-            <Text style={styles.inputCaption}>MOBILE NUMBER</Text>
-
-            {/* Phone Input with +91 and India Flag */}
-            <View style={[styles.inputBox, Boolean(error) && styles.inputBoxError]}>
-              <View style={styles.countryPrefix}>
-                <IndiaFlag width={24} height={17} />
-                <Text style={styles.countryCode}>+91</Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.centerWrapper}>
+          {/* Centered Floating Card */}
+          <View
+            style={[
+              styles.floatingCard,
+              {
+                backgroundColor: theme.cardBg,
+                borderColor: theme.cardBorder,
+              },
+            ]}
+          >
+            {/* 1. Brand Logo Lockup: DusMint Icon + "dusmint" & "Vendor" */}
+            <View style={styles.logoRow}>
+              <View style={styles.iconBox}>
+                <Svg width={40} height={40} viewBox="0 0 32 32">
+                  <Path
+                    d="M16 4C16 4 9 9 9 17C9 21.4183 12.134 25 16 25C19.866 25 23 21.4183 23 17C23 9 16 4 16 4Z"
+                    fill="#FF2D6C"
+                  />
+                  <Path
+                    d="M23 11C23 11 27 14 27 19C27 21.7614 25.2091 24 23 24C20.7909 24 19 21.7614 19 19C19 14 23 11 23 11Z"
+                    fill="#FF5E90"
+                  />
+                  <Path
+                    d="M16 11V22M16 15L12 13M16 18L13 19M16 17L19 16"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </Svg>
               </View>
 
-              <View style={styles.verticalDivider} />
+              <View style={styles.logoTextCol}>
+                <Text style={styles.brandTitle}>dusmint</Text>
+                <Text style={styles.brandSubtitle}>Vendor</Text>
+              </View>
+            </View>
 
-              <TextInput
-                style={styles.phoneInput}
-                value={phone}
-                onChangeText={handlePhoneChange}
-                placeholder="Enter 10-digit number"
-                placeholderTextColor="#94A3B8"
-                keyboardType="phone-pad"
-                maxLength={10}
-                selectionColor="#FC6011"
-                returnKeyType="done"
-                onSubmitEditing={handleContinue}
-              />
+            {/* 2. Subtitle */}
+            <Text style={[styles.subtitle, { color: theme.subtitleColor }]}>
+              Enter your mobile number to get started
+            </Text>
+
+            {/* 3. Outlined Input Box with Notched Floating Label */}
+            <View style={styles.inputWrapper}>
+              <View
+                style={[
+                  styles.outlinedBox,
+                  { borderColor: theme.inputBorder },
+                ]}
+              >
+                <TextInput
+                  style={[styles.textInput, { color: theme.inputText }]}
+                  value={phone}
+                  onChangeText={handlePhoneChange}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  selectionColor="#FF2D6C"
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  returnKeyType="done"
+                  onSubmitEditing={handleContinue}
+                />
+              </View>
+
+              {/* Floating Label notched on top border */}
+              <View
+                style={[
+                  styles.floatingLabelBadge,
+                  { backgroundColor: theme.floatingLabelBg },
+                ]}
+                pointerEvents="none"
+              >
+                <Text
+                  style={[
+                    styles.floatingLabelText,
+                    { color: theme.floatingLabelColor },
+                  ]}
+                >
+                  Mobile Number
+                </Text>
+              </View>
             </View>
 
             {Boolean(error) && (
-              <View style={styles.errorBox}>
+              <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
 
-            {/* Continue Button */}
+            {/* 4. Centered "Send OTP" Button */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[
+                  styles.sendOtpBtn,
+                  isFormValid && !loading
+                    ? styles.sendOtpBtnActive
+                    : { backgroundColor: theme.btnDisabledBg },
+                ]}
+                activeOpacity={0.85}
+                disabled={!isFormValid || loading}
+                onPress={handleContinue}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text
+                    style={[
+                      styles.sendOtpBtnText,
+                      {
+                        color:
+                          isFormValid && !loading
+                            ? theme.btnActiveText
+                            : theme.btnDisabledText,
+                      },
+                    ]}
+                  >
+                    Send OTP
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* 5. Theme Toggle: Switch to Light/Dark Mode */}
             <TouchableOpacity
-              style={[
-                styles.continueBtn,
-                phone.length < 10 && styles.continueBtnDisabled,
-              ]}
-              activeOpacity={0.85}
-              disabled={loading || phone.length < 10}
-              onPress={handleContinue}
+              style={styles.themeToggleBtn}
+              activeOpacity={0.7}
+              onPress={() => setIsDarkMode(!isDarkMode)}
             >
-              {loading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.continueBtnText}>CONTINUE</Text>
-              )}
+              <Ionicons
+                name={isDarkMode ? 'sunny-outline' : 'moon-outline'}
+                size={14}
+                color="#FF2D6C"
+                style={styles.themeIcon}
+              />
+              <Text
+                style={[
+                  styles.themeToggleText,
+                  { color: theme.toggleTextColor },
+                ]}
+              >
+                {isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              </Text>
             </TouchableOpacity>
 
-            <Text style={styles.termsNote}>
-              By continuing, you agree to DusMint's Merchant Terms of Partner Agreement
+            {/* 6. Legal Fine Print */}
+            <Text style={[styles.termsText, { color: theme.termsColor }]}>
+              By continuing, you agree to our Terms of Service{'\n'}and Privacy Policy
             </Text>
           </View>
-        </KeyboardAvoidingView>
-      </View>
-    </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  rootContainer: {
     flex: 1,
-    backgroundColor: '#0F172A',
   },
-  bgContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT,
-  },
-  bgImage: {
-    width: '100%',
-    height: '100%',
-  },
-  bgOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-  },
-  topBranding: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  logoBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  centerWrapper: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
+    paddingHorizontal: 20,
   },
-  logoBadgeEmoji: {
-    fontSize: 32,
+  floatingCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 24,
+    borderWidth: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  iconBox: {
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoTextCol: {
+    justifyContent: 'center',
   },
   brandTitle: {
-    fontSize: 26,
+    fontSize: 28,
+    fontFamily: 'Metropolis-Bold',
     fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -0.5,
+    color: '#FF2D6C',
+    letterSpacing: -0.6,
+    lineHeight: 32,
   },
-  brandTagline: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.85)',
-    marginTop: 4,
+  brandSubtitle: {
+    fontSize: 20,
+    fontFamily: 'Metropolis-Bold',
+    fontWeight: '700',
+    color: '#FF2D6C',
+    letterSpacing: -0.4,
+    lineHeight: 24,
+    marginTop: -2,
+  },
+  subtitle: {
+    fontSize: 13.5,
+    fontFamily: 'Metropolis-Medium',
     fontWeight: '500',
+    textAlign: 'center',
+    letterSpacing: -0.2,
+    marginBottom: 26,
+    marginTop: 4,
   },
-  keyboardAvoid: {
-    flex: 1,
-    justifyContent: 'flex-end',
+  inputWrapper: {
+    position: 'relative',
+    marginBottom: 18,
   },
-  sheet: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 22,
-    paddingTop: 14,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  handleBar: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#E2E8F0',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  sheetTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: -0.5,
-  },
-  sheetSubtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 6,
-    lineHeight: 20,
-    fontWeight: '400',
-  },
-  inputCaption: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    color: '#64748B',
-    marginTop: 22,
-    marginBottom: 8,
-  },
-  inputBox: {
-    height: 56,
-    borderRadius: 16,
+  outlinedBox: {
+    height: 52,
+    borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    justifyContent: 'center',
   },
-  inputBoxError: {
-    borderColor: '#EF4444',
-    backgroundColor: '#FEF2F2',
-  },
-  countryPrefix: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  countryCode: {
+  textInput: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginLeft: 8,
-  },
-  verticalDivider: {
-    width: 1,
-    height: 26,
-    backgroundColor: '#CBD5E1',
-    marginHorizontal: 12,
-  },
-  phoneInput: {
-    flex: 1,
-    height: '100%',
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontFamily: 'Metropolis-SemiBold',
+    fontWeight: '600',
+    letterSpacing: 0.5,
     padding: 0,
+    height: '100%',
   },
-  errorBox: {
-    marginTop: 6,
+  floatingLabelBadge: {
+    position: 'absolute',
+    top: -9,
+    left: 14,
+    paddingHorizontal: 6,
+  },
+  floatingLabelText: {
+    fontSize: 11.5,
+    fontFamily: 'Metropolis-Medium',
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  errorContainer: {
+    marginTop: -10,
+    marginBottom: 14,
     paddingHorizontal: 4,
   },
   errorText: {
     fontSize: 12,
+    fontFamily: 'Metropolis-Medium',
     color: '#EF4444',
-    fontWeight: '600',
   },
-  continueBtn: {
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: '#FC6011',
+  buttonRow: {
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 4,
+  },
+  sendOtpBtn: {
+    width: 140,
+    height: 46,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
-    shadowColor: '#FC6011',
+  },
+  sendOtpBtnActive: {
+    backgroundColor: '#FF2D6C',
+    shadowColor: '#FF2D6C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
-  continueBtnDisabled: {
-    backgroundColor: '#FED7AA',
-    shadowOpacity: 0,
-    elevation: 0,
+  sendOtpBtnText: {
+    fontSize: 14.5,
+    fontFamily: 'Metropolis-Bold',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  continueBtnText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1,
+  themeToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 22,
+    paddingVertical: 4,
   },
-  termsNote: {
+  themeIcon: {
+    marginRight: 6,
+  },
+  themeToggleText: {
+    fontSize: 12,
+    fontFamily: 'Metropolis-Medium',
+    fontWeight: '500',
+  },
+  termsText: {
     fontSize: 11,
-    color: '#94A3B8',
+    fontFamily: 'Metropolis-Regular',
     textAlign: 'center',
-    marginTop: 14,
     lineHeight: 16,
+    letterSpacing: -0.1,
   },
 });
