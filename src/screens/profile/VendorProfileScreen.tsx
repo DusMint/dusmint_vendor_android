@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorProfileInfo } from '../../api-client/types';
+import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
 export const VendorProfileScreen: React.FC<{ navigation?: any }> = () => {
   const insets = useSafeAreaInsets();
@@ -397,7 +398,19 @@ export const VendorProfileScreen: React.FC<{ navigation?: any }> = () => {
             onPress={() => {
               Alert.alert('Log Out', 'Are you sure you want to log out of DusMint Partner Terminal?', [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Log Out', style: 'destructive', onPress: () => Alert.alert('Logged Out') },
+                {
+                  text: 'Log Out',
+                  style: 'destructive',
+                  onPress: () => {
+                    useVendorAuthStore.getState().logout();
+                    if (navigation?.reset) {
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'VendorLogin' }],
+                      });
+                    }
+                  },
+                },
               ]);
             }}
           >
