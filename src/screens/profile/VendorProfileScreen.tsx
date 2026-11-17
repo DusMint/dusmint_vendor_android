@@ -17,7 +17,7 @@ import { dusmintApi } from '../../api-client/client';
 import { VendorProfileInfo } from '../../api-client/types';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
-export const VendorProfileScreen: React.FC<{ navigation?: any }> = () => {
+export const VendorProfileScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
   const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(null);

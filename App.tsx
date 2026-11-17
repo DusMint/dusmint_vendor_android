@@ -12,6 +12,10 @@ import { VendorPackScreen } from './src/screens/orders/VendorPackScreen';
 import { VendorStockScreen } from './src/screens/stock/VendorStockScreen';
 import { VendorEarningsScreen } from './src/screens/earnings/VendorEarningsScreen';
 import { VendorProfileScreen } from './src/screens/profile/VendorProfileScreen';
+import { LanguageSelectScreen } from './src/screens/language/LanguageSelectScreen';
+import { VendorLoginScreen } from './src/screens/auth/VendorLoginScreen';
+import { VendorOtpScreen } from './src/screens/auth/VendorOtpScreen';
+import { useVendorAuthStore } from './src/state/useVendorAuthStore';
 
 // Suppress dev-mode LogBox banners to prevent bottom navigation occlusion
 LogBox.ignoreAllLogs(true);
@@ -161,11 +165,23 @@ export default function App() {
     );
   }
 
+  const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
+  const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
+
+  const initialRouteName = !selectedLanguage
+    ? 'LanguageSelect'
+    : !isAuthenticated
+    ? 'VendorLogin'
+    : 'Tabs';
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar style="dark" />
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="LanguageSelect" component={LanguageSelectScreen} />
+          <Stack.Screen name="VendorLogin" component={VendorLoginScreen} />
+          <Stack.Screen name="VendorOtp" component={VendorOtpScreen} />
           <Stack.Screen name="Tabs" component={VendorTabs} />
           <Stack.Screen name="VendorPack" component={VendorPackScreen} />
         </Stack.Navigator>
