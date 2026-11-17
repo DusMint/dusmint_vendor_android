@@ -15,6 +15,7 @@ import { VendorProfileScreen } from './src/screens/profile/VendorProfileScreen';
 import { LanguageSelectScreen } from './src/screens/language/LanguageSelectScreen';
 import { VendorLoginScreen } from './src/screens/auth/VendorLoginScreen';
 import { VendorOtpScreen } from './src/screens/auth/VendorOtpScreen';
+import { VendorOnboardingScreen } from './src/screens/onboarding/VendorOnboardingScreen';
 import { useVendorAuthStore } from './src/state/useVendorAuthStore';
 
 // Suppress dev-mode LogBox banners to prevent bottom navigation occlusion
@@ -182,6 +183,7 @@ export default function App() {
           <Stack.Screen name="LanguageSelect" component={LanguageSelectScreen} />
           <Stack.Screen name="VendorLogin" component={VendorLoginScreen} />
           <Stack.Screen name="VendorOtp" component={VendorOtpScreen} />
+          <Stack.Screen name="VendorOnboarding" component={VendorOnboardingScreen} />
           <Stack.Screen name="Tabs" component={VendorTabs} />
           <Stack.Screen name="VendorPack" component={VendorPackScreen} />
         </Stack.Navigator>

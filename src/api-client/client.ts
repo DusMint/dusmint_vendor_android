@@ -47,8 +47,25 @@ export class DusmintApiClient {
     return res.data;
   }
 
-  async verifyPhoneOtp(phone: string, otp: string): Promise<{ token: string; user: UserProfile }> {
+  async verifyPhoneOtp(phone: string, otp: string): Promise<{ token: string; user: UserProfile; vendor?: any; isNewVendor?: boolean }> {
     const res = await this.client.post('/auth/otp/verify', { phone, otp });
+    return res.data;
+  }
+
+  async submitVendorOnboarding(data: {
+    ownerName: string;
+    ownerPhone: string;
+    email?: string;
+    shopName: string;
+    category?: string;
+    address: string;
+    lat?: number;
+    lng?: number;
+    shopPhotoUrls?: string[];
+    bankOrUpi: string;
+    authUserId?: string;
+  }): Promise<{ success: boolean; message: string; vendor: any }> {
+    const res = await this.client.post('/vendor/onboarding', data);
     return res.data;
   }
 

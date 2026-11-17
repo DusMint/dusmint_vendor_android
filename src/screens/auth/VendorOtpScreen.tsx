@@ -55,7 +55,12 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         const res = await dusmintApi.verifyPhoneOtp(fullPhone, code);
         setLoading(false);
         setAuth(res.token, res.user);
-        navigation.replace('Tabs');
+
+        if (res.isNewVendor) {
+          navigation.replace('VendorOnboarding', { phone: fullPhone, authUserId: res.user?.id });
+        } else {
+          navigation.replace('Tabs');
+        }
       } catch (err: any) {
         setLoading(false);
         const serverMsg =
