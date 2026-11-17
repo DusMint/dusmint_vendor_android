@@ -16,10 +16,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import * as ImagePicker from 'expo-image-picker';
 import { reverseGeocodeWithOla } from '../../utils/geo';
 import { dusmintApi } from '../../api-client/client';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
+
+// Safe dynamic loader to prevent fatal crash if running an older APK without ExponentImagePicker compiled
+let ImagePicker: any = null;
+try {
+  ImagePicker = require('expo-image-picker');
+} catch {}
 
 interface VendorOnboardingProps {
   route: any;
@@ -111,8 +116,26 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 
   // Image Picking
   const handlePickPhoto = async (fromCamera: boolean) => {
+    if (!ImagePicker || !ImagePicker.launchImageLibraryAsync) {
+      Alert.alert(
+        'Native Rebuild Required',
+        'Camera & Gallery require recompiling the Android APK (npx expo run:android). Would you like to use a sample shop photo to test onboarding?',
+        [
+          {
+            text: 'Use Sample Shop Photo',
+            onPress: () =>
+              setShopPhotoUri(
+                'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'
+              ),
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ]
+      );
+      return;
+    }
+
     try {
-      const options: ImagePicker.ImagePickerOptions = {
+      const options: any = {
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],

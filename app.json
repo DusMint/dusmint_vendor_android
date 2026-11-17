@@ -21,6 +21,15 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FC6011"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DusMint Partner needs photo access to upload your shopfront picture.",
+          "cameraPermission": "DusMint Partner needs camera access to take a picture of your store."
+        }
+      ]
+    ]
   }
 }
