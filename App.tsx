@@ -11,6 +11,7 @@ import { VendorOrdersScreen } from './src/screens/orders/VendorOrdersScreen';
 import { VendorPackScreen } from './src/screens/orders/VendorPackScreen';
 import { VendorStockScreen } from './src/screens/stock/VendorStockScreen';
 import { VendorEarningsScreen } from './src/screens/earnings/VendorEarningsScreen';
+import { VendorProfileScreen } from './src/screens/profile/VendorProfileScreen';
 
 // Suppress dev-mode LogBox banners to prevent bottom navigation occlusion
 LogBox.ignoreAllLogs(true);
@@ -97,6 +98,26 @@ function VendorTabs() {
             <View style={styles.iconContainer}>
               <Image
                 source={require('./assets/img/more_payment.png')}
+                style={[
+                  styles.tabIcon,
+                  { tintColor: focused ? '#FC6011' : '#94A3B8' },
+                ]}
+                resizeMode="contain"
+              />
+              {focused && <View style={styles.activeDot} />}
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="VendorProfile"
+        component={VendorProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <View style={styles.iconContainer}>
+              <Image
+                source={require('./assets/img/tab_profile.png')}
                 style={[
                   styles.tabIcon,
                   { tintColor: focused ? '#FC6011' : '#94A3B8' },
