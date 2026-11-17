@@ -157,6 +157,9 @@ export default function App() {
     'NotoSans-Bold': require('./assets/font/Metropolis-Bold.otf'),
   });
 
+  const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
+  const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
+
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
@@ -164,9 +167,6 @@ export default function App() {
       </View>
     );
   }
-
-  const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
-  const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
 
   const initialRouteName = !selectedLanguage
     ? 'LanguageSelect'

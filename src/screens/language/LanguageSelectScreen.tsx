@@ -79,13 +79,8 @@ export const LanguageSelectScreen: React.FC<{ navigation: any }> = ({ navigation
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Illustration & Heading */}
-        <View style={styles.heroSection}>
-          <Image
-            source={require('../../../assets/images/ill_language_select.png')}
-            style={styles.heroImage}
-            resizeMode="contain"
-          />
+        {/* Header Section without illustration */}
+        <View style={styles.headerSection}>
           <Text style={styles.title}>{t.title}</Text>
           <Text style={styles.subtitle}>{t.subtitle}</Text>
         </View>
@@ -158,14 +153,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 24,
   },
-  heroSection: {
+  headerSection: {
+    paddingTop: 24,
+    marginBottom: 32,
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  heroImage: {
-    width: 200,
-    height: 180,
-    marginBottom: 16,
   },
   title: {
     fontSize: 24,
