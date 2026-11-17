@@ -31,7 +31,7 @@ function VendorTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#FF2D6C',
+        tabBarActiveTintColor: '#047A36',
         tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: {
           height: 60 + bottomInset,
@@ -64,7 +64,7 @@ function VendorTabs() {
                 source={require('./assets/img/tab_home.png')}
                 style={[
                   styles.tabIcon,
-                  { tintColor: focused ? '#FF2D6C' : '#94A3B8' },
+                  { tintColor: focused ? '#047A36' : '#94A3B8' },
                 ]}
                 resizeMode="contain"
               />
@@ -84,7 +84,7 @@ function VendorTabs() {
                 source={require('./assets/img/tab_menu.png')}
                 style={[
                   styles.tabIcon,
-                  { tintColor: focused ? '#FF2D6C' : '#94A3B8' },
+                  { tintColor: focused ? '#047A36' : '#94A3B8' },
                 ]}
                 resizeMode="contain"
               />
@@ -104,7 +104,7 @@ function VendorTabs() {
                 source={require('./assets/img/more_payment.png')}
                 style={[
                   styles.tabIcon,
-                  { tintColor: focused ? '#FF2D6C' : '#94A3B8' },
+                  { tintColor: focused ? '#047A36' : '#94A3B8' },
                 ]}
                 resizeMode="contain"
               />
@@ -124,7 +124,7 @@ function VendorTabs() {
                 source={require('./assets/img/tab_profile.png')}
                 style={[
                   styles.tabIcon,
-                  { tintColor: focused ? '#FF2D6C' : '#94A3B8' },
+                  { tintColor: focused ? '#047A36' : '#94A3B8' },
                 ]}
                 resizeMode="contain"
               />
@@ -163,7 +163,7 @@ export default function App() {
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <ActivityIndicator size="large" color="#FF2D6C" />
+        <ActivityIndicator size="large" color="#047A36" />
       </View>
     );
   }
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#FF2D6C',
+    backgroundColor: '#047A36',
     marginTop: 2,
   },
 });

@@ -3,15 +3,15 @@
  * Replicated from sample_app/lib/common/color_extension.dart
  */
 export const Colors = {
-  // Brand Primary (Zepto-style Electric Rose Pink: #FF2D6C)
-  primary: '#FF2D6C',
-  primaryLight: '#FF5E90',
-  primaryDark: '#E01D58',
-  pink: '#FF2D6C',
-  rose: '#FF2D6C',
-  orange: '#FF2D6C',
-  orangeLight: '#FF5E90',
-  accentMint: '#059669',
+  // Brand Primary (DusMint Mandi Green: #047A36)
+  primary: '#047A36',
+  primaryLight: '#059669',
+  primaryDark: '#0A3622',
+  green: '#047A36',
+  greenLight: '#059669',
+  accentMint: '#E8F5EC',
+  orange: '#FC6011',
+  orangeLight: '#FF7A38',
 
   // Text Colors
   primaryText: '#4A4B4D',

@@ -192,9 +192,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   langCardSelected: {
-    borderColor: '#FF2D6C',
-    backgroundColor: '#FFF1F5',
-    shadowColor: '#FF2D6C',
+    borderColor: '#047A36',
+    backgroundColor: '#F0FDF4',
+    shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   langNameSelected: {
-    color: '#FF2D6C',
+    color: '#047A36',
     fontWeight: '800',
   },
   langLocalName: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   langLocalNameSelected: {
-    color: '#E01D58',
+    color: '#059669',
     fontWeight: '600',
   },
   bottomBar: {
@@ -229,14 +229,14 @@ const styles = StyleSheet.create({
     borderTopColor: '#F8FAFC',
   },
   continueButton: {
-    backgroundColor: '#FF2D6C',
+    backgroundColor: '#047A36',
     paddingVertical: 16,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FF2D6C',
+    shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 4,
   },
