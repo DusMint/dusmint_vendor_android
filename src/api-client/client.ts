@@ -69,6 +69,15 @@ export class DusmintApiClient {
     return res.data;
   }
 
+  async registerPushToken(
+    token: string,
+    platform: 'android' | 'ios' = 'android',
+    app: 'dusmint_vendor' | 'dusmint_customer' = 'dusmint_vendor'
+  ): Promise<{ success: boolean }> {
+    const res = await this.client.post('/push/fcm-register', { token, platform, app });
+    return res.data;
+  }
+
   async getProfile(): Promise<UserProfile> {
     const res = await this.client.get('/user/profile');
     return res.data;
