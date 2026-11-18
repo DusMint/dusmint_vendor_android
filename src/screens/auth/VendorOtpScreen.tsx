@@ -20,17 +20,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 import { OtpInputBoxes } from './widgets/OtpInputBoxes';
+import { startGoogleSmsConsent } from '../../utils/GoogleSmsConsent';
 
 export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
-  const { phone, autoVerifyOtp } = route.params || { phone: '+91 8010939887' };
+  const { phone } = route.params || { phone: '+91 8010939887' };
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(28);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
-
-  const [isAutoVerifying, setIsAutoVerifying] = useState(Boolean(autoVerifyOtp));
-  const [autoVerifySuccess, setAutoVerifySuccess] = useState(false);
 
   const setAuth = useVendorAuthStore((s) => s.setAuth);
   const hasVerified = useRef(false);
@@ -76,63 +74,19 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     [otp, phone, setAuth, navigation]
   );
 
-  // Background auto-verification (straight to the point, no popups)
+  // 1. Google Play Services SMS Consent (Production auto-capture when SMS arrives on this physical device)
   useEffect(() => {
-    if (!autoVerifyOtp) {
-      setIsAutoVerifying(false);
-      return;
-    }
-
-    let isMounted = true;
-
-    const verifyTimer = setTimeout(async () => {
-      if (!isMounted) return;
-      try {
-        const fullPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
-        const res = await dusmintApi.verifyPhoneOtp(fullPhone, autoVerifyOtp);
-        if (!isMounted) return;
-        hasVerified.current = true;
-        setAutoVerifySuccess(true);
-        setAuth(res.token, res.user);
-
-        setTimeout(() => {
-          if (!isMounted) return;
-          if (res.isNewVendor) {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'VendorOnboarding', params: { phone: fullPhone, authUserId: res.user?.id } }],
-            });
-          } else {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Tabs' }],
-            });
-          }
-        }, 500);
-      } catch (err: any) {
-        if (!isMounted) return;
-        setIsAutoVerifying(false);
-        const serverMsg =
-          err?.response?.data?.message ||
-          'Could not verify automatically. Please enter the OTP code manually.';
-        setError(serverMsg);
+    const cleanup = startGoogleSmsConsent((extractedOtp) => {
+      if (extractedOtp && extractedOtp.length === 6) {
+        setOtp(extractedOtp);
+        handleVerify(extractedOtp);
       }
-    }, 1000);
+    });
 
-    const fallbackTimer = setTimeout(() => {
-      if (isMounted && !hasVerified.current) {
-        setIsAutoVerifying(false);
-      }
-    }, 4500);
+    return () => cleanup();
+  }, [handleVerify]);
 
-    return () => {
-      isMounted = false;
-      clearTimeout(verifyTimer);
-      clearTimeout(fallbackTimer);
-    };
-  }, [autoVerifyOtp, phone, setAuth, navigation]);
-
-  // Auto-verify as soon as 6 digits are typed
+  // 2. Auto-verify as soon as 6 digits are populated
   useEffect(() => {
     if (otp.length === 6 && !loading && !hasVerified.current) {
       hasVerified.current = true;
@@ -142,12 +96,12 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     }
   }, [otp, loading, handleVerify]);
 
-  // Passive clipboard capture if user copies SMS code
+  // 3. Passive clipboard capture if user copies code from SMS notification
   useEffect(() => {
     let isMounted = true;
 
     const checkClipboardForOtp = async () => {
-      if (otp.length === 6 || loading || isAutoVerifying) return;
+      if (otp.length === 6 || loading) return;
       try {
         const text = await Clipboard.getString();
         if (!isMounted || !text) return;
@@ -178,7 +132,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
       appStateSub.remove();
       clearInterval(interval);
     };
-  }, [otp, loading, isAutoVerifying, handleVerify]);
+  }, [otp, loading, handleVerify]);
 
   // Timer countdown
   useEffect(() => {
@@ -232,109 +186,72 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
               <Ionicons name="arrow-back" size={22} color="#0F172A" />
             </TouchableOpacity>
 
-            {isAutoVerifying ? (
-              /* Minimal, Straight-to-Point Auto-Verifying View */
-              <View style={styles.verifyingContainer}>
-                {autoVerifySuccess ? (
-                  <View style={styles.successCircle}>
-                    <Ionicons name="checkmark" size={28} color="#FFFFFF" />
-                  </View>
-                ) : (
-                  <ActivityIndicator size="large" color="#047A36" style={styles.spinner} />
-                )}
+            <Text style={styles.title}>Verify Mobile</Text>
+            <View style={styles.subtitleRow}>
+              <Text style={styles.subtitle}>
+                Code sent to <Text style={styles.phoneHighlight}>{phone}</Text>
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.editText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
 
-                <Text style={styles.title}>
-                  {autoVerifySuccess ? 'Verified' : 'Verifying Mobile'}
-                </Text>
+            {/* 6-digit Input Boxes */}
+            <View style={styles.otpBoxWrapper}>
+              <OtpInputBoxes
+                length={6}
+                value={otp}
+                onChange={setOtp}
+                hasError={Boolean(error)}
+                onComplete={handleVerify}
+                autoFocus={true}
+              />
+            </View>
 
-                <Text style={styles.subtitle}>
-                  {autoVerifySuccess
-                    ? 'Entering dukaan...'
-                    : `Please wait, verifying ${phone}`}
-                </Text>
-
-                {!autoVerifySuccess && (
-                  <TouchableOpacity
-                    style={styles.manualLinkBtn}
-                    activeOpacity={0.7}
-                    onPress={() => setIsAutoVerifying(false)}
-                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  >
-                    <Text style={styles.manualLinkText}>Enter code manually</Text>
-                  </TouchableOpacity>
-                )}
+            {/* Inline Error Message */}
+            {Boolean(error) && (
+              <View style={styles.errorBox}>
+                <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
+                <Text style={styles.errorText}>{error}</Text>
               </View>
-            ) : (
-              /* Minimal Manual OTP Input View */
-              <>
-                <Text style={styles.title}>Verify Mobile</Text>
-                <View style={styles.subtitleRow}>
-                  <Text style={styles.subtitle}>
-                    Code sent to <Text style={styles.phoneHighlight}>{phone}</Text>
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text style={styles.editText}>Edit</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* 6-digit Input Boxes */}
-                <View style={styles.otpBoxWrapper}>
-                  <OtpInputBoxes
-                    length={6}
-                    value={otp}
-                    onChange={setOtp}
-                    hasError={Boolean(error)}
-                    onComplete={handleVerify}
-                    autoFocus={true}
-                  />
-                </View>
-
-                {/* Inline Error Message */}
-                {Boolean(error) && (
-                  <View style={styles.errorBox}>
-                    <Ionicons name="alert-circle" size={16} color="#EF4444" style={{ marginRight: 6 }} />
-                    <Text style={styles.errorText}>{error}</Text>
-                  </View>
-                )}
-
-                {/* Resend Timer & Button */}
-                <View style={styles.resendRow}>
-                  {timer > 0 ? (
-                    <Text style={styles.resendTimerText}>
-                      Resend code in <Text style={styles.timerBold}>{formattedTimer}</Text>
-                    </Text>
-                  ) : (
-                    <TouchableOpacity
-                      onPress={handleResend}
-                      activeOpacity={0.7}
-                      disabled={resending}
-                    >
-                      <Text style={styles.resendActionText}>
-                        {resending ? 'Sending...' : 'Resend Code'}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {/* Submit Verification Button */}
-                <TouchableOpacity
-                  style={[styles.verifyButton, otp.length < 6 && styles.verifyButtonDisabled]}
-                  activeOpacity={0.85}
-                  disabled={loading || otp.length < 6}
-                  onPress={() => handleVerify()}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.verifyButtonText}>CONTINUE</Text>
-                  )}
-                </TouchableOpacity>
-              </>
             )}
+
+            {/* Resend Timer & Button */}
+            <View style={styles.resendRow}>
+              {timer > 0 ? (
+                <Text style={styles.resendTimerText}>
+                  Resend code in <Text style={styles.timerBold}>{formattedTimer}</Text>
+                </Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleResend}
+                  activeOpacity={0.7}
+                  disabled={resending}
+                >
+                  <Text style={styles.resendActionText}>
+                    {resending ? 'Sending...' : 'Resend Code'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Submit Verification Button */}
+            <TouchableOpacity
+              style={[styles.verifyButton, otp.length < 6 && styles.verifyButtonDisabled]}
+              activeOpacity={0.85}
+              disabled={loading || otp.length < 6}
+              onPress={() => handleVerify()}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.verifyButtonText}>CONTINUE</Text>
+              )}
+            </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
@@ -366,24 +283,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 28,
   },
-  /* Minimal Auto-Verifying View */
-  verifyingContainer: {
-    alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 24,
-  },
-  spinner: {
-    marginBottom: 24,
-  },
-  successCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#047A36',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
   title: {
     fontSize: 24,
     fontWeight: '800',
@@ -393,21 +292,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#64748B',
-    marginTop: 6,
     fontWeight: '400',
   },
-  manualLinkBtn: {
-    marginTop: 28,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  manualLinkText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#047A36',
-    textDecorationLine: 'underline',
-  },
-  /* Manual Mode Styles */
   subtitleRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -37,15 +37,11 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
     const formattedPhone = `+91${phoneDigits}`;
 
     try {
-      const res = await dusmintApi.sendPhoneOtp(formattedPhone);
+      await dusmintApi.sendPhoneOtp(formattedPhone);
       setLoading(false);
-      navigation.navigate('VendorOtp', {
-        phone: formattedPhone,
-        autoVerifyOtp: res?.devOtp,
-      });
+      navigation.navigate('VendorOtp', { phone: formattedPhone });
     } catch {
       setLoading(false);
-      // Even if network blips or dev mode, proceed to OTP screen
       navigation.navigate('VendorOtp', { phone: formattedPhone });
     }
   };
