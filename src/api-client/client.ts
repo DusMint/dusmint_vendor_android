@@ -48,7 +48,7 @@ export class DusmintApiClient {
   }
 
   async verifyPhoneOtp(phone: string, otp: string): Promise<{ token: string; user: UserProfile; vendor?: any; isNewVendor?: boolean }> {
-    const res = await this.client.post('/auth/otp/verify', { phone, otp });
+    const res = await this.client.post('/auth/otp/verify', { phone, otp, app: 'dusmint_vendor' });
     return res.data;
   }
 
