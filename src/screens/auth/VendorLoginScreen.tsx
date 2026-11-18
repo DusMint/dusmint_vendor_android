@@ -141,7 +141,7 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
                 placeholderTextColor="#94A3B8"
                 keyboardType="phone-pad"
                 maxLength={10}
-                selectionColor="#047A36"
+                selectionColor="#22C55E"
                 returnKeyType="done"
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   brandMint: {
-    color: '#047A36',
+    color: '#22C55E',
   },
   sheetSubtitle: {
     fontSize: 14,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   inputBoxFocused: {
-    borderColor: '#047A36',
+    borderColor: '#22C55E',
     backgroundColor: '#FFFFFF',
   },
   inputBoxError: {
