@@ -1149,12 +1149,17 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   saveBtn: {
-    backgroundColor: '#047A36',
+    backgroundColor: '#22C55E',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 30,
+    shadowColor: '#22C55E',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   saveBtnText: {
     color: '#FFFFFF',

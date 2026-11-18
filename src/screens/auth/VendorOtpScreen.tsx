@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#047A36',
+    color: '#22C55E',
   },
   errorBox: {
     flexDirection: 'row',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     fontFamily: 'Metropolis-Bold',
-    color: '#047A36',
+    color: '#22C55E',
   },
   verifyButton: {
     height: 52,
