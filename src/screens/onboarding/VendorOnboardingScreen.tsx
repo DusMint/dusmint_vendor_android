@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#047A36',
+    backgroundColor: '#22C55E',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   autoLocateBtn: {
-    backgroundColor: '#047A36',
+    backgroundColor: '#22C55E',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
@@ -1105,7 +1105,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   uploadBtnPrimary: {
-    backgroundColor: '#047A36',
+    backgroundColor: '#22C55E',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
