@@ -1,15 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ScrollView,
   StatusBar,
   StyleSheet,
+  Animated,
+  LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
+
+interface LayoutRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 const LANGUAGES = [
   { id: 'en', name: 'English', localName: 'English' },
@@ -64,7 +72,74 @@ export const LanguageSelectScreen: React.FC<{ navigation: any }> = ({ navigation
   const [selectedLang, setSelectedLang] = useState('en');
   const setLanguage = useVendorAuthStore((s) => s.setLanguage);
 
+  // Position and size tracking for the animated gliding selection indicator
+  const cardLayouts = useRef<Record<string, LayoutRect>>({});
+  const [indicatorReady, setIndicatorReady] = useState(false);
+
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const indicatorY = useRef(new Animated.Value(0)).current;
+  const indicatorW = useRef(new Animated.Value(0)).current;
+  const indicatorH = useRef(new Animated.Value(0)).current;
+  const indicatorOpacity = useRef(new Animated.Value(0)).current;
+
   const t = TRANSLATIONS[selectedLang] || TRANSLATIONS.en;
+
+  const handleCardLayout = (id: string, e: LayoutChangeEvent) => {
+    const { x, y, width, height } = e.nativeEvent.layout;
+    cardLayouts.current[id] = { x, y, width, height };
+
+    if (id === selectedLang && !indicatorReady) {
+      indicatorX.setValue(x);
+      indicatorY.setValue(y);
+      indicatorW.setValue(width);
+      indicatorH.setValue(height);
+      setIndicatorReady(true);
+      Animated.timing(indicatorOpacity, {
+        toValue: 1,
+        duration: 180,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  const handleSelectLang = (id: string) => {
+    if (id === selectedLang) return;
+    setSelectedLang(id);
+
+    const target = cardLayouts.current[id];
+    if (target) {
+      Animated.parallel([
+        Animated.spring(indicatorX, {
+          toValue: target.x,
+          damping: 19,
+          stiffness: 210,
+          mass: 0.75,
+          useNativeDriver: false,
+        }),
+        Animated.spring(indicatorY, {
+          toValue: target.y,
+          damping: 19,
+          stiffness: 210,
+          mass: 0.75,
+          useNativeDriver: false,
+        }),
+        Animated.spring(indicatorW, {
+          toValue: target.width,
+          damping: 19,
+          stiffness: 210,
+          mass: 0.75,
+          useNativeDriver: false,
+        }),
+        Animated.spring(indicatorH, {
+          toValue: target.height,
+          damping: 19,
+          stiffness: 210,
+          mass: 0.75,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  };
 
   const handleContinue = () => {
     setLanguage(selectedLang);
@@ -87,16 +162,32 @@ export const LanguageSelectScreen: React.FC<{ navigation: any }> = ({ navigation
 
         {/* 2-Column Language Grid */}
         <View style={styles.gridContainer}>
+          {/* Animated Gliding Indicator Box */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.activeIndicator,
+              {
+                left: indicatorX,
+                top: indicatorY,
+                width: indicatorW,
+                height: indicatorH,
+                opacity: indicatorOpacity,
+              },
+            ]}
+          />
+
           {LANGUAGES.map((lang) => {
             const isSelected = selectedLang === lang.id;
             return (
               <TouchableOpacity
                 key={lang.id}
                 activeOpacity={0.75}
-                onPress={() => setSelectedLang(lang.id)}
+                onPress={() => handleSelectLang(lang.id)}
+                onLayout={(e) => handleCardLayout(lang.id, e)}
                 style={[
                   styles.langCard,
-                  isSelected && styles.langCardSelected,
+                  isSelected ? styles.langCardSelected : styles.langCardUnselected,
                 ]}
               >
                 <Text
@@ -175,30 +266,43 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   gridContainer: {
+    position: 'relative',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  langCard: {
-    width: '48%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 10,
+  activeIndicator: {
+    position: 'absolute',
     borderRadius: 18,
     borderWidth: 2,
-    borderColor: '#F1F5F9',
-    backgroundColor: '#FFFFFF',
-    marginBottom: 12,
-  },
-  langCardSelected: {
     borderColor: '#047A36',
     backgroundColor: '#F0FDF4',
     shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 3,
+    zIndex: 1,
+  },
+  langCard: {
+    width: '48%',
+    height: 82,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 18,
+    borderWidth: 2,
+    marginBottom: 12,
+    zIndex: 2,
+  },
+  langCardUnselected: {
+    borderColor: '#F1F5F9',
+    backgroundColor: 'transparent',
+  },
+  langCardSelected: {
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
   },
   langName: {
     fontSize: 16,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -201,13 +202,13 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
           [
             {
               text: 'Enter Dukaan',
-              onPress: () => navigation.replace('Tabs'),
+              onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] }),
             },
           ]
         );
       } else {
         // Fallback navigation
-        navigation.replace('Tabs');
+        navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
       }
     } catch (err: any) {
       setSubmitting(false);
@@ -215,24 +216,39 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       Alert.alert(
         'Onboarding Saved',
         'Your profile was saved. Welcome to DusMint Dukaan!',
-        [{ text: 'Continue', onPress: () => navigation.replace('Tabs') }]
+        [{ text: 'Continue', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] }) }]
       );
     }
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to exit onboarding?', [
+    Alert.alert('Exit Onboarding', 'Are you sure you want to exit onboarding and logout?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Logout',
         style: 'destructive',
         onPress: () => {
           logout();
-          navigation.replace('VendorLogin');
+          navigation.reset({ index: 0, routes: [{ name: 'VendorLogin' }] });
         },
       },
     ]);
   };
+
+  // Hardware back press listener: prevents navigating back to Login screen while authenticated
+  useEffect(() => {
+    const onBackPress = () => {
+      if (activeStep !== null) {
+        setActiveStep(null);
+        return true;
+      }
+      handleLogout();
+      return true;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [activeStep]);
 
   // =========================================================================
   // SUB-STEP 1: OWNER PROFILE

@@ -57,9 +57,15 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         setAuth(res.token, res.user);
 
         if (res.isNewVendor) {
-          navigation.replace('VendorOnboarding', { phone: fullPhone, authUserId: res.user?.id });
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'VendorOnboarding', params: { phone: fullPhone, authUserId: res.user?.id } }],
+          });
         } else {
-          navigation.replace('Tabs');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Tabs' }],
+          });
         }
       } catch (err: any) {
         setLoading(false);
