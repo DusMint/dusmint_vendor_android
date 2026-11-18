@@ -82,9 +82,10 @@ export const OtpInputBoxes: React.FC<OtpInputBoxesProps> = ({
         value={value}
         onChangeText={handleChange}
         maxLength={length}
-        keyboardType="number-pad"
+        keyboardType={Platform.OS === 'ios' ? 'number-pad' : 'numeric'}
         textContentType="oneTimeCode"
         autoComplete="sms-otp"
+        importantForAutofill="yes"
         autoFocus={autoFocus}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
@@ -133,10 +134,11 @@ const styles = StyleSheet.create({
   },
   hiddenInput: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0,
+    opacity: 0.02,
     zIndex: 10,
-    fontSize: 1, // Prevent Android layout jumps
+    fontSize: 20,
     color: 'transparent',
+    backgroundColor: 'transparent',
   },
   box: {
     width: 48,
