@@ -20,7 +20,7 @@ export class DusmintApiClient {
   private client: AxiosInstance;
   private authToken: string | null = null;
 
-  constructor(baseURL: string = process.env.EXPO_PUBLIC_API_URL || 'https://dusmint-backend.onrender.com/api/v1') {
+  constructor(baseURL: string = process.env.EXPO_PUBLIC_API_URL || 'https://riksho-backend-htdg.onrender.com/api/v1') {
     this.client = axios.create({
       baseURL,
       timeout: 30000,
