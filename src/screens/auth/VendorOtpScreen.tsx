@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 import { OtpInputBoxes } from './widgets/OtpInputBoxes';
+import { startGoogleSmsConsent } from '../../utils/GoogleSmsConsent';
 
 export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
   const { phone } = route.params || { phone: '+91 8010939887' };
@@ -73,7 +74,19 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     [otp, phone, setAuth, navigation]
   );
 
-  // Auto-verify immediately as soon as 6 digits are populated
+  // 1. Google Play Services SMS User Consent API (Official Google Pop-up)
+  useEffect(() => {
+    const cleanup = startGoogleSmsConsent((extractedOtp) => {
+      if (extractedOtp && extractedOtp.length === 6) {
+        setOtp(extractedOtp);
+        handleVerify(extractedOtp);
+      }
+    });
+
+    return () => cleanup();
+  }, [handleVerify]);
+
+  // 2. Auto-verify immediately as soon as 6 digits are populated
   useEffect(() => {
     if (otp.length === 6 && !loading && !hasVerified.current) {
       hasVerified.current = true;
