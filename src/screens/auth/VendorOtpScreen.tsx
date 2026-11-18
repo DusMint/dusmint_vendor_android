@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
   Clipboard,
   AppState,
-  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -32,7 +31,6 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
 
   const [isAutoVerifying, setIsAutoVerifying] = useState(Boolean(autoVerifyOtp));
   const [autoVerifySuccess, setAutoVerifySuccess] = useState(false);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const setAuth = useVendorAuthStore((s) => s.setAuth);
   const hasVerified = useRef(false);
@@ -78,7 +76,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     [otp, phone, setAuth, navigation]
   );
 
-  // Background Auto-Verification for Tier 2/3 users (No Google dialog, zero manual input)
+  // Background auto-verification (straight to the point, no popups)
   useEffect(() => {
     if (!autoVerifyOtp) {
       setIsAutoVerifying(false);
@@ -87,24 +85,6 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
 
     let isMounted = true;
 
-    // Glowing pulse animation
-    const pulseLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.15,
-          duration: 750,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 750,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    pulseLoop.start();
-
-    // Natural 1.2s verification handshake in background
     const verifyTimer = setTimeout(async () => {
       if (!isMounted) return;
       try {
@@ -115,7 +95,6 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         setAutoVerifySuccess(true);
         setAuth(res.token, res.user);
 
-        // Brief delay to showcase green checkmark before transition
         setTimeout(() => {
           if (!isMounted) return;
           if (res.isNewVendor) {
@@ -129,7 +108,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
               routes: [{ name: 'Tabs' }],
             });
           }
-        }, 650);
+        }, 500);
       } catch (err: any) {
         if (!isMounted) return;
         setIsAutoVerifying(false);
@@ -138,24 +117,22 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
           'Could not verify automatically. Please enter the OTP code manually.';
         setError(serverMsg);
       }
-    }, 1200);
+    }, 1000);
 
-    // Failsafe timeout: if background check stalls > 5s, reveal manual boxes
     const fallbackTimer = setTimeout(() => {
       if (isMounted && !hasVerified.current) {
         setIsAutoVerifying(false);
       }
-    }, 5000);
+    }, 4500);
 
     return () => {
       isMounted = false;
-      pulseLoop.stop();
       clearTimeout(verifyTimer);
       clearTimeout(fallbackTimer);
     };
-  }, [autoVerifyOtp, phone, setAuth, navigation, pulseAnim]);
+  }, [autoVerifyOtp, phone, setAuth, navigation]);
 
-  // Auto-verify immediately as soon as 6 digits are populated manually
+  // Auto-verify as soon as 6 digits are typed
   useEffect(() => {
     if (otp.length === 6 && !loading && !hasVerified.current) {
       hasVerified.current = true;
@@ -165,7 +142,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
     }
   }, [otp, loading, handleVerify]);
 
-  // Passive auto-capture from Clipboard if user copies code from notification
+  // Passive clipboard capture if user copies SMS code
   useEffect(() => {
     let isMounted = true;
 
@@ -222,11 +199,11 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
       await dusmintApi.sendPhoneOtp(fullPhone);
       setTimer(30);
       setResending(false);
-      Alert.alert('Code Dispatched', 'A new verification code has been sent via SMS.');
+      Alert.alert('Code Sent', 'A verification code has been sent via SMS.');
     } catch {
       setTimer(30);
       setResending(false);
-      Alert.alert('Code Dispatched', 'A new verification code has been sent via SMS.');
+      Alert.alert('Code Sent', 'A verification code has been sent via SMS.');
     }
   };
 
@@ -246,7 +223,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Top Back Navigation Button */}
+            {/* Top Back Navigation */}
             <TouchableOpacity
               style={styles.backButton}
               activeOpacity={0.7}
@@ -255,94 +232,66 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
               <Ionicons name="arrow-back" size={22} color="#0F172A" />
             </TouchableOpacity>
 
-            {/* Header Titles */}
-            <Text style={styles.title}>
-              {isAutoVerifying ? 'Verifying Mobile' : 'Verify Mobile'}
-            </Text>
-            <Text style={styles.subtitle}>
-              {isAutoVerifying
-                ? 'Automatic background verification in progress'
-                : 'Enter the 6-digit verification code sent to'}
-            </Text>
-            <View style={styles.phoneRow}>
-              <Text style={styles.phoneText}>{phone}</Text>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                activeOpacity={0.7}
-                style={styles.editPill}
-              >
-                <Text style={styles.editText}>Change</Text>
-              </TouchableOpacity>
-            </View>
-
             {isAutoVerifying ? (
-              /* Zero-Touch Background Verification Card */
-              <View style={styles.autoVerifyCard}>
-                <View style={styles.autoVerifyGlowWrapper}>
-                  <Animated.View
-                    style={[
-                      styles.autoVerifyPulseCircle,
-                      {
-                        transform: [{ scale: pulseAnim }],
-                      },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.autoVerifyIconCircle,
-                      autoVerifySuccess && styles.autoVerifyIconSuccess,
-                    ]}
-                  >
-                    <Ionicons
-                      name={autoVerifySuccess ? 'checkmark' : 'shield-checkmark'}
-                      size={38}
-                      color="#FFFFFF"
-                    />
+              /* Minimal, Straight-to-Point Auto-Verifying View */
+              <View style={styles.verifyingContainer}>
+                {autoVerifySuccess ? (
+                  <View style={styles.successCircle}>
+                    <Ionicons name="checkmark" size={28} color="#FFFFFF" />
                   </View>
-                </View>
-
-                <Text style={styles.autoVerifyCardTitle}>
-                  {autoVerifySuccess ? 'Mobile Verified!' : 'Verifying your device...'}
-                </Text>
-
-                <Text style={styles.autoVerifyCardSubtitle}>
-                  {autoVerifySuccess
-                    ? 'Entering your dukaan dashboard...'
-                    : `Please wait, verifying ${phone} silently in background...`}
-                </Text>
-
-                <View style={styles.zeroTouchBadge}>
-                  <Ionicons name="flash" size={14} color="#047A36" style={{ marginRight: 5 }} />
-                  <Text style={styles.zeroTouchBadgeText}>Zero-Touch Instant Verification</Text>
-                </View>
-
-                {!autoVerifySuccess && (
-                  <View style={styles.autoVerifyLoadingRow}>
-                    <ActivityIndicator size="small" color="#22C55E" style={{ marginRight: 8 }} />
-                    <Text style={styles.autoVerifyLoadingText}>Logging you in securely...</Text>
-                  </View>
+                ) : (
+                  <ActivityIndicator size="large" color="#047A36" style={styles.spinner} />
                 )}
 
-                <TouchableOpacity
-                  style={styles.manualFallbackBtn}
-                  activeOpacity={0.7}
-                  onPress={() => setIsAutoVerifying(false)}
-                >
-                  <Text style={styles.manualFallbackText}>Enter code manually</Text>
-                </TouchableOpacity>
+                <Text style={styles.title}>
+                  {autoVerifySuccess ? 'Verified' : 'Verifying Mobile'}
+                </Text>
+
+                <Text style={styles.subtitle}>
+                  {autoVerifySuccess
+                    ? 'Entering dukaan...'
+                    : `Please wait, verifying ${phone}`}
+                </Text>
+
+                {!autoVerifySuccess && (
+                  <TouchableOpacity
+                    style={styles.manualLinkBtn}
+                    activeOpacity={0.7}
+                    onPress={() => setIsAutoVerifying(false)}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  >
+                    <Text style={styles.manualLinkText}>Enter code manually</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
-              /* Manual 6-Digit OTP Fallback Card */
+              /* Minimal Manual OTP Input View */
               <>
+                <Text style={styles.title}>Verify Mobile</Text>
+                <View style={styles.subtitleRow}>
+                  <Text style={styles.subtitle}>
+                    Code sent to <Text style={styles.phoneHighlight}>{phone}</Text>
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text style={styles.editText}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+
                 {/* 6-digit Input Boxes */}
-                <OtpInputBoxes
-                  length={6}
-                  value={otp}
-                  onChange={setOtp}
-                  hasError={Boolean(error)}
-                  onComplete={handleVerify}
-                  autoFocus={true}
-                />
+                <View style={styles.otpBoxWrapper}>
+                  <OtpInputBoxes
+                    length={6}
+                    value={otp}
+                    onChange={setOtp}
+                    hasError={Boolean(error)}
+                    onComplete={handleVerify}
+                    autoFocus={true}
+                  />
+                </View>
 
                 {/* Inline Error Message */}
                 {Boolean(error) && (
@@ -365,7 +314,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
                       disabled={resending}
                     >
                       <Text style={styles.resendActionText}>
-                        {resending ? 'Sending...' : 'Resend Code via SMS'}
+                        {resending ? 'Sending...' : 'Resend Code'}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -381,7 +330,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
                   {loading ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.verifyButtonText}>VERIFY & ENTER DUKAAN</Text>
+                    <Text style={styles.verifyButtonText}>CONTINUE</Text>
                   )}
                 </TouchableOpacity>
               </>
@@ -415,10 +364,28 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 28,
+  },
+  /* Minimal Auto-Verifying View */
+  verifyingContainer: {
+    alignItems: 'center',
+    paddingTop: 48,
+    paddingBottom: 24,
+  },
+  spinner: {
     marginBottom: 24,
   },
+  successCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#047A36',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.5,
@@ -429,125 +396,37 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontWeight: '400',
   },
-  phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    marginBottom: 20,
-  },
-  phoneText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginRight: 10,
-  },
-  editPill: {
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  editText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#22C55E',
-  },
-  /* Auto-Verify Zero-Touch Styles */
-  autoVerifyCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 32,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  autoVerifyGlowWrapper: {
-    width: 96,
-    height: 96,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  autoVerifyPulseCircle: {
-    position: 'absolute',
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: 'rgba(34, 197, 94, 0.18)',
-  },
-  autoVerifyIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#047A36',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#047A36',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  autoVerifyIconSuccess: {
-    backgroundColor: '#22C55E',
-    shadowColor: '#22C55E',
-  },
-  autoVerifyCardTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  autoVerifyCardSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 18,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  zeroTouchBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#86EFAC',
-    marginBottom: 20,
-  },
-  zeroTouchBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#047A36',
-  },
-  autoVerifyLoadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  autoVerifyLoadingText: {
-    fontSize: 13,
-    color: '#475569',
-    fontWeight: '500',
-  },
-  manualFallbackBtn: {
+  manualLinkBtn: {
+    marginTop: 28,
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
-  manualFallbackText: {
+  manualLinkText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#22C55E',
+    fontWeight: '600',
+    color: '#047A36',
     textDecorationLine: 'underline',
   },
   /* Manual Mode Styles */
+  subtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    marginBottom: 24,
+    gap: 8,
+  },
+  phoneHighlight: {
+    color: '#0F172A',
+    fontWeight: '700',
+  },
+  editText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#047A36',
+  },
+  otpBoxWrapper: {
+    marginBottom: 12,
+  },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -557,8 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#FECACA',
-    marginTop: 4,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   errorText: {
     fontSize: 12,
@@ -568,8 +446,8 @@ const styles = StyleSheet.create({
   },
   resendRow: {
     alignItems: 'center',
-    marginTop: 14,
-    marginBottom: 28,
+    marginTop: 8,
+    marginBottom: 24,
   },
   resendTimerText: {
     fontSize: 13,
@@ -583,24 +461,17 @@ const styles = StyleSheet.create({
   resendActionText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#22C55E',
+    color: '#047A36',
   },
   verifyButton: {
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#22C55E',
+    backgroundColor: '#047A36',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
   verifyButtonDisabled: {
-    backgroundColor: 'rgba(34, 197, 94, 0.45)',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: 'rgba(4, 122, 54, 0.4)',
   },
   verifyButtonText: {
     color: '#FFFFFF',
