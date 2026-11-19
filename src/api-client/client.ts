@@ -16,6 +16,10 @@ import {
   VendorEarningsData,
 } from './types';
 
+const SUPABASE_REST_URL = 'https://llvulxhjpyztuoorcacz.supabase.co/rest/v1';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsdnVseGhqcHl6dHVvb3JjYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzExNjAsImV4cCI6MjA5ODY0NzE2MH0.yVEm7ra2IjJ6xZWIIQj9KBJbCdsE6KItkLOjHM64zcU';
+
 export class DusmintApiClient {
   private client: AxiosInstance;
   private authToken: string | null = null;
@@ -157,10 +161,6 @@ export class DusmintApiClient {
     const res = await this.client.post('/claims', payload);
     return res.data;
   }
-
-const SUPABASE_REST_URL = 'https://llvulxhjpyztuoorcacz.supabase.co/rest/v1';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsdnVseGhqcHl6dHVvb3JjYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNzExNjAsImV4cCI6MjA5ODY0NzE2MH0.yVEm7ra2IjJ6xZWIIQj9KBJbCdsE6KItkLOjHM64zcU';
 
   // ==========================================
   // --- Merchant / Vendor Specific APIs ---

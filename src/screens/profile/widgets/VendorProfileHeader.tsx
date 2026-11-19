@@ -117,7 +117,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
         <TouchableOpacity
           style={styles.avatarWrapper}
           onPress={() => {
-            if (photoUrl) {
+            if (photoUrl && !imageError) {
               setIsPhotoViewerOpen(true);
             } else {
               onEditProfilePress();
@@ -125,11 +125,12 @@ export const VendorProfileHeader: React.FC<Props> = ({
           }}
           activeOpacity={0.8}
         >
-          {photoUrl ? (
+          {photoUrl && !imageError ? (
             <Image
               source={{ uri: photoUrl }}
               style={styles.avatarImg}
               resizeMode="cover"
+              onError={() => setImageError(true)}
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
@@ -139,7 +140,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
           )}
 
           {/* Zoom badge indicator */}
-          {Boolean(photoUrl) && (
+          {Boolean(photoUrl && !imageError) && (
             <View style={styles.zoomBadge}>
               <Ionicons name="scan-outline" size={10} color="#FFFFFF" />
             </View>
