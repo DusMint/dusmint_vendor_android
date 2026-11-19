@@ -160,8 +160,9 @@ export default function App() {
 
   const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
   const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
+  const isHydrated = useVendorAuthStore((s) => s.isHydrated);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
         <ActivityIndicator size="large" color="#047A36" />

@@ -47,7 +47,6 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 }) => {
   const { phone: routePhone, authUserId } = route.params || {};
   const user = useVendorAuthStore((s) => s.user);
-  const logout = useVendorAuthStore((s) => s.logout);
 
   const phone = routePhone || user?.phone || '+91 8010939887';
 
@@ -103,12 +102,11 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       setLat(currentLat);
       setLng(currentLng);
 
-      // Call Ola Maps reverse geocode
       const result = await reverseGeocodeWithOla(currentLat, currentLng);
       if (result.address) {
         setAddress(result.address);
       }
-    } catch (err: any) {
+    } catch {
       Alert.alert('Location Error', 'Unable to fetch current GPS. Please type the address manually.');
     } finally {
       setLocating(false);
@@ -119,11 +117,11 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   const handlePickPhoto = async (fromCamera: boolean) => {
     if (!ImagePicker || !ImagePicker.launchImageLibraryAsync) {
       Alert.alert(
-        'Native Rebuild Required',
-        'Camera & Gallery require recompiling the Android APK (npx expo run:android). Would you like to use a sample shop photo to test onboarding?',
+        'Native Camera Required',
+        'Use sample shop photo for development testing?',
         [
           {
-            text: 'Use Sample Shop Photo',
+            text: 'Use Sample Photo',
             onPress: () =>
               setShopPhotoUri(
                 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'
@@ -163,7 +161,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setShopPhotoUri(result.assets[0].uri);
       }
-    } catch (err: any) {
+    } catch {
       Alert.alert('Photo Error', 'Could not open image picker.');
     }
   };
@@ -197,7 +195,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 
       if (res.success) {
         Alert.alert(
-          '🎉 Dukaan Activated!',
+          'Dukaan Activated!',
           'Your shop has been onboarded successfully. You are now live on DusMint!',
           [
             {
@@ -207,12 +205,10 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
           ]
         );
       } else {
-        // Fallback navigation
         navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
       }
-    } catch (err: any) {
+    } catch {
       setSubmitting(false);
-      // Graceful fallback to tabs
       Alert.alert(
         'Onboarding Saved',
         'Your profile was saved. Welcome to DusMint Dukaan!',
@@ -221,28 +217,25 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert('Exit Onboarding', 'Are you sure you want to exit onboarding and logout?', [
+  // Exit App handler (does NOT log out; cleanly closes app so user returns to saved progress)
+  const handleExitApp = () => {
+    Alert.alert('Close App', 'Do you want to exit DusMint? Your progress will be saved.', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: () => {
-          logout();
-          navigation.reset({ index: 0, routes: [{ name: 'VendorLogin' }] });
-        },
+        text: 'Close App',
+        onPress: () => BackHandler.exitApp(),
       },
     ]);
   };
 
-  // Hardware back press listener: prevents navigating back to Login screen while authenticated
+  // Hardware back press listener: exits current sub-step or prompts to close the app
   useEffect(() => {
     const onBackPress = () => {
       if (activeStep !== null) {
         setActiveStep(null);
         return true;
       }
-      handleLogout();
+      handleExitApp();
       return true;
     };
 
@@ -254,18 +247,24 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   // SUB-STEP 1: OWNER PROFILE
   // =========================================================================
   const renderStep1 = () => (
-    <ScrollView style={styles.subStepScroll} keyboardShouldPersistTaps="handled">
-      <View style={styles.subStepHeader}>
-        <TouchableOpacity onPress={() => setActiveStep(null)} style={styles.backCircle}>
-          <Ionicons name="arrow-back" size={20} color="#0F172A" />
-        </TouchableOpacity>
-        <Text style={styles.subStepTitle}>Owner Profile</Text>
-        <View style={{ width: 36 }} />
-      </View>
+    <ScrollView
+      style={styles.subStepScroll}
+      contentContainerStyle={styles.subStepContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Matching OTP Back Button */}
+      <TouchableOpacity
+        onPress={() => setActiveStep(null)}
+        style={styles.backButton}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="arrow-back" size={22} color="#0F172A" />
+      </TouchableOpacity>
 
-      <Text style={styles.subStepDescription}>
-        Enter your personal details to link ownership of this Dukaan.
-      </Text>
+      {/* Left-aligned Title & Subtitle */}
+      <Text style={styles.subStepTitle}>Owner Profile</Text>
+      <Text style={styles.subStepSubtitle}>Your personal contact details</Text>
 
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>FULL NAME *</Text>
@@ -280,12 +279,12 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       </View>
 
       <View style={styles.fieldBox}>
-        <Text style={styles.fieldLabel}>REGISTERED MOBILE NUMBER (LOCKED)</Text>
+        <Text style={styles.fieldLabel}>MOBILE NUMBER</Text>
         <View style={styles.lockedFieldRow}>
-          <Ionicons name="lock-closed" size={16} color="#047A36" style={{ marginRight: 8 }} />
+          <Ionicons name="lock-closed" size={15} color="#047A36" style={{ marginRight: 8 }} />
           <Text style={styles.lockedPhoneText}>{phone}</Text>
           <View style={styles.verifiedTag}>
-            <Text style={styles.verifiedTagText}>OTP Verified</Text>
+            <Text style={styles.verifiedTagText}>Verified</Text>
           </View>
         </View>
       </View>
@@ -307,6 +306,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         style={[styles.saveBtn, !isStep1Done && styles.btnDisabled]}
         disabled={!isStep1Done}
         onPress={() => setActiveStep(null)}
+        activeOpacity={0.85}
       >
         <Text style={styles.saveBtnText}>SAVE & CONTINUE</Text>
       </TouchableOpacity>
@@ -317,18 +317,24 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   // SUB-STEP 2: SHOP DETAILS & OLA MAPS LOCATION
   // =========================================================================
   const renderStep2 = () => (
-    <ScrollView style={styles.subStepScroll} keyboardShouldPersistTaps="handled">
-      <View style={styles.subStepHeader}>
-        <TouchableOpacity onPress={() => setActiveStep(null)} style={styles.backCircle}>
-          <Ionicons name="arrow-back" size={20} color="#0F172A" />
-        </TouchableOpacity>
-        <Text style={styles.subStepTitle}>Shop & Location</Text>
-        <View style={{ width: 36 }} />
-      </View>
+    <ScrollView
+      style={styles.subStepScroll}
+      contentContainerStyle={styles.subStepContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Matching OTP Back Button */}
+      <TouchableOpacity
+        onPress={() => setActiveStep(null)}
+        style={styles.backButton}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="arrow-back" size={22} color="#0F172A" />
+      </TouchableOpacity>
 
-      <Text style={styles.subStepDescription}>
-        Tell us about your shop and locate it via Ola Maps so riders can pick up orders easily.
-      </Text>
+      {/* Left-aligned Title & Subtitle */}
+      <Text style={styles.subStepTitle}>Shop & Location</Text>
+      <Text style={styles.subStepSubtitle}>Store name, category, and pickup address</Text>
 
       {/* Shop Name */}
       <View style={styles.fieldBox}>
@@ -371,29 +377,25 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         </View>
       </View>
 
-      {/* Ola Maps Auto-Locate Button */}
+      {/* Sleek Ola Maps Auto-Locate Button */}
       <View style={styles.locateCard}>
         <View style={styles.locateCardLeft}>
-          <Ionicons name="navigate-circle" size={28} color="#047A36" />
+          <Ionicons name="navigate-circle-outline" size={24} color="#047A36" />
           <View style={{ marginLeft: 10, flex: 1 }}>
             <Text style={styles.locateCardTitle}>Ola Maps Auto-Locate</Text>
-            <Text style={styles.locateCardSub}>
-              Detect accurate shop GPS coordinates and address
-            </Text>
+            <Text style={styles.locateCardSub}>Fetch current shop GPS & address</Text>
           </View>
         </View>
         <TouchableOpacity
           style={styles.autoLocateBtn}
           onPress={handleAutoLocate}
           disabled={locating}
+          activeOpacity={0.8}
         >
           {locating ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <>
-              <Ionicons name="locate" size={15} color="#FFFFFF" style={{ marginRight: 4 }} />
-              <Text style={styles.autoLocateBtnText}>DETECT</Text>
-            </>
+            <Text style={styles.autoLocateBtnText}>Detect</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -414,9 +416,9 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 
       {lat && lng && (
         <View style={styles.coordsBadge}>
-          <Ionicons name="pin" size={14} color="#047A36" style={{ marginRight: 4 }} />
+          <Ionicons name="pin" size={13} color="#047A36" style={{ marginRight: 4 }} />
           <Text style={styles.coordsText}>
-            GPS Pinned: {lat.toFixed(4)}, {lng.toFixed(4)}
+            GPS: {lat.toFixed(4)}, {lng.toFixed(4)}
           </Text>
         </View>
       )}
@@ -425,6 +427,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         style={[styles.saveBtn, !isStep2Done && styles.btnDisabled]}
         disabled={!isStep2Done}
         onPress={() => setActiveStep(null)}
+        activeOpacity={0.85}
       >
         <Text style={styles.saveBtnText}>SAVE & CONTINUE</Text>
       </TouchableOpacity>
@@ -435,18 +438,23 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   // SUB-STEP 3: SHOP PHOTO
   // =========================================================================
   const renderStep3 = () => (
-    <ScrollView style={styles.subStepScroll}>
-      <View style={styles.subStepHeader}>
-        <TouchableOpacity onPress={() => setActiveStep(null)} style={styles.backCircle}>
-          <Ionicons name="arrow-back" size={20} color="#0F172A" />
-        </TouchableOpacity>
-        <Text style={styles.subStepTitle}>Shop Photo</Text>
-        <View style={{ width: 36 }} />
-      </View>
+    <ScrollView
+      style={styles.subStepScroll}
+      contentContainerStyle={styles.subStepContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Matching OTP Back Button */}
+      <TouchableOpacity
+        onPress={() => setActiveStep(null)}
+        style={styles.backButton}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="arrow-back" size={22} color="#0F172A" />
+      </TouchableOpacity>
 
-      <Text style={styles.subStepDescription}>
-        Take or upload a clear photo of your stall or shop front. Customers and delivery riders will see this photo.
-      </Text>
+      {/* Left-aligned Title & Subtitle */}
+      <Text style={styles.subStepTitle}>Shop Photo</Text>
+      <Text style={styles.subStepSubtitle}>Clear photo of your stall or storefront</Text>
 
       {shopPhotoUri ? (
         <View style={styles.photoPreviewCard}>
@@ -455,13 +463,15 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
             <TouchableOpacity
               style={styles.retakeBtn}
               onPress={() => handlePickPhoto(true)}
+              activeOpacity={0.7}
             >
-              <Ionicons name="camera" size={16} color="#047A36" style={{ marginRight: 6 }} />
-              <Text style={styles.retakeBtnText}>Retake Photo</Text>
+              <Ionicons name="camera-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
+              <Text style={styles.retakeBtnText}>Change Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.removeBtn}
               onPress={() => setShopPhotoUri(null)}
+              activeOpacity={0.7}
             >
               <Ionicons name="trash-outline" size={16} color="#EF4444" style={{ marginRight: 4 }} />
               <Text style={styles.removeBtnText}>Remove</Text>
@@ -471,27 +481,27 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       ) : (
         <View style={styles.photoUploadPlaceholder}>
           <View style={styles.photoUploadIconCircle}>
-            <Ionicons name="camera-outline" size={36} color="#047A36" />
+            <Ionicons name="camera-outline" size={32} color="#047A36" />
           </View>
-          <Text style={styles.uploadPromptTitle}>No photo attached yet</Text>
-          <Text style={styles.uploadPromptSub}>
-            Take a live picture of your mandi counter or choose from your phone's gallery.
-          </Text>
+          <Text style={styles.uploadPromptTitle}>Attach Shop Photo</Text>
+          <Text style={styles.uploadPromptSub}>Take a photo of your dukaan counter or upload from gallery</Text>
 
           <View style={styles.uploadActionsRow}>
             <TouchableOpacity
               style={styles.uploadBtnPrimary}
               onPress={() => handlePickPhoto(true)}
+              activeOpacity={0.8}
             >
-              <Ionicons name="camera" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Ionicons name="camera" size={17} color="#FFFFFF" style={{ marginRight: 6 }} />
               <Text style={styles.uploadBtnPrimaryText}>Take Photo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.uploadBtnSecondary}
               onPress={() => handlePickPhoto(false)}
+              activeOpacity={0.8}
             >
-              <Ionicons name="images-outline" size={18} color="#0F172A" style={{ marginRight: 6 }} />
+              <Ionicons name="images-outline" size={17} color="#0F172A" style={{ marginRight: 6 }} />
               <Text style={styles.uploadBtnSecondaryText}>Choose Gallery</Text>
             </TouchableOpacity>
           </View>
@@ -502,6 +512,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         style={[styles.saveBtn, !isStep3Done && styles.btnDisabled]}
         disabled={!isStep3Done}
         onPress={() => setActiveStep(null)}
+        activeOpacity={0.85}
       >
         <Text style={styles.saveBtnText}>SAVE & CONTINUE</Text>
       </TouchableOpacity>
@@ -512,18 +523,24 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   // SUB-STEP 4: PAYOUT & UPI
   // =========================================================================
   const renderStep4 = () => (
-    <ScrollView style={styles.subStepScroll} keyboardShouldPersistTaps="handled">
-      <View style={styles.subStepHeader}>
-        <TouchableOpacity onPress={() => setActiveStep(null)} style={styles.backCircle}>
-          <Ionicons name="arrow-back" size={20} color="#0F172A" />
-        </TouchableOpacity>
-        <Text style={styles.subStepTitle}>Payout & UPI</Text>
-        <View style={{ width: 36 }} />
-      </View>
+    <ScrollView
+      style={styles.subStepScroll}
+      contentContainerStyle={styles.subStepContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Matching OTP Back Button */}
+      <TouchableOpacity
+        onPress={() => setActiveStep(null)}
+        style={styles.backButton}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="arrow-back" size={22} color="#0F172A" />
+      </TouchableOpacity>
 
-      <Text style={styles.subStepDescription}>
-        DusMint settles earnings directly to your UPI daily. Enter your active VPA / UPI ID below.
-      </Text>
+      {/* Left-aligned Title & Subtitle */}
+      <Text style={styles.subStepTitle}>Payout & UPI</Text>
+      <Text style={styles.subStepSubtitle}>Direct daily earnings settlement</Text>
 
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>UPI ID (VPA) *</Text>
@@ -551,9 +568,9 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       </View>
 
       <View style={styles.payoutTrustBadge}>
-        <Ionicons name="shield-checkmark" size={20} color="#047A36" style={{ marginRight: 8 }} />
+        <Ionicons name="shield-checkmark-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
         <Text style={styles.payoutTrustText}>
-          Instant daily batch settlement. 0% delay on completed delivery slots.
+          Earnings are settled directly to your UPI ID daily.
         </Text>
       </View>
 
@@ -561,6 +578,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         style={[styles.saveBtn, !isStep4Done && styles.btnDisabled]}
         disabled={!isStep4Done}
         onPress={() => setActiveStep(null)}
+        activeOpacity={0.85}
       >
         <Text style={styles.saveBtnText}>SAVE & CONTINUE</Text>
       </TouchableOpacity>
@@ -574,7 +592,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
     {
       id: 1,
       title: 'Owner Profile',
-      sub: isStep1Done ? `${ownerName} • ${phone}` : 'Full name & mobile verification',
+      sub: isStep1Done ? `${ownerName} • ${phone}` : 'Full name & mobile details',
       icon: 'person-outline',
       isDone: isStep1Done,
     },
@@ -583,21 +601,21 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       title: 'Shop & Location',
       sub: isStep2Done
         ? `${shopName} • ${address.slice(0, 24)}...`
-        : 'Shop name, category & Ola Maps address',
+        : 'Name, category & pickup address',
       icon: 'storefront-outline',
       isDone: isStep2Done,
     },
     {
       id: 3,
       title: 'Shop Photo',
-      sub: isStep3Done ? 'Photo uploaded & attached' : 'Stall or shop counter photo',
+      sub: isStep3Done ? 'Photo attached' : 'Stall or shop counter photo',
       icon: 'camera-outline',
       isDone: isStep3Done,
     },
     {
       id: 4,
       title: 'Payout & UPI',
-      sub: isStep4Done ? `UPI: ${bankOrUpi}` : 'Daily earnings settlement UPI ID',
+      sub: isStep4Done ? `UPI: ${bankOrUpi}` : 'Daily settlement UPI ID',
       icon: 'wallet-outline',
       isDone: isStep4Done,
     },
@@ -622,28 +640,30 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
             contentContainerStyle={styles.hubContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Top Bar with Logout */}
+            {/* Top Bar with subtle Close App button */}
             <View style={styles.topBar}>
-              <View>
+              <View style={{ flex: 1, marginRight: 12 }}>
                 <Text style={styles.hubTitle}>Dukaan Onboarding</Text>
                 <Text style={styles.hubSubtitle}>
-                  Complete 4 quick steps to start selling on DusMint
+                  Set up your dukaan to start selling
                 </Text>
               </View>
 
+              {/* Clean Close App Action (styled like the OTP back button) */}
               <TouchableOpacity
-                onPress={handleLogout}
-                style={styles.logoutBtn}
+                onPress={handleExitApp}
+                style={styles.exitBtn}
                 activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="log-out-outline" size={18} color="#EF4444" />
+                <Ionicons name="close" size={22} color="#0F172A" />
               </TouchableOpacity>
             </View>
 
             {/* Progress Tracker Card */}
             <View style={styles.progressCard}>
               <View style={styles.progressTextRow}>
-                <Text style={styles.progressLabel}>ONBOARDING PROGRESS</Text>
+                <Text style={styles.progressLabel}>PROGRESS</Text>
                 <Text style={styles.progressFraction}>{completedCount} of 4 Completed</Text>
               </View>
               <View style={styles.progressBarTrack}>
@@ -663,7 +683,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
                   <View style={[styles.cardIconBox, card.isDone && styles.cardIconBoxDone]}>
                     <Ionicons
                       name={card.icon as any}
-                      size={22}
+                      size={20}
                       color={card.isDone ? '#047A36' : '#64748B'}
                     />
                   </View>
@@ -677,11 +697,11 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 
                   {card.isDone ? (
                     <View style={styles.checkCircle}>
-                      <Ionicons name="checkmark-sharp" size={16} color="#FFFFFF" />
+                      <Ionicons name="checkmark-sharp" size={15} color="#FFFFFF" />
                     </View>
                   ) : (
                     <View style={styles.pendingCircle}>
-                      <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+                      <Ionicons name="chevron-forward" size={15} color="#94A3B8" />
                     </View>
                   )}
                 </TouchableOpacity>
@@ -718,21 +738,21 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
   },
   hubScroll: {
     flex: 1,
   },
   hubContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 40,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 20,
+    alignItems: 'center',
+    marginBottom: 24,
   },
   hubTitle: {
     fontSize: 24,
@@ -741,22 +761,23 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   hubSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#64748B',
     marginTop: 4,
   },
-  logoutBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FEF2F2',
+  // Same button shape as OTP screen back button
+  exitBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
@@ -781,15 +802,15 @@ const styles = StyleSheet.create({
     color: '#047A36',
   },
   progressBarTrack: {
-    height: 8,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 4,
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#047A36',
-    borderRadius: 4,
+    borderRadius: 3,
   },
   cardsContainer: {
     gap: 12,
@@ -806,11 +827,11 @@ const styles = StyleSheet.create({
   },
   cardDone: {
     borderColor: '#BBF7D0',
-    backgroundColor: '#FAFCFA',
+    backgroundColor: '#FBFDFB',
   },
   cardIconBox: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     backgroundColor: '#F1F5F9',
     justifyContent: 'center',
@@ -827,27 +848,27 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 3,
+    marginBottom: 2,
   },
   cardSub: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#64748B',
   },
   checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#22C55E',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#047A36',
     justifyContent: 'center',
     alignItems: 'center',
   },
   pendingCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -855,21 +876,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitBtn: {
-    backgroundColor: '#22C55E',
+    backgroundColor: '#047A36',
     width: '100%',
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: 'center',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
   submitBtnDisabled: {
-    backgroundColor: '#CBD5E1',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#E2E8F0',
   },
   submitBtnText: {
     color: '#FFFFFF',
@@ -887,33 +901,36 @@ const styles = StyleSheet.create({
   subStepScroll: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 16,
   },
-  subStepHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  subStepContent: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 40,
   },
-  backCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F1F5F9',
+  // Exact OTP screen back button style
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
+  // Left-aligned header titles
   subStepTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '800',
     color: '#0F172A',
+    letterSpacing: -0.5,
   },
-  subStepDescription: {
-    fontSize: 13,
+  subStepSubtitle: {
+    fontSize: 14,
     color: '#64748B',
-    marginBottom: 20,
-    lineHeight: 18,
+    marginTop: 4,
+    marginBottom: 24,
   },
   fieldBox: {
     marginBottom: 18,
@@ -923,20 +940,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#64748B',
     marginBottom: 8,
-    letterSpacing: 0.4,
+    letterSpacing: 0.5,
   },
   textInput: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     fontSize: 15,
     color: '#0F172A',
   },
   textArea: {
-    height: 80,
+    height: 84,
     textAlignVertical: 'top',
   },
   lockedFieldRow: {
@@ -945,9 +962,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0FDF4',
     borderWidth: 1,
     borderColor: '#BBF7D0',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
   },
   lockedPhoneText: {
     fontSize: 15,
@@ -958,7 +975,7 @@ const styles = StyleSheet.create({
   verifiedTag: {
     backgroundColor: '#DCFCE7',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   verifiedTagText: {
@@ -974,8 +991,8 @@ const styles = StyleSheet.create({
   catChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -1022,12 +1039,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   autoLocateBtn: {
-    backgroundColor: '#22C55E',
-    paddingHorizontal: 12,
+    backgroundColor: '#047A36',
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   autoLocateBtnText: {
     color: '#FFFFFF',
@@ -1058,7 +1073,7 @@ const styles = StyleSheet.create({
   },
   previewImage: {
     width: '100%',
-    height: 200,
+    height: 190,
   },
   previewActionsRow: {
     flexDirection: 'row',
@@ -1095,13 +1110,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   photoUploadIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#F0FDF4',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   uploadPromptTitle: {
     fontSize: 15,
@@ -1110,10 +1125,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   uploadPromptSub: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#64748B',
     textAlign: 'center',
-    lineHeight: 16,
     marginBottom: 16,
   },
   uploadActionsRow: {
@@ -1121,7 +1135,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   uploadBtnPrimary: {
-    backgroundColor: '#22C55E',
+    backgroundColor: '#047A36',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -1151,31 +1165,25 @@ const styles = StyleSheet.create({
   payoutTrustBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#BBF7D0',
+    borderColor: '#E2E8F0',
     borderRadius: 12,
     padding: 12,
     marginBottom: 20,
   },
   payoutTrustText: {
     fontSize: 12,
-    color: '#166534',
+    color: '#64748B',
     flex: 1,
-    lineHeight: 16,
   },
   saveBtn: {
-    backgroundColor: '#22C55E',
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: '#047A36',
+    paddingVertical: 15,
+    borderRadius: 14,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 8,
     marginBottom: 30,
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
   },
   saveBtnText: {
     color: '#FFFFFF',
@@ -1184,6 +1192,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   btnDisabled: {
-    backgroundColor: '#CBD5E1',
+    backgroundColor: '#E2E8F0',
   },
 });
