@@ -41,6 +41,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : insets.top;
   const [menuVisible, setMenuVisible] = useState(false);
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const localStorePhoto = useVendorAuthStore((s) => s.storePhotoUri);
   const activeVendorFromStore = useVendorAuthStore((s) => s.activeVendor);
@@ -54,6 +55,10 @@ export const VendorProfileHeader: React.FC<Props> = ({
       ? activeVendorFromStore.shop_photo_urls[0]
       : null) ||
     localStorePhoto;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [photoUrl]);
 
   // Prefer vendor's owner_phone if present, otherwise logged-in phone
   const rawPhone = vendor?.owner_phone || phone;

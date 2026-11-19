@@ -13,11 +13,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { VendorProfileInfo } from '../../../api-client/types';
 import { dusmintApi } from '../../../api-client/client';
+import { useVendorAuthStore } from '../../../state/useVendorAuthStore';
 
 interface Props {
   visible: boolean;
@@ -52,6 +55,7 @@ export const EditVendorModal: React.FC<Props> = ({
   const [bankOrUpi, setBankOrUpi] = useState('');
   const [address, setAddress] = useState('');
   const [category, setCategory] = useState('groceries');
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -80,6 +84,13 @@ export const EditVendorModal: React.FC<Props> = ({
         setBankOrUpi(vendor.bank_or_upi || '');
         setAddress(vendor.address || '');
         setCategory(vendor.category || 'groceries');
+        const existingPhoto =
+          (vendor.shop_photo_urls && vendor.shop_photo_urls.length > 0
+            ? vendor.shop_photo_urls[0]
+            : null) ||
+          useVendorAuthStore.getState().storePhotoUri ||
+          null;
+        setPhotoUri(existingPhoto);
         setError('');
       }
     } else {
@@ -118,6 +129,41 @@ export const EditVendorModal: React.FC<Props> = ({
     });
   };
 
+  const handlePickPhoto = async (fromCamera: boolean) => {
+    try {
+      const options: ImagePicker.ImagePickerOptions = {
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.85,
+      };
+
+      let result;
+      if (fromCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Camera Permission', 'Please allow camera access to take shop photos.');
+          return;
+        }
+        result = await ImagePicker.launchCameraAsync(options);
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Gallery Permission', 'Please allow media library access to pick photos.');
+          return;
+        }
+        result = await ImagePicker.launchImageLibraryAsync(options);
+      }
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const picked = result.assets[0].uri;
+        setPhotoUri(picked);
+      }
+    } catch {
+      Alert.alert('Photo Error', 'Could not open image picker.');
+    }
+  };
+
   const handleSave = async () => {
     if (!shopName.trim()) {
       setError('Please enter shop name');
@@ -146,17 +192,27 @@ export const EditVendorModal: React.FC<Props> = ({
         bankOrUpi: bankOrUpi.trim(),
         category,
         address: address.trim() || undefined,
+        shopPhotoUrls: photoUri ? [photoUri] : undefined,
       });
 
-      if (res.success && res.vendor) {
-        onProfileUpdated({
-          ...vendor,
-          ...res.vendor,
-        });
-        handleDismiss();
-      } else {
-        setError('Could not save profile changes. Please try again.');
+      if (photoUri) {
+        useVendorAuthStore.getState().setStorePhotoUri(photoUri);
       }
+
+      const updatedVendor: VendorProfileInfo = {
+        ...vendor,
+        ...(res.vendor || {}),
+        name: shopName.trim(),
+        owner_name: ownerName.trim(),
+        bank_or_upi: bankOrUpi.trim(),
+        category,
+        address: address.trim() || vendor.address,
+        shop_photo_urls: photoUri ? [photoUri] : vendor.shop_photo_urls,
+      };
+
+      onProfileUpdated(updatedVendor);
+      useVendorAuthStore.getState().setActiveVendor(updatedVendor);
+      handleDismiss();
     } catch (err: any) {
       setError(err?.message || 'Network error, could not save profile');
     } finally {
@@ -291,6 +347,53 @@ export const EditVendorModal: React.FC<Props> = ({
                     );
                   })}
                 </View>
+              </View>
+
+              {/* Shop Picture */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Shop Picture</Text>
+                {photoUri ? (
+                  <View style={styles.photoPreviewBox}>
+                    <Image source={{ uri: photoUri }} style={styles.editPhotoPreview} resizeMode="cover" />
+                    <View style={styles.photoBtnRow}>
+                      <TouchableOpacity
+                        style={styles.photoActionBtn}
+                        onPress={() => handlePickPhoto(true)}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name="camera" size={14} color="#047A36" style={{ marginRight: 4 }} />
+                        <Text style={styles.photoActionText}>Take New</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.photoActionBtn}
+                        onPress={() => handlePickPhoto(false)}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name="images" size={14} color="#0F172A" style={{ marginRight: 4 }} />
+                        <Text style={styles.photoActionText}>From Gallery</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.noPhotoBox}>
+                    <TouchableOpacity
+                      style={styles.attachBtn}
+                      onPress={() => handlePickPhoto(true)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="camera-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.attachBtnText}>Take Photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.attachBtn, styles.attachBtnSecondary]}
+                      onPress={() => handlePickPhoto(false)}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="images-outline" size={16} color="#0F172A" style={{ marginRight: 6 }} />
+                      <Text style={styles.attachBtnSecondaryText}>Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
 
               {/* UPI ID */}
@@ -444,6 +547,69 @@ const styles = StyleSheet.create({
   },
   catChipTextActive: {
     color: '#15803D',
+    fontWeight: '700',
+  },
+  photoPreviewBox: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 8,
+  },
+  editPhotoPreview: {
+    width: '100%',
+    height: 120,
+    borderRadius: 10,
+    backgroundColor: '#E2E8F0',
+  },
+  photoBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
+  photoActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingVertical: 7,
+  },
+  photoActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0F172A',
+  },
+  noPhotoBox: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  attachBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#047A36',
+    borderRadius: 10,
+    paddingVertical: 10,
+  },
+  attachBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12.5,
+    fontWeight: '700',
+  },
+  attachBtnSecondary: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  attachBtnSecondaryText: {
+    color: '#0F172A',
+    fontSize: 12.5,
     fontWeight: '700',
   },
   saveBtn: {
