@@ -151,7 +151,9 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       }
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setShopPhotoUri(result.assets[0].uri);
+        const pickedUri = result.assets[0].uri;
+        setShopPhotoUri(pickedUri);
+        useVendorAuthStore.getState().setStorePhotoUri(pickedUri);
       }
     } catch {
       Alert.alert('Photo Error', 'Could not open image picker.');

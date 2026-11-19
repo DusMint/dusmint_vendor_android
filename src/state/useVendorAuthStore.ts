@@ -14,6 +14,7 @@ export interface VendorUser {
 interface VendorAuthState {
   token: string | null;
   user: VendorUser | null;
+  storePhotoUri: string | null;
   selectedLanguage: string | null;
   isAuthenticated: boolean;
   hasActiveVendor: boolean;
@@ -23,6 +24,7 @@ interface VendorAuthState {
   // Actions
   setHydrated: (val: boolean) => void;
   setLanguage: (lang: string) => void;
+  setStorePhotoUri: (uri: string | null) => void;
   setHasActiveVendor: (val: boolean) => void;
   setAuth: (token: string, user: any, hasActiveVendor?: boolean) => void;
   logout: () => void;
@@ -84,6 +86,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
     (set) => ({
       token: null,
       user: null,
+      storePhotoUri: null,
       selectedLanguage: null,
       isAuthenticated: false,
       hasActiveVendor: false,
@@ -95,6 +98,10 @@ export const useVendorAuthStore = create<VendorAuthState>()(
 
       setLanguage: (lang: string) => {
         set({ selectedLanguage: lang });
+      },
+
+      setStorePhotoUri: (uri: string | null) => {
+        set({ storePhotoUri: uri });
       },
 
       setHasActiveVendor: (val: boolean) => {
@@ -134,6 +141,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
+        storePhotoUri: state.storePhotoUri,
         selectedLanguage: state.selectedLanguage,
         isAuthenticated: state.isAuthenticated,
         hasActiveVendor: state.hasActiveVendor,

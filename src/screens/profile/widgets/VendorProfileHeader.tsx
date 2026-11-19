@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { VendorProfileInfo } from '../../../api-client/types';
+import { useVendorAuthStore } from '../../../state/useVendorAuthStore';
 
 interface Props {
   vendor: VendorProfileInfo | null;
@@ -41,11 +42,13 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const [menuVisible, setMenuVisible] = useState(false);
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
 
-  // Check if store has a valid uploaded photo
+  const localStorePhoto = useVendorAuthStore((s) => s.storePhotoUri);
+
+  // Check if store has a valid uploaded photo (from backend or local onboarding cache)
   const photoUrl =
-    vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
+    (vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
       ? vendor.shop_photo_urls[0]
-      : null;
+      : null) || localStorePhoto;
 
   // Prefer vendor's owner_phone if present, otherwise logged-in phone
   const rawPhone = vendor?.owner_phone || phone;
@@ -119,12 +122,13 @@ export const VendorProfileHeader: React.FC<Props> = ({
               resizeMode="cover"
             />
           ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarEmoji}>🏪</Text>
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="storefront-outline" size={24} color="#047A36" />
+              <Text style={styles.placeholderLabel}>Store</Text>
             </View>
           )}
 
-          {/* Small zoom indicator badge */}
+          {/* Zoom badge indicator */}
           {Boolean(photoUrl) && (
             <View style={styles.zoomBadge}>
               <Ionicons name="scan-outline" size={10} color="#FFFFFF" />
@@ -162,7 +166,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Full-Screen Store Photo Viewer Modal */}
+      {/* Full-Screen Store Photo Preview Modal */}
       <Modal
         visible={isPhotoViewerOpen}
         transparent
@@ -193,7 +197,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
 
                 <View style={styles.photoCaptionBox}>
                   <Text style={styles.photoShopTitle}>{vendor?.name || 'My Dukaan'}</Text>
-                  <Text style={styles.photoSub}>दुकान की फोटो (Uploaded Store Picture)</Text>
+                  <Text style={styles.photoSub}>Store Picture</Text>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -335,7 +339,7 @@ const styles = StyleSheet.create({
     borderColor: '#10B981',
     backgroundColor: '#F1F5F9',
   },
-  avatarFallback: {
+  avatarPlaceholder: {
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -345,8 +349,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarEmoji: {
-    fontSize: 24,
+  placeholderLabel: {
+    fontSize: 8,
+    fontWeight: '700',
+    color: '#047A36',
+    marginTop: 1,
   },
   zoomBadge: {
     position: 'absolute',
@@ -424,7 +431,7 @@ const styles = StyleSheet.create({
   },
   photoModalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.88)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
