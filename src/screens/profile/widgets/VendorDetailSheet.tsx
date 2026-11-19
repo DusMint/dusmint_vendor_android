@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Linking,
   Vibration,
   Platform,
+  Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,7 +40,63 @@ export const VendorDetailSheet: React.FC<Props> = ({
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
 
-  if (!visible || !optionId) return null;
+  const [showModal, setShowModal] = useState(visible);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(600)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setShowModal(true);
+      fadeAnim.setValue(0);
+      slideAnim.setValue(600);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 65,
+          friction: 11,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 600,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowModal(false);
+      });
+    }
+  }, [visible, fadeAnim, slideAnim]);
+
+  const handleDismiss = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 600,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowModal(false);
+      onClose();
+    });
+  };
 
   const handleTestChime = () => {
     Vibration.vibrate([0, 400, 150, 400]);
@@ -51,6 +108,8 @@ export const VendorDetailSheet: React.FC<Props> = ({
       onShowToast('Dialing 1800-889-MINT');
     });
   };
+
+  if (!showModal && !visible) return null;
 
   const renderContent = () => {
     switch (optionId) {
@@ -64,7 +123,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Shop Details & Category</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -104,7 +163,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
               style={styles.actionBtn}
               activeOpacity={0.85}
               onPress={() => {
-                onClose();
+                handleDismiss();
                 onOpenEdit();
               }}
             >
@@ -124,7 +183,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Mandi Location & Cluster</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -172,7 +231,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Settlement UPI Account</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -200,7 +259,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
               style={styles.actionBtn}
               activeOpacity={0.85}
               onPress={() => {
-                onClose();
+                handleDismiss();
                 onOpenEdit();
               }}
             >
@@ -220,7 +279,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Delivery Slot Timings</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -257,7 +316,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Mandi Order Alarm</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -295,7 +354,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Language / भाषा</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -308,7 +367,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
               onPress={() => {
                 onSetLanguage('en');
                 onShowToast('Language set to English');
-                onClose();
+                handleDismiss();
               }}
               activeOpacity={0.8}
             >
@@ -332,7 +391,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
               onPress={() => {
                 onSetLanguage('hi');
                 onShowToast('भाषा हिंदी में सेट की गई');
-                onClose();
+                handleDismiss();
               }}
               activeOpacity={0.8}
             >
@@ -359,7 +418,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Partner Support Desk</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -409,7 +468,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 </View>
                 <Text style={styles.sheetTitle}>Compliance & Terms</Text>
               </View>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
               </TouchableOpacity>
             </View>
@@ -451,31 +510,45 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
   return (
     <Modal
-      visible={visible}
+      visible={showModal}
       transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleDismiss}
+      statusBarTranslucent
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop}>
-          <TouchableWithoutFeedback>
-            <View style={[styles.sheet, { paddingBottom: bottomInset }]}>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {renderContent()}
-              </ScrollView>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={styles.modalRoot}>
+        {/* Full-screen static dark backdrop that ONLY smoothly fades in, NEVER moves */}
+        <TouchableWithoutFeedback onPress={handleDismiss}>
+          <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} />
+        </TouchableWithoutFeedback>
+
+        {/* Sliding Bottom Sheet */}
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              paddingBottom: bottomInset,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {renderContent()}
+          </ScrollView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
+  modalRoot: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   sheet: {
     backgroundColor: '#FFFFFF',
@@ -484,6 +557,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
   },
   sheetHeader: {
     flexDirection: 'row',

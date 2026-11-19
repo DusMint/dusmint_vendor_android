@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,6 +43,10 @@ export const EditVendorModal: React.FC<Props> = ({
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
 
+  const [showModal, setShowModal] = useState(visible);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(600)).current;
+
   const [shopName, setShopName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [bankOrUpi, setBankOrUpi] = useState('');
@@ -50,14 +55,66 @@ export const EditVendorModal: React.FC<Props> = ({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (visible && vendor) {
-      setShopName(vendor.name || '');
-      setOwnerName(vendor.owner_name || '');
-      setBankOrUpi(vendor.bank_or_upi || '');
-      setCategory(vendor.category || 'groceries');
-      setError('');
+    if (visible) {
+      setShowModal(true);
+      fadeAnim.setValue(0);
+      slideAnim.setValue(600);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 65,
+          friction: 11,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      if (vendor) {
+        setShopName(vendor.name || '');
+        setOwnerName(vendor.owner_name || '');
+        setBankOrUpi(vendor.bank_or_upi || '');
+        setCategory(vendor.category || 'groceries');
+        setError('');
+      }
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 600,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowModal(false);
+      });
     }
-  }, [visible, vendor]);
+  }, [visible, vendor, fadeAnim, slideAnim]);
+
+  const handleDismiss = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 600,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowModal(false);
+      onClose();
+    });
+  };
 
   const handleSave = async () => {
     if (!shopName.trim()) {
@@ -93,7 +150,7 @@ export const EditVendorModal: React.FC<Props> = ({
           ...vendor,
           ...res.vendor,
         });
-        onClose();
+        handleDismiss();
       } else {
         setError('Failed to update dukaan profile. Please try again.');
       }
@@ -104,154 +161,167 @@ export const EditVendorModal: React.FC<Props> = ({
     }
   };
 
+  if (!showModal && !visible) return null;
+
   return (
     <Modal
-      visible={visible}
+      visible={showModal}
       transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleDismiss}
+      statusBarTranslucent
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop}>
-          <TouchableWithoutFeedback>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-              style={styles.sheetContainer}
-            >
-              <View style={[styles.sheet, { paddingBottom: bottomInset }]}>
-                {/* Header */}
-                <View style={styles.header}>
-                  <Text style={styles.title}>Edit Dukaan Profile</Text>
-                  <TouchableOpacity
-                    onPress={onClose}
-                    style={styles.closeBtn}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Ionicons name="close" size={22} color="#0F172A" />
-                  </TouchableOpacity>
-                </View>
+      <View style={styles.modalRoot}>
+        {/* Full-screen static dark backdrop that ONLY smoothly fades in, NEVER moves */}
+        <TouchableWithoutFeedback onPress={handleDismiss}>
+          <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} />
+        </TouchableWithoutFeedback>
 
-                {error ? (
-                  <View style={styles.errorBox}>
-                    <Ionicons name="alert-circle" size={16} color="#DC2626" />
-                    <Text style={styles.errorText}>{error}</Text>
-                  </View>
-                ) : null}
+        {/* Sliding Bottom Sheet */}
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              paddingBottom: bottomInset,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Edit Dukaan Profile</Text>
+              <TouchableOpacity
+                onPress={handleDismiss}
+                style={styles.closeBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={22} color="#0F172A" />
+              </TouchableOpacity>
+            </View>
 
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={styles.scrollContent}
-                >
-                  {/* Shop Name */}
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>DUKAAN / SHOP NAME</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={shopName}
-                      onChangeText={(t) => {
-                        setShopName(t);
-                        setError('');
-                      }}
-                      placeholder="e.g. Mandi Fresh Kirana"
-                      placeholderTextColor="#94A3B8"
-                    />
-                  </View>
-
-                  {/* Owner Name */}
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>OWNER FULL NAME</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={ownerName}
-                      onChangeText={(t) => {
-                        setOwnerName(t);
-                        setError('');
-                      }}
-                      placeholder="e.g. Ramesh Sharma"
-                      placeholderTextColor="#94A3B8"
-                    />
-                  </View>
-
-                  {/* Category Pills */}
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>STORE CATEGORY</Text>
-                    <View style={styles.categoryRow}>
-                      {CATEGORIES.map((cat) => {
-                        const isSelected = category.toLowerCase() === cat.id;
-                        return (
-                          <TouchableOpacity
-                            key={cat.id}
-                            style={[
-                              styles.catChip,
-                              isSelected && styles.catChipActive,
-                            ]}
-                            onPress={() => setCategory(cat.id)}
-                            activeOpacity={0.8}
-                          >
-                            <Text
-                              style={[
-                                styles.catChipText,
-                                isSelected && styles.catChipTextActive,
-                              ]}
-                            >
-                              {cat.label}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  </View>
-
-                  {/* UPI ID */}
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>SETTLEMENT UPI ID (DAILY T+0)</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={bankOrUpi}
-                      onChangeText={(t) => {
-                        setBankOrUpi(t);
-                        setError('');
-                      }}
-                      placeholder="e.g. shopowner@okhdfcbank"
-                      placeholderTextColor="#94A3B8"
-                      autoCapitalize="none"
-                    />
-                    <Text style={styles.fieldHint}>
-                      Daily sales earnings are auto-settled to this VPA upon rider pickup.
-                    </Text>
-                  </View>
-
-                  {/* Save Button */}
-                  <TouchableOpacity
-                    style={[styles.saveBtn, isSaving && styles.saveBtnDisabled]}
-                    onPress={handleSave}
-                    disabled={isSaving}
-                    activeOpacity={0.85}
-                  >
-                    {isSaving ? (
-                      <ActivityIndicator size="small" color="#FFFFFF" />
-                    ) : (
-                      <Text style={styles.saveBtnText}>Save Profile Changes</Text>
-                    )}
-                  </TouchableOpacity>
-                </ScrollView>
+            {error ? (
+              <View style={styles.errorBox}>
+                <Ionicons name="alert-circle" size={16} color="#DC2626" />
+                <Text style={styles.errorText}>{error}</Text>
               </View>
-            </KeyboardAvoidingView>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+            ) : null}
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Shop Name */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>DUKAAN / SHOP NAME</Text>
+                <TextInput
+                  style={styles.input}
+                  value={shopName}
+                  onChangeText={(t) => {
+                    setShopName(t);
+                    setError('');
+                  }}
+                  placeholder="e.g. Mandi Fresh Kirana"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              {/* Owner Name */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>OWNER FULL NAME</Text>
+                <TextInput
+                  style={styles.input}
+                  value={ownerName}
+                  onChangeText={(t) => {
+                    setOwnerName(t);
+                    setError('');
+                  }}
+                  placeholder="e.g. Ramesh Sharma"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              {/* Category Pills */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>STORE CATEGORY</Text>
+                <View style={styles.categoryRow}>
+                  {CATEGORIES.map((cat) => {
+                    const isSelected = category.toLowerCase() === cat.id;
+                    return (
+                      <TouchableOpacity
+                        key={cat.id}
+                        style={[
+                          styles.catChip,
+                          isSelected && styles.catChipActive,
+                        ]}
+                        onPress={() => setCategory(cat.id)}
+                        activeOpacity={0.8}
+                      >
+                        <Text
+                          style={[
+                            styles.catChipText,
+                            isSelected && styles.catChipTextActive,
+                          ]}
+                        >
+                          {cat.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              {/* UPI ID */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>SETTLEMENT UPI ID (DAILY T+0)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={bankOrUpi}
+                  onChangeText={(t) => {
+                    setBankOrUpi(t);
+                    setError('');
+                  }}
+                  placeholder="e.g. shopowner@okhdfcbank"
+                  placeholderTextColor="#94A3B8"
+                  autoCapitalize="none"
+                />
+                <Text style={styles.fieldHint}>
+                  Daily sales earnings are auto-settled to this VPA upon rider pickup.
+                </Text>
+              </View>
+
+              {/* Save Button */}
+              <TouchableOpacity
+                style={[styles.saveBtn, isSaving && styles.saveBtnDisabled]}
+                onPress={handleSave}
+                disabled={isSaving}
+                activeOpacity={0.85}
+              >
+                {isSaving ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.saveBtnText}>Save Profile Changes</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  backdrop: {
+  modalRoot: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
-  sheetContainer: {
-    width: '100%',
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   sheet: {
     backgroundColor: '#FFFFFF',
@@ -260,6 +330,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     maxHeight: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 10,
   },
   header: {
     flexDirection: 'row',
