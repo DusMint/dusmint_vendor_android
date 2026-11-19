@@ -89,7 +89,8 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
       const list = await dusmintApi.getVendorList();
       setVendors(list || []);
 
-      const userPhoneClean = (user?.phone || '').replace(/\D/g, '').slice(-10);
+      const currentPhone = user?.phone || activeVendor?.owner_phone || persistedVendor?.owner_phone || '';
+      const userPhoneClean = currentPhone.replace(/\D/g, '').slice(-10);
 
       let matched: VendorProfileInfo | null = null;
 
@@ -114,15 +115,29 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         }
       }
 
-      // 4. Fallback to list[0] only if absolutely nothing matched
-      if (!matched && list && list.length > 0) {
-        matched = list[0];
-      }
-
+      // 4. Merge matched server data with local persisted state so fields like address/photos are not wiped
       if (matched) {
-        setActiveVendor(matched);
-        if (matched.is_open !== undefined) {
-          setIsOpen(matched.is_open);
+        const base = activeVendor || persistedVendor;
+        const merged: VendorProfileInfo = {
+          ...base,
+          ...matched,
+          address: matched.address || base?.address,
+          bank_or_upi: matched.bank_or_upi || base?.bank_or_upi,
+          shop_photo_urls:
+            matched.shop_photo_urls && matched.shop_photo_urls.length > 0
+              ? matched.shop_photo_urls
+              : base?.shop_photo_urls,
+        };
+        setActiveVendor(merged);
+        setActiveVendorInStore(merged);
+        if (merged.is_open !== undefined) {
+          setIsOpen(merged.is_open);
+        }
+      } else if (persistedVendor) {
+        // Keep persisted vendor if server list doesn't match
+        setActiveVendor(persistedVendor);
+        if (persistedVendor.is_open !== undefined) {
+          setIsOpen(persistedVendor.is_open);
         }
       }
     } catch (err) {
@@ -130,7 +145,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [user?.phone, user?.id]);
+  }, [user?.phone, user?.id, activeVendor, persistedVendor, setActiveVendorInStore]);
 
   useEffect(() => {
     loadVendorProfile();
@@ -183,7 +198,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   const handleToggleLanguage = () => {
     const nextLang = selectedLanguage === 'hi' ? 'en' : 'hi';
     setLanguage(nextLang);
-    showToast(nextLang === 'hi' ? 'भाषा हिंदी में बदली गई' : 'Language switched to English');
+    showToast(nextLang === 'hi' ? 'Language switched to Hindi' : 'Language switched to English');
   };
 
   // Log Out Confirmation
@@ -210,47 +225,47 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
-  // Tier 2, 3, 4 shopkeeper-friendly menu items (English + Hindi clarity)
+  // Clean, straightforward menu items in plain English
   const optionsData: VendorOptionItem[] = useMemo(() => {
     return [
       {
         id: 'opt-shop',
-        label: 'Shop Details (दुकान की जानकारी)',
+        label: 'Shop Details',
         iconName: 'storefront-outline',
       },
       {
         id: 'opt-location',
-        label: 'Shop Address (दुकान का पता)',
+        label: 'Shop Address',
         iconName: 'location-outline',
       },
       {
         id: 'opt-settlement',
-        label: 'Payment UPI (पैसे आने का खाता)',
+        label: 'Payment UPI Account',
         iconName: 'card-outline',
       },
       {
         id: 'opt-slots',
-        label: 'Store Timings (दुकान और आर्डर का समय)',
+        label: 'Delivery Slot Timings',
         iconName: 'time-outline',
       },
       {
         id: 'opt-alarm',
-        label: 'Order Ringtone (आर्डर की घंटी)',
+        label: 'Order Alert Ringtone',
         iconName: 'notifications-outline',
       },
       {
         id: 'opt-lang',
-        label: 'Language / भाषा',
+        label: 'App Language',
         iconName: 'globe-outline',
       },
       {
         id: 'opt-support',
-        label: 'Help & Support (मदद और सहायता)',
+        label: 'Help & Support',
         iconName: 'headset-outline',
       },
       {
         id: 'opt-terms',
-        label: 'Partner Terms (पार्टनर नियम)',
+        label: 'Partner Terms & Policy',
         iconName: 'shield-checkmark-outline',
       },
     ];

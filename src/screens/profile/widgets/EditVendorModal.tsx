@@ -27,11 +27,11 @@ interface Props {
 }
 
 const CATEGORIES = [
-  { id: 'groceries', label: 'किराना (Groceries)' },
-  { id: 'vegetables', label: 'सब्जी (Vegetables)' },
-  { id: 'fruits', label: 'फल (Fruits)' },
-  { id: 'dairy', label: 'डेयरी व दूध (Dairy)' },
-  { id: 'bakery', label: 'बेकरी (Bakery)' },
+  { id: 'groceries', label: 'Groceries' },
+  { id: 'vegetables', label: 'Vegetables' },
+  { id: 'fruits', label: 'Fruits' },
+  { id: 'dairy', label: 'Dairy & Milk' },
+  { id: 'bakery', label: 'Bakery' },
 ];
 
 export const EditVendorModal: React.FC<Props> = ({
@@ -120,15 +120,15 @@ export const EditVendorModal: React.FC<Props> = ({
 
   const handleSave = async () => {
     if (!shopName.trim()) {
-      setError('कृपया दुकान का नाम दर्ज करें');
+      setError('Please enter shop name');
       return;
     }
     if (!ownerName.trim()) {
-      setError('कृपया मालिक का नाम दर्ज करें');
+      setError('Please enter owner name');
       return;
     }
     if (!bankOrUpi.trim()) {
-      setError('कृपया पैसे आने की UPI ID दर्ज करें');
+      setError('Please enter payment UPI ID');
       return;
     }
 
@@ -155,10 +155,10 @@ export const EditVendorModal: React.FC<Props> = ({
         });
         handleDismiss();
       } else {
-        setError('प्रोफाइल सेव नहीं हो पाई। कृपया दोबारा कोशिश करें।');
+        setError('Could not save profile changes. Please try again.');
       }
     } catch (err: any) {
-      setError(err?.message || 'नेटवर्क एरर, प्रोफाइल सेव नहीं हो सकी');
+      setError(err?.message || 'Network error, could not save profile');
     } finally {
       setIsSaving(false);
     }
