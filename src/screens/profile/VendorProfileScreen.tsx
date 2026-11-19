@@ -8,8 +8,6 @@ import {
   RefreshControl,
   Alert,
   Animated,
-  Vibration,
-  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
@@ -19,8 +17,8 @@ import { VendorProfileInfo } from '../../api-client/types';
 // Widgets
 import { VendorProfileHeader } from './widgets/VendorProfileHeader';
 import { VendorStatusCard } from './widgets/VendorStatusCard';
-import { VendorPartnerBanner } from './widgets/VendorPartnerBanner';
 import { VendorOptionsCard, VendorOptionItem } from './widgets/VendorOptionsCard';
+import { VendorDetailSheet } from './widgets/VendorDetailSheet';
 import { VendorAppFooter } from './widgets/VendorAppFooter';
 import { EditVendorModal } from './widgets/EditVendorModal';
 
@@ -40,6 +38,9 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+
+  // Detail Sheet State (opened when menu option is pressed)
+  const [activeDetailOptionId, setActiveDetailOptionId] = useState<string | null>(null);
 
   // Floating Toast Animation
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -80,33 +81,54 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     }, 2400);
   }, [toastAnim, toastOpacity]);
 
-  // Load real vendor details from backend API
+  // Load real vendor details strictly for the currently logged-in merchant!
   const loadVendorProfile = useCallback(async () => {
     try {
       const list = await dusmintApi.getVendorList();
-      if (list && list.length > 0) {
-        setVendors(list);
-        setActiveVendor((prev) => {
-          if (prev) {
-            const found = list.find((v) => v.id === prev.id);
-            if (found) {
-              if (found.is_open !== undefined) setIsOpen(found.is_open);
-              return found;
-            }
-          }
-          if (list[0].is_open !== undefined) setIsOpen(list[0].is_open);
-          return list[0];
-        });
-      } else {
-        setVendors([]);
-        setActiveVendor(null);
+      setVendors(list || []);
+
+      const userPhoneClean = (user?.phone || '').replace(/\D/g, '').slice(-10);
+
+      let matched: VendorProfileInfo | null = null;
+
+      // 1. Match by phone digits
+      if (userPhoneClean && list && list.length > 0) {
+        matched = list.find((v) => {
+          const vPhoneClean = (v.owner_phone || '').replace(/\D/g, '').slice(-10);
+          return vPhoneClean === userPhoneClean;
+        }) || null;
+      }
+
+      // 2. Match by auth_user_id
+      if (!matched && user?.id && list && list.length > 0) {
+        matched = list.find((v) => v.auth_user_id === user.id) || null;
+      }
+
+      // 3. Fallback: query backend /vendor/me
+      if (!matched) {
+        const myVendor = await dusmintApi.getMyVendorProfile(user?.phone);
+        if (myVendor) {
+          matched = myVendor;
+        }
+      }
+
+      // 4. Fallback to list[0] only if absolutely nothing matched
+      if (!matched && list && list.length > 0) {
+        matched = list[0];
+      }
+
+      if (matched) {
+        setActiveVendor(matched);
+        if (matched.is_open !== undefined) {
+          setIsOpen(matched.is_open);
+        }
       }
     } catch (err) {
       console.warn('Failed to load vendor profile:', err);
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [user?.phone, user?.id]);
 
   useEffect(() => {
     loadVendorProfile();
@@ -128,7 +150,6 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
       setActiveVendor((prev) => (prev ? { ...prev, is_open: newVal } : null));
       showToast(newVal ? 'Dukaan is Online & Accepting Orders' : 'Dukaan is Offline / Closed');
     } catch (err: any) {
-      // Revert if failed
       setIsOpen(!newVal);
       Alert.alert('Status Update Failed', err?.message || 'Could not update store status.');
     } finally {
@@ -136,10 +157,10 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // Switch Dukaan
+  // Switch Dukaan (if partner has multiple outlets)
   const handleSwitchStore = () => {
     if (vendors.length <= 1) {
-      Alert.alert('Single Dukaan Registered', 'You currently manage 1 active vendor outlet in Indore.');
+      Alert.alert('Single Dukaan Registered', 'You currently manage 1 active vendor outlet.');
       return;
     }
     const options = vendors.map((v) => ({
@@ -156,32 +177,11 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     ]);
   };
 
-  // Partner Helpline
-  const handleCallSupport = () => {
-    Linking.openURL('tel:18008896468').catch(() => {
-      Alert.alert(
-        'DusMint Partner Helpline',
-        'Toll Free: 1800-889-MINT (1800-889-6468)\nEmail: partners@dusmint.com\nWorking Hours: 06:00 AM – 11:00 PM',
-        [{ text: 'OK' }]
-      );
-    });
-  };
-
   // Toggle App Language
   const handleToggleLanguage = () => {
     const nextLang = selectedLanguage === 'hi' ? 'en' : 'hi';
     setLanguage(nextLang);
     showToast(nextLang === 'hi' ? 'भाषा हिंदी में बदली गई' : 'Language switched to English');
-  };
-
-  // Test Chime Sound
-  const handleTestChime = () => {
-    Vibration.vibrate([0, 400, 150, 400]);
-    Alert.alert(
-      '🔔 Mandi Loud Order Alarm',
-      'Alert chime and vibration pattern tested successfully. Incoming batch orders will trigger this alarm.',
-      [{ text: 'OK' }]
-    );
   };
 
   // Log Out Confirmation
@@ -208,121 +208,55 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
-  // Options Data for ProfileOptionsCard
+  // Clean Options List (No badges!)
   const optionsData: VendorOptionItem[] = useMemo(() => {
-    const categoryLabel = activeVendor?.category ? activeVendor.category.toUpperCase() : 'GROCERIES';
-    const clusterLabel = activeVendor?.cluster_city || 'Indore';
-    const upiLabel = activeVendor?.bank_or_upi || 'Setup UPI';
-
     return [
       {
         id: 'opt-shop',
         label: 'Shop Details & Category',
         iconName: 'storefront-outline',
-        badgeText: categoryLabel,
-        badgeType: 'green',
       },
       {
         id: 'opt-location',
         label: 'Mandi Location & Cluster',
         iconName: 'location-outline',
-        badgeText: clusterLabel,
-        badgeType: 'neutral',
       },
       {
         id: 'opt-settlement',
         label: 'Settlement UPI Account',
         iconName: 'card-outline',
-        badgeText: upiLabel,
-        badgeType: 'green',
       },
       {
         id: 'opt-slots',
         label: 'Delivery Slot Timings',
         iconName: 'time-outline',
-        badgeText: '06:00 - 21:00',
-        badgeType: 'neutral',
       },
       {
         id: 'opt-alarm',
         label: 'Mandi Loud Order Alarm',
         iconName: 'notifications-outline',
-        badgeText: 'Test Sound',
-        badgeType: 'orange',
       },
       {
         id: 'opt-lang',
         label: 'Language / भाषा',
         iconName: 'globe-outline',
-        badgeText: selectedLanguage === 'hi' ? 'हिंदी (HI)' : 'English (EN)',
-        badgeType: 'neutral',
       },
       {
         id: 'opt-support',
         label: 'Partner Support Helpline',
         iconName: 'headset-outline',
-        badgeText: '1800-889-MINT',
-        badgeType: 'orange',
       },
       {
         id: 'opt-terms',
         label: 'Partner Compliance & Terms',
         iconName: 'shield-checkmark-outline',
-        badgeText: 'Verified ✓',
-        badgeType: 'green',
       },
     ];
-  }, [activeVendor, selectedLanguage]);
+  }, []);
 
-  // Handle Option Clicks
+  // When any menu item is pressed, open its dedicated information sheet/page!
   const handleOptionPress = (option: VendorOptionItem) => {
-    switch (option.id) {
-      case 'opt-shop':
-        setIsEditModalOpen(true);
-        break;
-      case 'opt-location':
-        Alert.alert(
-          'Mandi Cluster Location',
-          `Assigned Cluster: ${activeVendor?.cluster_name || 'Central Mandi Cluster'}\nCity: ${activeVendor?.cluster_city || 'Indore'}\nCoordinates: ${activeVendor?.lat || 22.7196}, ${activeVendor?.lng || 75.8577}\n\nTo update your store location, please contact your DusMint Cluster Manager.`,
-          [{ text: 'Got It' }]
-        );
-        break;
-      case 'opt-settlement':
-        Alert.alert(
-          'Settlement UPI VPA',
-          `Current Daily Settlement ID:\n${activeVendor?.bank_or_upi || 'Not configured'}\n\nPayments are settled daily in the T+0 cycle directly via UPI upon rider order pickups.`,
-          [
-            { text: 'Edit UPI ID', onPress: () => setIsEditModalOpen(true) },
-            { text: 'Close', style: 'cancel' },
-          ]
-        );
-        break;
-      case 'opt-slots':
-        Alert.alert(
-          'Operating Delivery Slot Windows',
-          '• Morning Batch: 06:00 AM – 11:00 AM\n• Evening Batch: 04:00 PM – 09:00 PM\n\nCut-off orders close 1 hour prior to rider pickup. Please ensure stock is updated before slot start.',
-          [{ text: 'OK' }]
-        );
-        break;
-      case 'opt-alarm':
-        handleTestChime();
-        break;
-      case 'opt-lang':
-        handleToggleLanguage();
-        break;
-      case 'opt-support':
-        handleCallSupport();
-        break;
-      case 'opt-terms':
-        Alert.alert(
-          'Partner Compliance & License',
-          `• DusMint Merchant Terms: Tier-1 Mandi Partner (${activeVendor?.commission_pct ?? 8.0}% Commission)\n• FSSAI Status: Verified Partner Dukaan\n• Weight Tolerance: ±5% standard digital scale check\n• 100% Tamper-proof QR sealing compliant.`,
-          [{ text: 'Understood' }]
-        );
-        break;
-      default:
-        break;
-    }
+    setActiveDetailOptionId(option.id);
   };
 
   return (
@@ -346,7 +280,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
           phone={user?.phone || activeVendor?.owner_phone || ''}
           selectedLanguage={selectedLanguage}
           onToggleLanguage={handleToggleLanguage}
-          onHelpPress={handleCallSupport}
+          onHelpPress={() => setActiveDetailOptionId('opt-support')}
           onLogoutPress={handleLogout}
           onEditProfilePress={() => setIsEditModalOpen(true)}
           onSwitchStore={vendors.length > 1 ? handleSwitchStore : undefined}
@@ -359,27 +293,32 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
           isLoading={isTogglingStatus}
         />
 
-        {/* 3. DusMint Partner Club Banner */}
-        <VendorPartnerBanner
-          commissionPct={activeVendor?.commission_pct ?? 8.0}
-        />
-
-        {/* 4. Minimalist Options List Card */}
+        {/* 3. Minimalist Options List Card (Clean, no colorful badges) */}
         <VendorOptionsCard
           options={optionsData}
           onOptionPress={handleOptionPress}
         />
 
-        {/* 5. App Version Footer */}
-        <VendorAppFooter
-          version="1.0.0"
-          build="42"
-          cluster={activeVendor?.cluster_name || 'Indore Mandi Cluster'}
-        />
+        {/* 4. App Version Footer */}
+        <VendorAppFooter version="1.0.0" build="42" />
 
         {/* Bottom padding to clear tab bar */}
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Information Detail Sheet (Opens when menu items are clicked) */}
+      <VendorDetailSheet
+        visible={Boolean(activeDetailOptionId)}
+        optionId={activeDetailOptionId}
+        vendor={activeVendor}
+        selectedLanguage={selectedLanguage}
+        onClose={() => setActiveDetailOptionId(null)}
+        onOpenEdit={() => setIsEditModalOpen(true)}
+        onSetLanguage={(lang) => {
+          setLanguage(lang);
+        }}
+        onShowToast={showToast}
+      />
 
       {/* Edit Dukaan Profile Modal Sheet */}
       <EditVendorModal

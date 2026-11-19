@@ -157,6 +157,7 @@ export interface QualityClaimPayload {
 // --- Vendor Operations Types ---
 export interface VendorProfileInfo {
   id: string;
+  auth_user_id?: string | null;
   name: string;
   owner_name?: string;
   owner_phone?: string;
