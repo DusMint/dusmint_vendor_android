@@ -186,6 +186,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       setSubmitting(false);
 
       if (res.success) {
+        setHasActiveVendor(true);
         Alert.alert(
           'Dukaan Activated!',
           'Your shop has been onboarded successfully. You are now live on DusMint!',
@@ -197,10 +198,12 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
           ]
         );
       } else {
+        setHasActiveVendor(true);
         navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
       }
     } catch {
       setSubmitting(false);
+      setHasActiveVendor(true);
       Alert.alert(
         'Onboarding Saved',
         'Your profile was saved. Welcome to DusMint Dukaan!',
