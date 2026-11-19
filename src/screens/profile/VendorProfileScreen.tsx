@@ -208,32 +208,32 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     );
   };
 
-  // Clean Options List (No badges!)
+  // Tier 2, 3, 4 shopkeeper-friendly menu items (English + Hindi clarity)
   const optionsData: VendorOptionItem[] = useMemo(() => {
     return [
       {
         id: 'opt-shop',
-        label: 'Shop Details & Category',
+        label: 'Shop Details (दुकान की जानकारी)',
         iconName: 'storefront-outline',
       },
       {
         id: 'opt-location',
-        label: 'Mandi Location & Cluster',
+        label: 'Shop Address (दुकान का पता)',
         iconName: 'location-outline',
       },
       {
         id: 'opt-settlement',
-        label: 'Settlement UPI Account',
+        label: 'Payment UPI (पैसे आने का खाता)',
         iconName: 'card-outline',
       },
       {
         id: 'opt-slots',
-        label: 'Delivery Slot Timings',
+        label: 'Store Timings (दुकान और आर्डर का समय)',
         iconName: 'time-outline',
       },
       {
         id: 'opt-alarm',
-        label: 'Mandi Loud Order Alarm',
+        label: 'Order Ringtone (आर्डर की घंटी)',
         iconName: 'notifications-outline',
       },
       {
@@ -243,12 +243,12 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
       },
       {
         id: 'opt-support',
-        label: 'Partner Support Helpline',
+        label: 'Help & Support (मदद और सहायता)',
         iconName: 'headset-outline',
       },
       {
         id: 'opt-terms',
-        label: 'Partner Compliance & Terms',
+        label: 'Partner Terms (पार्टनर नियम)',
         iconName: 'shield-checkmark-outline',
       },
     ];

@@ -180,7 +180,7 @@ export class DusmintApiClient {
 
   async updateVendorProfile(
     vendorId: string,
-    payload: { shopName?: string; ownerName?: string; bankOrUpi?: string; category?: string }
+    payload: { shopName?: string; ownerName?: string; bankOrUpi?: string; category?: string; address?: string }
   ): Promise<{ success: boolean; vendor: any }> {
     const res = await this.client.patch('/vendor/profile', { vendorId, ...payload });
     return res.data;

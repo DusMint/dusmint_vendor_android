@@ -27,11 +27,11 @@ interface Props {
 }
 
 const CATEGORIES = [
-  { id: 'groceries', label: 'Groceries' },
-  { id: 'vegetables', label: 'Vegetables' },
-  { id: 'fruits', label: 'Fruits' },
-  { id: 'dairy', label: 'Dairy' },
-  { id: 'bakery', label: 'Bakery' },
+  { id: 'groceries', label: 'किराना (Groceries)' },
+  { id: 'vegetables', label: 'सब्जी (Vegetables)' },
+  { id: 'fruits', label: 'फल (Fruits)' },
+  { id: 'dairy', label: 'डेयरी व दूध (Dairy)' },
+  { id: 'bakery', label: 'बेकरी (Bakery)' },
 ];
 
 export const EditVendorModal: React.FC<Props> = ({
@@ -50,6 +50,7 @@ export const EditVendorModal: React.FC<Props> = ({
   const [shopName, setShopName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [bankOrUpi, setBankOrUpi] = useState('');
+  const [address, setAddress] = useState('');
   const [category, setCategory] = useState('groceries');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -77,6 +78,7 @@ export const EditVendorModal: React.FC<Props> = ({
         setShopName(vendor.name || '');
         setOwnerName(vendor.owner_name || '');
         setBankOrUpi(vendor.bank_or_upi || '');
+        setAddress(vendor.address || '');
         setCategory(vendor.category || 'groceries');
         setError('');
       }
@@ -118,15 +120,15 @@ export const EditVendorModal: React.FC<Props> = ({
 
   const handleSave = async () => {
     if (!shopName.trim()) {
-      setError('Please enter your dukaan/shop name');
+      setError('कृपया दुकान का नाम दर्ज करें');
       return;
     }
     if (!ownerName.trim()) {
-      setError('Please enter owner name');
+      setError('कृपया मालिक का नाम दर्ज करें');
       return;
     }
     if (!bankOrUpi.trim()) {
-      setError('Please enter your settlement UPI ID');
+      setError('कृपया पैसे आने की UPI ID दर्ज करें');
       return;
     }
 
@@ -143,6 +145,7 @@ export const EditVendorModal: React.FC<Props> = ({
         ownerName: ownerName.trim(),
         bankOrUpi: bankOrUpi.trim(),
         category,
+        address: address.trim() || undefined,
       });
 
       if (res.success && res.vendor) {
@@ -152,10 +155,10 @@ export const EditVendorModal: React.FC<Props> = ({
         });
         handleDismiss();
       } else {
-        setError('Failed to update dukaan profile. Please try again.');
+        setError('प्रोफाइल सेव नहीं हो पाई। कृपया दोबारा कोशिश करें।');
       }
     } catch (err: any) {
-      setError(err?.message || 'Network error while saving profile');
+      setError(err?.message || 'नेटवर्क एरर, प्रोफाइल सेव नहीं हो सकी');
     } finally {
       setIsSaving(false);
     }
@@ -172,7 +175,7 @@ export const EditVendorModal: React.FC<Props> = ({
       statusBarTranslucent
     >
       <View style={styles.modalRoot}>
-        {/* Full-screen static dark backdrop that ONLY smoothly fades in, NEVER moves */}
+        {/* Full-screen static dark backdrop that ONLY smoothly fades in */}
         <TouchableWithoutFeedback onPress={handleDismiss}>
           <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} />
         </TouchableWithoutFeedback>
@@ -192,7 +195,7 @@ export const EditVendorModal: React.FC<Props> = ({
           >
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.title}>Edit Dukaan Profile</Text>
+              <Text style={styles.title}>दुकान की जानकारी बदलें (Edit)</Text>
               <TouchableOpacity
                 onPress={handleDismiss}
                 style={styles.closeBtn}
@@ -216,7 +219,7 @@ export const EditVendorModal: React.FC<Props> = ({
             >
               {/* Shop Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>DUKAAN / SHOP NAME</Text>
+                <Text style={styles.label}>दुकान का नाम (SHOP NAME)</Text>
                 <TextInput
                   style={styles.input}
                   value={shopName}
@@ -224,14 +227,14 @@ export const EditVendorModal: React.FC<Props> = ({
                     setShopName(t);
                     setError('');
                   }}
-                  placeholder="e.g. Mandi Fresh Kirana"
+                  placeholder="उदा. गुप्ता किराना स्टोर"
                   placeholderTextColor="#94A3B8"
                 />
               </View>
 
               {/* Owner Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>OWNER FULL NAME</Text>
+                <Text style={styles.label}>मालिक का नाम (OWNER NAME)</Text>
                 <TextInput
                   style={styles.input}
                   value={ownerName}
@@ -239,14 +242,30 @@ export const EditVendorModal: React.FC<Props> = ({
                     setOwnerName(t);
                     setError('');
                   }}
-                  placeholder="e.g. Ramesh Sharma"
+                  placeholder="उदा. सुमित गुप्ता"
                   placeholderTextColor="#94A3B8"
+                />
+              </View>
+
+              {/* Shop Address */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>दुकान का पता (SHOP ADDRESS)</Text>
+                <TextInput
+                  style={[styles.input, { minHeight: 60, textAlignVertical: 'top' }]}
+                  value={address}
+                  onChangeText={(t) => {
+                    setAddress(t);
+                    setError('');
+                  }}
+                  placeholder="उदा. दूकान नंबर 4, मेन मार्केट"
+                  placeholderTextColor="#94A3B8"
+                  multiline
                 />
               </View>
 
               {/* Category Pills */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>STORE CATEGORY</Text>
+                <Text style={styles.label}>सामान का प्रकार (CATEGORY)</Text>
                 <View style={styles.categoryRow}>
                   {CATEGORIES.map((cat) => {
                     const isSelected = category.toLowerCase() === cat.id;
@@ -276,7 +295,7 @@ export const EditVendorModal: React.FC<Props> = ({
 
               {/* UPI ID */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>SETTLEMENT UPI ID (DAILY T+0)</Text>
+                <Text style={styles.label}>पैसे आने की UPI ID (DAILY T+0 PAYOUT)</Text>
                 <TextInput
                   style={styles.input}
                   value={bankOrUpi}
@@ -284,12 +303,12 @@ export const EditVendorModal: React.FC<Props> = ({
                     setBankOrUpi(t);
                     setError('');
                   }}
-                  placeholder="e.g. shopowner@okhdfcbank"
+                  placeholder="उदा. sumit@okhdfcbank"
                   placeholderTextColor="#94A3B8"
                   autoCapitalize="none"
                 />
                 <Text style={styles.fieldHint}>
-                  Daily sales earnings are auto-settled to this VPA upon rider pickup.
+                  रोज की बिक्री का पैसा सीधे इसी UPI खाते में ट्रांसफर होगा।
                 </Text>
               </View>
 
@@ -303,7 +322,7 @@ export const EditVendorModal: React.FC<Props> = ({
                 {isSaving ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.saveBtnText}>Save Profile Changes</Text>
+                  <Text style={styles.saveBtnText}>जानकारी सेव करें (Save Changes)</Text>
                 )}
               </TouchableOpacity>
             </ScrollView>
@@ -343,7 +362,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
@@ -376,7 +395,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   label: {
     fontSize: 11,
@@ -391,7 +410,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 11,
     fontSize: 14,
     color: '#0F172A',
     fontWeight: '600',
@@ -407,7 +426,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   catChip: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
     backgroundColor: '#F1F5F9',
@@ -445,7 +464,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
   },
 });
