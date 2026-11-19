@@ -27,15 +27,12 @@ export const VendorEarningsScreen: React.FC = () => {
     } catch {
       // Graceful fallback default so merchant screen never breaks or spams warnings
       setEarnings({
-        todaySalesPaise: 425000,
-        commissionDeductedPaise: 34000,
-        netPayoutPendingPaise: 391000,
+        todaySalesPaise: 0,
+        commissionDeductedPaise: 0,
+        netPayoutPendingPaise: 0,
         payoutVpa: '',
         settlementSchedule: 'Daily 09:30 PM Batch',
-        recentSettlements: [
-          { date: 'Yesterday', amountPaise: 512000, status: 'Credited (Ref: UPI-98412)' },
-          { date: '28 Oct', amountPaise: 489000, status: 'Credited (Ref: UPI-98103)' },
-        ],
+        recentSettlements: [],
       });
     } finally {
       setLoading(false);
@@ -121,23 +118,33 @@ export const VendorEarningsScreen: React.FC = () => {
 
         {/* Settlement History */}
         <Text style={styles.sectionHeading}>RECENT SETTLEMENTS</Text>
-        {(earnings?.recentSettlements || []).map((p, idx) => (
-          <View key={idx} style={styles.payoutCard}>
-            <View style={styles.payoutHeader}>
-              <Text style={styles.payoutDate}>{p.date}</Text>
-              <Text style={styles.netAmount}>₹{(p.amountPaise / 100).toFixed(2)}</Text>
-            </View>
-            <View style={styles.payoutFooter}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="checkmark-circle" size={13} color="#059669" style={{ marginRight: 4 }} />
-                <Text style={styles.statusText}>{p.status}</Text>
-              </View>
-              <TouchableOpacity activeOpacity={0.7}>
-                <Text style={styles.statementLink}>Download Invoice ›</Text>
-              </TouchableOpacity>
-            </View>
+        {(earnings?.recentSettlements || []).length === 0 ? (
+          <View style={styles.emptyPayoutBox}>
+            <Ionicons name="receipt-outline" size={28} color="#94A3B8" />
+            <Text style={styles.emptyPayoutText}>No settlement records yet for today.</Text>
+            <Text style={styles.emptyPayoutSub}>
+              Completed delivery orders are automatically batched for daily settlement.
+            </Text>
           </View>
-        ))}
+        ) : (
+          (earnings?.recentSettlements || []).map((p, idx) => (
+            <View key={idx} style={styles.payoutCard}>
+              <View style={styles.payoutHeader}>
+                <Text style={styles.payoutDate}>{p.date}</Text>
+                <Text style={styles.netAmount}>₹{(p.amountPaise / 100).toFixed(2)}</Text>
+              </View>
+              <View style={styles.payoutFooter}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="checkmark-circle" size={13} color="#059669" style={{ marginRight: 4 }} />
+                  <Text style={styles.statusText}>{p.status}</Text>
+                </View>
+                <TouchableOpacity activeOpacity={0.7}>
+                  <Text style={styles.statementLink}>Download Invoice ›</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -343,5 +350,27 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#FC6011',
+  },
+  emptyPayoutBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  emptyPayoutText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+    marginTop: 8,
+  },
+  emptyPayoutSub: {
+    fontSize: 11,
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginTop: 4,
+    paddingHorizontal: 16,
   },
 });
