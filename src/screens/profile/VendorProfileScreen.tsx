@@ -86,36 +86,33 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   // Load real vendor details strictly for the currently logged-in merchant!
   const loadVendorProfile = useCallback(async () => {
     try {
-      const list = await dusmintApi.getVendorList();
-      setVendors(list || []);
-
       const currentPhone = user?.phone || activeVendor?.owner_phone || persistedVendor?.owner_phone || '';
       const userPhoneClean = currentPhone.replace(/\D/g, '').slice(-10);
 
+      // 1. Try getMyVendorProfile directly first (queries Supabase with full columns)
       let matched: VendorProfileInfo | null = null;
+      if (userPhoneClean) {
+        matched = await dusmintApi.getMyVendorProfile(userPhoneClean);
+      }
 
-      // 1. Match by phone digits
-      if (userPhoneClean && list && list.length > 0) {
+      // 2. Also load vendor list
+      const list = await dusmintApi.getVendorList();
+      setVendors(list || []);
+
+      // 3. Fallback match in list if not directly fetched
+      if (!matched && userPhoneClean && list && list.length > 0) {
         matched = list.find((v) => {
           const vPhoneClean = (v.owner_phone || '').replace(/\D/g, '').slice(-10);
           return vPhoneClean === userPhoneClean;
         }) || null;
       }
 
-      // 2. Match by auth_user_id
+      // 4. Match by auth_user_id
       if (!matched && user?.id && list && list.length > 0) {
         matched = list.find((v) => v.auth_user_id === user.id) || null;
       }
 
-      // 3. Fallback: query backend /vendor/me
-      if (!matched) {
-        const myVendor = await dusmintApi.getMyVendorProfile(user?.phone);
-        if (myVendor) {
-          matched = myVendor;
-        }
-      }
-
-      // 4. Merge matched server data with local persisted state so fields like address/photos are not wiped
+      // 5. Merge matched data with local state so no rich fields (address/photo) are wiped
       if (matched) {
         const base = activeVendor || persistedVendor;
         const merged: VendorProfileInfo = {
@@ -130,6 +127,9 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         };
         setActiveVendor(merged);
         setActiveVendorInStore(merged);
+        if (merged.shop_photo_urls && merged.shop_photo_urls.length > 0) {
+          useVendorAuthStore.getState().setStorePhotoUri(merged.shop_photo_urls[0]);
+        }
         if (merged.is_open !== undefined) {
           setIsOpen(merged.is_open);
         }
