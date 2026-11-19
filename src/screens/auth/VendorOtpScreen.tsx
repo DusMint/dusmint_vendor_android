@@ -50,7 +50,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         const fullPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
         const res = await dusmintApi.verifyPhoneOtp(fullPhone, code);
         setLoading(false);
-        setAuth(res.token, res.user, !res.isNewVendor);
+        setAuth(res.token, res.user, !res.isNewVendor, res.vendor);
 
         if (res.isNewVendor) {
           navigation.reset({

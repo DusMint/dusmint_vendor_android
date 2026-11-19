@@ -28,13 +28,15 @@ interface Props {
 
 export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   const user = useVendorAuthStore((s) => s.user);
+  const persistedVendor = useVendorAuthStore((s) => s.activeVendor);
+  const setActiveVendorInStore = useVendorAuthStore((s) => s.setActiveVendor);
   const selectedLanguage = (useVendorAuthStore((s) => s.selectedLanguage) as 'en' | 'hi') || 'en';
   const setLanguage = useVendorAuthStore((s) => s.setLanguage);
   const logout = useVendorAuthStore((s) => s.logout);
 
   const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
-  const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(persistedVendor);
+  const [isOpen, setIsOpen] = useState(persistedVendor?.is_open ?? true);
   const [refreshing, setRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);

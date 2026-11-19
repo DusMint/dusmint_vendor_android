@@ -187,6 +187,23 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       const res = await dusmintApi.submitVendorOnboarding(payload);
       setSubmitting(false);
 
+      const savedVendorData = res.vendor || {
+        name: payload.shopName,
+        owner_name: payload.ownerName,
+        owner_phone: payload.ownerPhone,
+        address: payload.address,
+        bank_or_upi: payload.bankOrUpi,
+        category: payload.category,
+        lat: payload.lat,
+        lng: payload.lng,
+        shop_photo_urls: payload.shopPhotoUrls,
+        is_open: true,
+      };
+      useVendorAuthStore.getState().setActiveVendor(savedVendorData);
+      if (shopPhotoUri) {
+        useVendorAuthStore.getState().setStorePhotoUri(shopPhotoUri);
+      }
+
       if (res.success) {
         setHasActiveVendor(true);
         Alert.alert(
@@ -206,6 +223,20 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
     } catch {
       setSubmitting(false);
       setHasActiveVendor(true);
+      const fallbackVendor = {
+        name: shopName.trim(),
+        owner_name: ownerName.trim(),
+        owner_phone: phone,
+        address: address.trim(),
+        bank_or_upi: bankOrUpi.trim(),
+        category,
+        shop_photo_urls: shopPhotoUri ? [shopPhotoUri] : [],
+        is_open: true,
+      };
+      useVendorAuthStore.getState().setActiveVendor(fallbackVendor as any);
+      if (shopPhotoUri) {
+        useVendorAuthStore.getState().setStorePhotoUri(shopPhotoUri);
+      }
       Alert.alert(
         'Onboarding Saved',
         'Your profile was saved. Welcome to DusMint Dukaan!',
