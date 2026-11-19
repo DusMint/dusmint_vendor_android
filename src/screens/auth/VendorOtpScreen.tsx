@@ -52,9 +52,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         setLoading(false);
         setAuth(res.token, res.user);
 
-        const isDemoVendor = fullPhone.includes('9876543210') || fullPhone.includes('8010939887');
-
-        if (res.isNewVendor && !isDemoVendor) {
+        if (res.isNewVendor) {
           navigation.reset({
             index: 0,
             routes: [{ name: 'VendorOnboarding', params: { phone: fullPhone, authUserId: res.user?.id } }],
