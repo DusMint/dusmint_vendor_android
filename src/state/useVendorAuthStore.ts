@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { NativeModules } from 'react-native';
 import { dusmintApi } from '../api-client/client';
+import { VendorProfileInfo } from '../api-client/types';
 
 export interface VendorUser {
   id: string;
@@ -14,6 +15,7 @@ export interface VendorUser {
 interface VendorAuthState {
   token: string | null;
   user: VendorUser | null;
+  activeVendor: VendorProfileInfo | null;
   storePhotoUri: string | null;
   selectedLanguage: string | null;
   isAuthenticated: boolean;
@@ -25,8 +27,9 @@ interface VendorAuthState {
   setHydrated: (val: boolean) => void;
   setLanguage: (lang: string) => void;
   setStorePhotoUri: (uri: string | null) => void;
+  setActiveVendor: (vendor: VendorProfileInfo | null) => void;
   setHasActiveVendor: (val: boolean) => void;
-  setAuth: (token: string, user: any, hasActiveVendor?: boolean) => void;
+  setAuth: (token: string, user: any, hasActiveVendor?: boolean, vendor?: any) => void;
   logout: () => void;
 }
 
@@ -86,6 +89,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
     (set) => ({
       token: null,
       user: null,
+      activeVendor: null,
       storePhotoUri: null,
       selectedLanguage: null,
       isAuthenticated: false,
@@ -104,19 +108,36 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         set({ storePhotoUri: uri });
       },
 
+      setActiveVendor: (vendor: VendorProfileInfo | null) => {
+        const photoUri =
+          (vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
+            ? vendor.shop_photo_urls[0]
+            : null) || null;
+        set((state) => ({
+          activeVendor: vendor,
+          storePhotoUri: photoUri || state.storePhotoUri,
+        }));
+      },
+
       setHasActiveVendor: (val: boolean) => {
         set({ hasActiveVendor: val });
       },
 
-      setAuth: (token: string, user: any, hasActiveVendor = false) => {
+      setAuth: (token: string, user: any, hasActiveVendor = false, vendor?: any) => {
         dusmintApi.setAuthToken(token);
-        set({
+        const photoUri =
+          (vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
+            ? vendor.shop_photo_urls[0]
+            : null) || null;
+        set((state) => ({
           token,
           user,
           isAuthenticated: true,
           hasActiveVendor,
+          activeVendor: vendor || state.activeVendor || null,
+          storePhotoUri: photoUri || state.storePhotoUri,
           selectedLanguage: user?.preferredLanguage || 'en',
-        });
+        }));
       },
 
       logout: () => {
@@ -124,6 +145,8 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         set({
           token: null,
           user: null,
+          activeVendor: null,
+          storePhotoUri: null,
           isAuthenticated: false,
           hasActiveVendor: false,
         });
@@ -141,6 +164,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       partialize: (state) => ({
         token: state.token,
         user: state.user,
+        activeVendor: state.activeVendor,
         storePhotoUri: state.storePhotoUri,
         selectedLanguage: state.selectedLanguage,
         isAuthenticated: state.isAuthenticated,
