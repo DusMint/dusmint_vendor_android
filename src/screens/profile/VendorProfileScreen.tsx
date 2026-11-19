@@ -19,6 +19,7 @@ import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
 export const VendorProfileScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const user = useVendorAuthStore((s) => s.user);
   const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
   const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -156,7 +157,7 @@ export const VendorProfileScreen: React.FC<{ navigation?: any }> = ({ navigation
             </View>
             <Text style={styles.ownerText}>
               Owner: <Text style={styles.boldText}>{activeVendor?.owner_name || 'Ramesh Sharma'}</Text> •{' '}
-              {activeVendor?.owner_phone || '+91 8010939887'}
+              {user?.phone || activeVendor?.owner_phone || '+91 9876543210'}
             </Text>
             <View style={styles.metaRow}>
               <View style={styles.scorePill}>

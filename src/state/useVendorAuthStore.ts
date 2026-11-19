@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeModules } from 'react-native';
 import { dusmintApi } from '../api-client/client';
 
 export interface VendorUser {
@@ -26,28 +26,53 @@ interface VendorAuthState {
   logout: () => void;
 }
 
-// Memory fallback to ensure smooth operation if native AsyncStorage is pending rebuild
+// In-memory store fallback so app never crashes if native module is not yet compiled
 const memoryStore: Record<string, string> = {};
+
+// Safe dynamic accessor: avoids importing @react-native-async-storage/async-storage if native module is null
+const getNativeStorage = () => {
+  try {
+    const hasNative = Boolean(
+      NativeModules.RNCAsyncStorage || NativeModules.PlatformLocalStorage
+    );
+    if (!hasNative) return null;
+    return require('@react-native-async-storage/async-storage').default;
+  } catch {
+    return null;
+  }
+};
+
+const hasNativeAsyncStorage = Boolean(
+  NativeModules.RNCAsyncStorage || NativeModules.PlatformLocalStorage
+);
 
 const safeStorage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
-      const val = await AsyncStorage.getItem(name);
-      return val ?? memoryStore[name] ?? null;
-    } catch {
-      return memoryStore[name] ?? null;
-    }
+      const storage = getNativeStorage();
+      if (storage) {
+        const val = await storage.getItem(name);
+        if (val !== null && val !== undefined) return val;
+      }
+    } catch {}
+    return memoryStore[name] ?? null;
   },
   setItem: async (name: string, value: string): Promise<void> => {
     memoryStore[name] = value;
     try {
-      await AsyncStorage.setItem(name, value);
+      const storage = getNativeStorage();
+      if (storage) {
+        await storage.setItem(name, value);
+      }
     } catch {}
   },
   removeItem: async (name: string): Promise<void> => {
     delete memoryStore[name];
     try {
-      await AsyncStorage.removeItem(name);
+      const storage = getNativeStorage();
+      if (storage) {
+        await storage.removeItem(name);
+      }
     } catch {}
   },
 };
@@ -60,7 +85,8 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       selectedLanguage: null,
       isAuthenticated: false,
       isLoading: false,
-      isHydrated: false,
+      // If native storage is not compiled into the APK, start hydrated to avoid blocking the UI
+      isHydrated: !hasNativeAsyncStorage,
 
       setHydrated: (val: boolean) => set({ isHydrated: val }),
 
