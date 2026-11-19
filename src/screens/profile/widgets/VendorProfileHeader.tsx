@@ -8,6 +8,7 @@ import {
   StatusBar,
   Modal,
   TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -38,6 +39,13 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const insets = useSafeAreaInsets();
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : insets.top;
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
+
+  // Check if store has a valid uploaded photo
+  const photoUrl =
+    vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
+      ? vendor.shop_photo_urls[0]
+      : null;
 
   // Prefer vendor's owner_phone if present, otherwise logged-in phone
   const rawPhone = vendor?.owner_phone || phone;
@@ -59,7 +67,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </Svg>
       </View>
 
-      {/* Top Action Row (Clean - no partner terminal badge) */}
+      {/* Top Action Row */}
       <View style={styles.topRow}>
         <View />
 
@@ -90,35 +98,108 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </View>
       </View>
 
-      {/* Vendor Dukaan Details Area */}
-      <TouchableOpacity
-        style={styles.userDetails}
-        onPress={onEditProfilePress}
-        activeOpacity={0.85}
-      >
-        <View style={styles.nameRow}>
-          <Text style={styles.userName} numberOfLines={1}>
-            {vendor?.name || 'My Dukaan'}
+      {/* Vendor Dukaan Details Area with Store Photo Avatar on the Left */}
+      <View style={styles.storeCardRow}>
+        {/* Profile Picture / Store Avatar on the Left */}
+        <TouchableOpacity
+          style={styles.avatarWrapper}
+          onPress={() => {
+            if (photoUrl) {
+              setIsPhotoViewerOpen(true);
+            } else {
+              onEditProfilePress();
+            }
+          }}
+          activeOpacity={0.8}
+        >
+          {photoUrl ? (
+            <Image
+              source={{ uri: photoUrl }}
+              style={styles.avatarImg}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Text style={styles.avatarEmoji}>🏪</Text>
+            </View>
+          )}
+
+          {/* Small zoom indicator badge */}
+          {Boolean(photoUrl) && (
+            <View style={styles.zoomBadge}>
+              <Ionicons name="scan-outline" size={10} color="#FFFFFF" />
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Store Info on the Right */}
+        <TouchableOpacity
+          style={styles.userDetails}
+          onPress={onEditProfilePress}
+          activeOpacity={0.85}
+        >
+          <View style={styles.nameRow}>
+            <Text style={styles.userName} numberOfLines={1}>
+              {vendor?.name || 'My Dukaan'}
+            </Text>
+            <View style={styles.editBadge}>
+              <Ionicons name="pencil-sharp" size={10} color="#15803D" style={{ marginRight: 3 }} />
+              <Text style={styles.editText}>EDIT</Text>
+            </View>
+          </View>
+
+          <Text style={styles.ownerText} numberOfLines={1}>
+            Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Partner'}</Text>
+            {Boolean(cleanPhone) && ` • ${cleanPhone}`}
           </Text>
-          <View style={styles.editBadge}>
-            <Ionicons name="pencil-sharp" size={10} color="#15803D" style={{ marginRight: 3 }} />
-            <Text style={styles.editText}>EDIT</Text>
-          </View>
-        </View>
 
-        <Text style={styles.ownerText}>
-          Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Partner'}</Text>
-          {Boolean(cleanPhone) && ` • ${cleanPhone}`}
-        </Text>
-
-        {/* Minimal verified badge - no hardcoded groceries or indore */}
-        <View style={styles.metaRow}>
-          <View style={styles.verifiedMiniBadge}>
-            <Ionicons name="checkmark-circle" size={12} color="#059669" />
-            <Text style={styles.verifiedMiniText}>Verified Partner</Text>
+          <View style={styles.metaRow}>
+            <View style={styles.verifiedMiniBadge}>
+              <Ionicons name="checkmark-circle" size={12} color="#059669" />
+              <Text style={styles.verifiedMiniText}>Verified Partner</Text>
+            </View>
           </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
+
+      {/* Full-Screen Store Photo Viewer Modal */}
+      <Modal
+        visible={isPhotoViewerOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsPhotoViewerOpen(false)}
+        statusBarTranslucent
+      >
+        <TouchableWithoutFeedback onPress={() => setIsPhotoViewerOpen(false)}>
+          <View style={styles.photoModalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.photoModalContent}>
+                {/* Close Button */}
+                <TouchableOpacity
+                  style={styles.photoCloseBtn}
+                  onPress={() => setIsPhotoViewerOpen(false)}
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                >
+                  <Ionicons name="close" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+
+                {photoUrl ? (
+                  <Image
+                    source={{ uri: photoUrl }}
+                    style={styles.fullPhoto}
+                    resizeMode="contain"
+                  />
+                ) : null}
+
+                <View style={styles.photoCaptionBox}>
+                  <Text style={styles.photoShopTitle}>{vendor?.name || 'My Dukaan'}</Text>
+                  <Text style={styles.photoSub}>दुकान की फोटो (Uploaded Store Picture)</Text>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       {/* 3-Dot Popup Menu Modal */}
       <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
@@ -204,7 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   rightActions: {
     flexDirection: 'row',
@@ -238,8 +319,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  storeCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarWrapper: {
+    position: 'relative',
+    marginRight: 14,
+  },
+  avatarImg: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    borderColor: '#10B981',
+    backgroundColor: '#F1F5F9',
+  },
+  avatarFallback: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#DCFCE7',
+    borderWidth: 2,
+    borderColor: '#86EFAC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 24,
+  },
+  zoomBadge: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    backgroundColor: '#047A36',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   userDetails: {
-    paddingHorizontal: 4,
+    flex: 1,
   },
   nameRow: {
     flexDirection: 'row',
@@ -280,7 +403,7 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
     gap: 8,
   },
   verifiedMiniBadge: {
@@ -298,6 +421,50 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#059669',
     fontWeight: '600',
+  },
+  photoModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.88)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  photoModalContent: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  photoCloseBtn: {
+    position: 'absolute',
+    top: -50,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  fullPhoto: {
+    width: '100%',
+    height: 320,
+    borderRadius: 20,
+    backgroundColor: '#0F172A',
+  },
+  photoCaptionBox: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  photoShopTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  photoSub: {
+    color: '#94A3B8',
+    fontSize: 12,
+    marginTop: 3,
   },
   menuOverlay: {
     flex: 1,

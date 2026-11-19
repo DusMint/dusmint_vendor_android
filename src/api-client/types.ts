@@ -167,6 +167,7 @@ export interface VendorProfileInfo {
   score?: number;
   commission_pct?: number;
   bank_or_upi?: string;
+  address?: string;
   lat?: number;
   lng?: number;
   shop_photo_urls?: string[];

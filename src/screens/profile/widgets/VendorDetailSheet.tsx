@@ -100,12 +100,12 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
   const handleTestChime = () => {
     Vibration.vibrate([0, 400, 150, 400]);
-    onShowToast('🔔 Loud Mandi alert chime tested!');
+    onShowToast('🔔 घंटी बज रही है (Order Alarm Tested)');
   };
 
   const handleCallSupport = () => {
     Linking.openURL('tel:18008896468').catch(() => {
-      onShowToast('Dialing 1800-889-MINT');
+      onShowToast('डायल करें: 1800-889-MINT');
     });
   };
 
@@ -113,6 +113,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
   const renderContent = () => {
     switch (optionId) {
+      // 1. दुकान की जानकारी (Shop Details)
       case 'opt-shop':
         return (
           <View>
@@ -121,7 +122,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="storefront" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Shop Details & Category</Text>
+                <Text style={styles.sheetTitle}>दुकान की जानकारी (Shop Details)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -130,31 +131,31 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Dukaan Name</Text>
+                <Text style={styles.infoLabel}>दुकान का नाम</Text>
                 <Text style={styles.infoValue}>{vendor?.name || 'My Dukaan'}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Owner Name</Text>
+                <Text style={styles.infoLabel}>मालिक का नाम</Text>
                 <Text style={styles.infoValue}>{vendor?.owner_name || 'Partner'}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Registered Phone</Text>
+                <Text style={styles.infoLabel}>रजिस्टर मोबाइल</Text>
                 <Text style={styles.infoValue}>{vendor?.owner_phone || 'Not available'}</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Store Category</Text>
+                <Text style={styles.infoLabel}>सामान का प्रकार</Text>
                 <Text style={[styles.infoValue, { textTransform: 'capitalize' }]}>
-                  {vendor?.category || 'General'}
+                  {vendor?.category || 'किराना'}
                 </Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Store Status</Text>
+                <Text style={styles.infoLabel}>दुकान का स्टेटस</Text>
                 <Text style={[styles.infoValue, { color: vendor?.is_open ? '#15803D' : '#DC2626' }]}>
-                  {vendor?.is_open ? '● Online & Accepting Orders' : '● Closed'}
+                  {vendor?.is_open ? '● दुकान खुली है (Online)' : '● दुकान बंद है (Closed)'}
                 </Text>
               </View>
             </View>
@@ -168,11 +169,12 @@ export const VendorDetailSheet: React.FC<Props> = ({
               }}
             >
               <Ionicons name="create-outline" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.actionBtnText}>Edit Shop Profile</Text>
+              <Text style={styles.actionBtnText}>✏️ दुकान की जानकारी बदलें (Edit)</Text>
             </TouchableOpacity>
           </View>
         );
 
+      // 2. दुकान का पता (Shop Address & Location)
       case 'opt-location':
         return (
           <View>
@@ -181,7 +183,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="location" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Mandi Location & Cluster</Text>
+                <Text style={styles.sheetTitle}>दुकान का पता (Shop Address)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -189,15 +191,17 @@ export const VendorDetailSheet: React.FC<Props> = ({
             </View>
 
             <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Assigned Cluster</Text>
-                <Text style={styles.infoValue}>{vendor?.cluster_name || 'Mandi Cluster'}</Text>
+              <View style={styles.infoRowVertical}>
+                <Text style={styles.infoLabel}>दुकान का पूरा पता</Text>
+                <Text style={styles.addressValue}>
+                  {vendor?.address || 'ऑनबोर्डिंग में दर्ज किया गया पता'}
+                </Text>
               </View>
               {Boolean(vendor?.cluster_city) && (
                 <>
                   <View style={styles.divider} />
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>Cluster City</Text>
+                    <Text style={styles.infoLabel}>शहर / इलाका</Text>
                     <Text style={styles.infoValue}>{vendor?.cluster_city}</Text>
                   </View>
                 </>
@@ -206,7 +210,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <>
                   <View style={styles.divider} />
                   <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>GPS Coordinates</Text>
+                    <Text style={styles.infoLabel}>लोकेशन पिन (GPS)</Text>
                     <Text style={styles.infoValue}>
                       {Number(vendor?.lat).toFixed(4)}, {Number(vendor?.lng).toFixed(4)}
                     </Text>
@@ -215,12 +219,28 @@ export const VendorDetailSheet: React.FC<Props> = ({
               )}
             </View>
 
-            <Text style={styles.hintText}>
-              Your shop coordinates define which hyperlocal delivery orders are assigned to you. Contact your cluster manager to change location.
-            </Text>
+            <View style={styles.tipBox}>
+              <Ionicons name="bicycle" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Text style={styles.tipText}>
+                डिलीवरी पार्टनर (राइडर) इसी पते पर आकर आपके पैक किए हुए आर्डर कलेक्ट करेगा।
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.actionBtn}
+              activeOpacity={0.85}
+              onPress={() => {
+                handleDismiss();
+                onOpenEdit();
+              }}
+            >
+              <Ionicons name="create-outline" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+              <Text style={styles.actionBtnText}>✏️ पता अपडेट करें (Change Address)</Text>
+            </TouchableOpacity>
           </View>
         );
 
+      // 3. पैसे आने का UPI (Payment UPI Account)
       case 'opt-settlement':
         return (
           <View>
@@ -229,7 +249,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="card" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Settlement UPI Account</Text>
+                <Text style={styles.sheetTitle}>पैसे आने का UPI (Payment)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -238,21 +258,28 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Settlement UPI ID</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '700' }]}>
-                  {vendor?.bank_or_upi || 'Not configured'}
+                <Text style={styles.infoLabel}>दुकान की UPI ID</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                  {vendor?.bank_or_upi || 'सेट नहीं है'}
                 </Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Settlement Cycle</Text>
-                <Text style={styles.infoValue}>T+0 Daily Auto-Payout</Text>
+                <Text style={styles.infoLabel}>पैसे आने का समय</Text>
+                <Text style={styles.infoValue}>रोजाना (Daily T+0)</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Payout Trigger</Text>
-                <Text style={styles.infoValue}>On Rider Order Collection</Text>
+                <Text style={styles.infoLabel}>पेमेंट का तरीका</Text>
+                <Text style={styles.infoValue}>सीधा बैंक / UPI ट्रांसफर</Text>
               </View>
+            </View>
+
+            <View style={styles.tipBox}>
+              <Ionicons name="shield-checkmark" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Text style={styles.tipText}>
+                रोज की बिक्री का पैसा डिलीवरी पार्टनर द्वारा आर्डर पिक करने के बाद सीधे आपके इसी UPI खाते में आ जाएगा।
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -264,11 +291,12 @@ export const VendorDetailSheet: React.FC<Props> = ({
               }}
             >
               <Ionicons name="pencil" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.actionBtnText}>Change UPI Settlement ID</Text>
+              <Text style={styles.actionBtnText}>✏️ UPI ID बदलें (Change UPI)</Text>
             </TouchableOpacity>
           </View>
         );
 
+      // 4. दुकान और आर्डर का समय (Store Timings & Orders)
       case 'opt-slots':
         return (
           <View>
@@ -277,7 +305,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="time" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Delivery Slot Timings</Text>
+                <Text style={styles.sheetTitle}>दुकान और आर्डर का समय</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -286,26 +314,34 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.slotCard}>
               <View style={styles.slotHeader}>
-                <Text style={styles.slotBadgeMorning}>MORNING BATCH</Text>
+                <Text style={styles.slotBadgeMorning}>🌅 सुबह का समय</Text>
                 <Text style={styles.slotTiming}>06:00 AM – 11:00 AM</Text>
               </View>
               <Text style={styles.slotSub}>
-                Cutoff for morning customer orders closes at 05:00 AM. Packing starts at 05:30 AM.
+                सुबह 6:00 बजे से आर्डर आना शुरू होंगे। सामान पहले से ताज़ा और तैयार रखें।
               </Text>
             </View>
 
             <View style={[styles.slotCard, { marginTop: 12 }]}>
               <View style={styles.slotHeader}>
-                <Text style={styles.slotBadgeEvening}>EVENING BATCH</Text>
+                <Text style={styles.slotBadgeEvening}>🌆 शाम का समय</Text>
                 <Text style={styles.slotTiming}>04:00 PM – 09:00 PM</Text>
               </View>
               <Text style={styles.slotSub}>
-                Cutoff for evening customer orders closes at 03:00 PM. Packing starts at 03:30 PM.
+                शाम 4:00 बजे से आर्डर आएंगे। राइडर आते ही पैकेट तुरंत हैंडओवर करें।
+              </Text>
+            </View>
+
+            <View style={[styles.tipBox, { marginTop: 14 }]}>
+              <Ionicons name="cube-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Text style={styles.tipText}>
+                आर्डर आते ही सामान पैक करके रखें ताकि राइडर बिना देर किए सीधे लेकर निकल सके।
               </Text>
             </View>
           </View>
         );
 
+      // 5. आर्डर की घंटी (Order Ringtone / Alarm)
       case 'opt-alarm':
         return (
           <View>
@@ -314,7 +350,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="notifications" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Mandi Order Alarm</Text>
+                <Text style={styles.sheetTitle}>आर्डर की घंटी (Order Ringtone)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -323,15 +359,19 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Order Chime</Text>
-                <Text style={styles.infoValue}>Enabled (High Volume)</Text>
+                <Text style={styles.infoLabel}>आर्डर अलार्म</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '700' }]}>चालू है (Active)</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Vibration Pattern</Text>
-                <Text style={styles.infoValue}>Repeated Mandi Alert</Text>
+                <Text style={styles.infoLabel}>आवाज़</Text>
+                <Text style={styles.infoValue}>फुल वॉल्यूम + वाइब्रेशन</Text>
               </View>
             </View>
+
+            <Text style={styles.hintText}>
+              नया आर्डर आते ही फोन साइलेंट होने पर भी ज़ोरदार घंटी बजेगी ताकि आपका कोई भी आर्डर छूटे नहीं।
+            </Text>
 
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: '#EA580C' }]}
@@ -339,11 +379,12 @@ export const VendorDetailSheet: React.FC<Props> = ({
               onPress={handleTestChime}
             >
               <Ionicons name="volume-high" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.actionBtnText}>Test Chime & Vibration Now</Text>
+              <Text style={styles.actionBtnText}>🔔 घंटी बजाकर चेक करें (Test Sound)</Text>
             </TouchableOpacity>
           </View>
         );
 
+      // 6. ऐप की भाषा (App Language)
       case 'opt-lang':
         return (
           <View>
@@ -352,7 +393,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="globe" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Language / भाषा</Text>
+                <Text style={styles.sheetTitle}>भाषा चुनें (Choose Language)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -362,31 +403,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <TouchableOpacity
               style={[
                 styles.langOptionCard,
-                selectedLanguage === 'en' && styles.langOptionCardActive,
-              ]}
-              onPress={() => {
-                onSetLanguage('en');
-                onShowToast('Language set to English');
-                handleDismiss();
-              }}
-              activeOpacity={0.8}
-            >
-              <View>
-                <Text style={styles.langOptionTitle}>English</Text>
-                <Text style={styles.langOptionSub}>Default app interface</Text>
-              </View>
-              {selectedLanguage === 'en' ? (
-                <Ionicons name="checkmark-circle" size={22} color="#047A36" />
-              ) : (
-                <View style={styles.radioEmpty} />
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.langOptionCard,
                 selectedLanguage === 'hi' && styles.langOptionCardActive,
-                { marginTop: 12 },
               ]}
               onPress={() => {
                 onSetLanguage('hi');
@@ -397,9 +414,33 @@ export const VendorDetailSheet: React.FC<Props> = ({
             >
               <View>
                 <Text style={styles.langOptionTitle}>हिंदी (Hindi)</Text>
-                <Text style={styles.langOptionSub}>मंडी और आर्डर हिंदी में</Text>
+                <Text style={styles.langOptionSub}>आर्डर और दुकान की सारी जानकारी हिंदी में</Text>
               </View>
               {selectedLanguage === 'hi' ? (
+                <Ionicons name="checkmark-circle" size={22} color="#047A36" />
+              ) : (
+                <View style={styles.radioEmpty} />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.langOptionCard,
+                selectedLanguage === 'en' && styles.langOptionCardActive,
+                { marginTop: 12 },
+              ]}
+              onPress={() => {
+                onSetLanguage('en');
+                onShowToast('Language set to English');
+                handleDismiss();
+              }}
+              activeOpacity={0.8}
+            >
+              <View>
+                <Text style={styles.langOptionTitle}>English</Text>
+                <Text style={styles.langOptionSub}>Standard English interface</Text>
+              </View>
+              {selectedLanguage === 'en' ? (
                 <Ionicons name="checkmark-circle" size={22} color="#047A36" />
               ) : (
                 <View style={styles.radioEmpty} />
@@ -408,6 +449,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
           </View>
         );
 
+      // 7. मदद और सपोर्ट (Help & Support)
       case 'opt-support':
         return (
           <View>
@@ -416,7 +458,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="headset" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Partner Support Desk</Text>
+                <Text style={styles.sheetTitle}>मदद और सपोर्ट (Helpline)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -425,27 +467,26 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Toll Free Helpline</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '700' }]}>
-                  1800-889-MINT
+                <Text style={styles.infoLabel}>टोल-फ्री हेल्पलाइन</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                  1800-889-6468
                 </Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Direct Phone</Text>
-                <Text style={styles.infoValue}>1800-889-6468</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Partner Support Email</Text>
+                <Text style={styles.infoLabel}>सपोर्ट ईमेल</Text>
                 <Text style={styles.infoValue}>partners@dusmint.com</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Support Hours</Text>
-                <Text style={styles.infoValue}>06:00 AM – 11:00 PM</Text>
+                <Text style={styles.infoLabel}>सपोर्ट का समय</Text>
+                <Text style={styles.infoValue}>सुबह 6:00 से रात 11:00 तक</Text>
               </View>
             </View>
+
+            <Text style={styles.hintText}>
+              आर्डर, पेमेंट या ऐप से जुड़ी किसी भी समस्या के लिए हमारे पार्टनर हेल्पलाइन पर सीधे कॉल करें।
+            </Text>
 
             <TouchableOpacity
               style={styles.actionBtn}
@@ -453,11 +494,12 @@ export const VendorDetailSheet: React.FC<Props> = ({
               onPress={handleCallSupport}
             >
               <Ionicons name="call" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
-              <Text style={styles.actionBtnText}>Call Partner Support Now</Text>
+              <Text style={styles.actionBtnText}>📞 हेल्पलाइन पर कॉल करें (Call Helpline)</Text>
             </TouchableOpacity>
           </View>
         );
 
+      // 8. पार्टनर नियम (Partner Rules)
       case 'opt-terms':
         return (
           <View>
@@ -466,7 +508,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
                 <View style={styles.headerIconCircle}>
                   <Ionicons name="shield-checkmark" size={20} color="#047A36" />
                 </View>
-                <Text style={styles.sheetTitle}>Compliance & Terms</Text>
+                <Text style={styles.sheetTitle}>पार्टनर नियम (Partner Rules)</Text>
               </View>
               <TouchableOpacity onPress={handleDismiss} style={styles.closeBtn}>
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -475,30 +517,25 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Merchant Partner Tier</Text>
-                <Text style={styles.infoValue}>Tier-1 Mandi Dukaan</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Commission Rate</Text>
-                <Text style={styles.infoValue}>{vendor?.commission_pct ?? 10}% Flat Rate</Text>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>FSSAI Status</Text>
-                <Text style={[styles.infoValue, { color: '#15803D', fontWeight: '700' }]}>
-                  Verified Partner ✓
+                <Text style={styles.infoLabel}>कमीशन रेट</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                  {vendor?.commission_pct ?? 10}% (बाकी सारा पैसा आपका)
                 </Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>QR Sealing Protocol</Text>
-                <Text style={styles.infoValue}>100% Tamper-Proof Tape</Text>
+                <Text style={styles.infoLabel}>सामान की क्वालिटी</Text>
+                <Text style={styles.infoValue}>साफ और ताज़ा सामान ही पैक करें</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>पैकिंग सील</Text>
+                <Text style={styles.infoValue}>QR सील टेप लगाना अनिवार्य है</Text>
               </View>
             </View>
 
             <Text style={styles.hintText}>
-              All vendor partner payouts and order batch allocations adhere to standard Mandi Trade compliance and food safety policies.
+              DusMint पार्टनर बनने के नियम आसान और पारदर्शी हैं। समय पर सामान पैक करें और रोज़ाना कमाई पाएं।
             </Text>
           </View>
         );
@@ -517,7 +554,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
       statusBarTranslucent
     >
       <View style={styles.modalRoot}>
-        {/* Full-screen static dark backdrop that ONLY smoothly fades in, NEVER moves */}
+        {/* Full-screen static dark backdrop that ONLY smoothly fades in */}
         <TouchableWithoutFeedback onPress={handleDismiss}>
           <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} />
         </TouchableWithoutFeedback>
@@ -556,7 +593,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
     paddingTop: 20,
-    maxHeight: '80%',
+    maxHeight: '82%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
@@ -573,6 +610,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    flex: 1,
   },
   headerIconCircle: {
     width: 36,
@@ -583,10 +621,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
+    flex: 1,
   },
   closeBtn: {
     width: 34,
@@ -595,6 +634,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 8,
   },
   infoCard: {
     backgroundColor: '#F8FAFC',
@@ -610,26 +650,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
   },
+  infoRowVertical: {
+    paddingVertical: 8,
+  },
   infoLabel: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#64748B',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   infoValue: {
     fontSize: 13.5,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#0F172A',
     maxWidth: '55%',
     textAlign: 'right',
+  },
+  addressValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginTop: 4,
+    lineHeight: 20,
   },
   divider: {
     height: 1,
     backgroundColor: '#E2E8F0',
   },
+  tipBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 14,
+  },
+  tipText: {
+    fontSize: 12,
+    color: '#15803D',
+    fontWeight: '600',
+    flex: 1,
+    lineHeight: 17,
+  },
   hintText: {
     fontSize: 12,
-    color: '#94A3B8',
-    marginTop: 14,
+    color: '#64748B',
+    marginTop: 12,
     lineHeight: 18,
   },
   actionBtn: {
