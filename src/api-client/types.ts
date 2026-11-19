@@ -165,6 +165,13 @@ export interface VendorProfileInfo {
   is_open?: boolean;
   score?: number;
   commission_pct?: number;
+  bank_or_upi?: string;
+  lat?: number;
+  lng?: number;
+  shop_photo_urls?: string[];
+  status?: string;
+  cluster_name?: string;
+  cluster_city?: string;
 }
 
 export interface VendorOrderItem {

@@ -166,6 +166,19 @@ export class DusmintApiClient {
     return res.data;
   }
 
+  async toggleVendorStatus(vendorId: string, isOpen: boolean): Promise<{ success: boolean; vendor: any }> {
+    const res = await this.client.patch('/vendor/status', { vendorId, isOpen });
+    return res.data;
+  }
+
+  async updateVendorProfile(
+    vendorId: string,
+    payload: { shopName?: string; ownerName?: string; bankOrUpi?: string; category?: string }
+  ): Promise<{ success: boolean; vendor: any }> {
+    const res = await this.client.patch('/vendor/profile', { vendorId, ...payload });
+    return res.data;
+  }
+
   async getVendorOrders(vendorId?: string): Promise<VendorOrderPart[]> {
     const res = await this.client.get('/vendor/orders', {
       params: vendorId ? { vendorId } : undefined,
