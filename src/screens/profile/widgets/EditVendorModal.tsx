@@ -195,7 +195,7 @@ export const EditVendorModal: React.FC<Props> = ({
           >
             {/* Header */}
             <View style={styles.header}>
-              <Text style={styles.title}>दुकान की जानकारी बदलें (Edit)</Text>
+              <Text style={styles.title}>Edit Shop Details</Text>
               <TouchableOpacity
                 onPress={handleDismiss}
                 style={styles.closeBtn}
@@ -219,7 +219,7 @@ export const EditVendorModal: React.FC<Props> = ({
             >
               {/* Shop Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>दुकान का नाम (SHOP NAME)</Text>
+                <Text style={styles.label}>Shop Name</Text>
                 <TextInput
                   style={styles.input}
                   value={shopName}
@@ -227,14 +227,14 @@ export const EditVendorModal: React.FC<Props> = ({
                     setShopName(t);
                     setError('');
                   }}
-                  placeholder="उदा. गुप्ता किराना स्टोर"
+                  placeholder="e.g. Gupta Traders"
                   placeholderTextColor="#94A3B8"
                 />
               </View>
 
               {/* Owner Name */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>मालिक का नाम (OWNER NAME)</Text>
+                <Text style={styles.label}>Owner Name</Text>
                 <TextInput
                   style={styles.input}
                   value={ownerName}
@@ -242,14 +242,14 @@ export const EditVendorModal: React.FC<Props> = ({
                     setOwnerName(t);
                     setError('');
                   }}
-                  placeholder="उदा. सुमित गुप्ता"
+                  placeholder="e.g. Sumit Shaw"
                   placeholderTextColor="#94A3B8"
                 />
               </View>
 
               {/* Shop Address */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>दुकान का पता (SHOP ADDRESS)</Text>
+                <Text style={styles.label}>Shop Address</Text>
                 <TextInput
                   style={[styles.input, { minHeight: 60, textAlignVertical: 'top' }]}
                   value={address}
@@ -257,7 +257,7 @@ export const EditVendorModal: React.FC<Props> = ({
                     setAddress(t);
                     setError('');
                   }}
-                  placeholder="उदा. दूकान नंबर 4, मेन मार्केट"
+                  placeholder="e.g. Shop 4, Main Market, Kalkaji"
                   placeholderTextColor="#94A3B8"
                   multiline
                 />
@@ -265,7 +265,7 @@ export const EditVendorModal: React.FC<Props> = ({
 
               {/* Category Pills */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>सामान का प्रकार (CATEGORY)</Text>
+                <Text style={styles.label}>Category</Text>
                 <View style={styles.categoryRow}>
                   {CATEGORIES.map((cat) => {
                     const isSelected = category.toLowerCase() === cat.id;
@@ -295,7 +295,7 @@ export const EditVendorModal: React.FC<Props> = ({
 
               {/* UPI ID */}
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>पैसे आने की UPI ID (DAILY T+0 PAYOUT)</Text>
+                <Text style={styles.label}>Payment UPI ID</Text>
                 <TextInput
                   style={styles.input}
                   value={bankOrUpi}
@@ -303,12 +303,12 @@ export const EditVendorModal: React.FC<Props> = ({
                     setBankOrUpi(t);
                     setError('');
                   }}
-                  placeholder="उदा. sumit@okhdfcbank"
+                  placeholder="e.g. sumit@okhdfcbank"
                   placeholderTextColor="#94A3B8"
                   autoCapitalize="none"
                 />
                 <Text style={styles.fieldHint}>
-                  रोज की बिक्री का पैसा सीधे इसी UPI खाते में ट्रांसफर होगा।
+                  Daily sales payouts will be transferred directly to this UPI account.
                 </Text>
               </View>
 
@@ -322,7 +322,7 @@ export const EditVendorModal: React.FC<Props> = ({
                 {isSaving ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.saveBtnText}>जानकारी सेव करें (Save Changes)</Text>
+                  <Text style={styles.saveBtnText}>Save Changes</Text>
                 )}
               </TouchableOpacity>
             </ScrollView>

@@ -43,12 +43,17 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const [isPhotoViewerOpen, setIsPhotoViewerOpen] = useState(false);
 
   const localStorePhoto = useVendorAuthStore((s) => s.storePhotoUri);
+  const activeVendorFromStore = useVendorAuthStore((s) => s.activeVendor);
 
   // Check if store has a valid uploaded photo (from backend or local onboarding cache)
   const photoUrl =
     (vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
       ? vendor.shop_photo_urls[0]
-      : null) || localStorePhoto;
+      : null) ||
+    (activeVendorFromStore?.shop_photo_urls && activeVendorFromStore.shop_photo_urls.length > 0
+      ? activeVendorFromStore.shop_photo_urls[0]
+      : null) ||
+    localStorePhoto;
 
   // Prefer vendor's owner_phone if present, otherwise logged-in phone
   const rawPhone = vendor?.owner_phone || phone;
@@ -85,7 +90,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
           >
             <Ionicons name="language-outline" size={15} color="#22C55E" style={{ marginRight: 5 }} />
             <Text style={styles.langText}>
-              {selectedLanguage === 'hi' ? 'हिंदी (HI)' : 'English (EN)'}
+              {selectedLanguage === 'hi' ? 'Hindi (HI)' : 'English (EN)'}
             </Text>
           </TouchableOpacity>
 

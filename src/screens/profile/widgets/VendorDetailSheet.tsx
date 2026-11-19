@@ -11,10 +11,12 @@ import {
   Vibration,
   Platform,
   Animated,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { VendorProfileInfo } from '../../../api-client/types';
+import { useVendorAuthStore } from '../../../state/useVendorAuthStore';
 
 interface Props {
   visible: boolean;
@@ -43,6 +45,17 @@ export const VendorDetailSheet: React.FC<Props> = ({
   const [showModal, setShowModal] = useState(visible);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(600)).current;
+
+  const localStorePhoto = useVendorAuthStore((s) => s.storePhotoUri);
+  const activeVendorFromStore = useVendorAuthStore((s) => s.activeVendor);
+  const photoUrl =
+    (vendor?.shop_photo_urls && vendor.shop_photo_urls.length > 0
+      ? vendor.shop_photo_urls[0]
+      : null) ||
+    (activeVendorFromStore?.shop_photo_urls && activeVendorFromStore.shop_photo_urls.length > 0
+      ? activeVendorFromStore.shop_photo_urls[0]
+      : null) ||
+    localStorePhoto;
 
   useEffect(() => {
     if (visible) {
@@ -100,7 +113,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
 
   const handleTestChime = () => {
     Vibration.vibrate([0, 400, 150, 400]);
-    onShowToast('🔔 Order alert ringtone tested!');
+    onShowToast('Order alert ringtone tested');
   };
 
   const handleCallSupport = () => {
@@ -158,6 +171,19 @@ export const VendorDetailSheet: React.FC<Props> = ({
                   {vendor?.is_open ? '● Online & Accepting Orders' : '● Closed'}
                 </Text>
               </View>
+              {photoUrl ? (
+                <>
+                  <View style={styles.divider} />
+                  <View style={styles.infoRowVertical}>
+                    <Text style={styles.infoLabel}>Shop Picture</Text>
+                    <Image
+                      source={{ uri: photoUrl }}
+                      style={styles.shopPhotoThumb}
+                      resizeMode="cover"
+                    />
+                  </View>
+                </>
+              ) : null}
             </View>
 
             <TouchableOpacity
@@ -431,13 +457,13 @@ export const VendorDetailSheet: React.FC<Props> = ({
               ]}
               onPress={() => {
                 onSetLanguage('hi');
-                onShowToast('भाषा हिंदी में सेट की गई');
+                onShowToast('Language switched to Hindi');
                 handleDismiss();
               }}
               activeOpacity={0.8}
             >
               <View>
-                <Text style={styles.langOptionTitle}>हिंदी (Hindi)</Text>
+                <Text style={styles.langOptionTitle}>Hindi</Text>
                 <Text style={styles.langOptionSub}>Orders and store in Hindi</Text>
               </View>
               {selectedLanguage === 'hi' ? (
@@ -671,6 +697,13 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     marginTop: 4,
     lineHeight: 20,
+  },
+  shopPhotoThumb: {
+    width: '100%',
+    height: 130,
+    borderRadius: 12,
+    marginTop: 8,
+    backgroundColor: '#F1F5F9',
   },
   divider: {
     height: 1,
