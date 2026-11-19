@@ -41,31 +41,12 @@ export const VendorProfileScreen: React.FC<{ navigation?: any }> = ({ navigation
           setIsStoreOpen(list[0].is_open);
         }
       } else {
-        // Fallback default vendor profile
-        setActiveVendor({
-          id: 'vnd-indore-54',
-          name: 'Mandi Fresh Sabzi & Fruits',
-          owner_name: 'Ramesh Sharma',
-          owner_phone: '+91 8010939887',
-          category: 'Vegetables & Fruits',
-          cluster_id: 'Indore Vijay Nagar Cluster',
-          is_open: true,
-          score: 4.8,
-          commission_pct: 8.0,
-        });
+        setVendors([]);
+        setActiveVendor(null);
       }
     } catch {
-      setActiveVendor({
-        id: 'vnd-indore-54',
-        name: 'Mandi Fresh Sabzi & Fruits',
-        owner_name: 'Ramesh Sharma',
-        owner_phone: '+91 8010939887',
-        category: 'Vegetables & Fruits',
-        cluster_id: 'Indore Vijay Nagar Cluster',
-        is_open: true,
-        score: 4.8,
-        commission_pct: 8.0,
-      });
+      setVendors([]);
+      setActiveVendor(null);
     } finally {
       setRefreshing(false);
     }
@@ -149,22 +130,24 @@ export const VendorProfileScreen: React.FC<{ navigation?: any }> = ({ navigation
           </View>
           <View style={styles.merchantInfo}>
             <View style={styles.verifiedRow}>
-              <Text style={styles.storeName}>{activeVendor?.name || 'Mandi Fresh Sabzi'}</Text>
+              <Text style={styles.storeName}>{activeVendor?.name || 'My Dukaan'}</Text>
               <View style={styles.verifiedBadge}>
                 <Ionicons name="checkmark-circle" size={14} color="#16A34A" />
                 <Text style={styles.verifiedText}>Verified</Text>
               </View>
             </View>
             <Text style={styles.ownerText}>
-              Owner: <Text style={styles.boldText}>{activeVendor?.owner_name || 'Ramesh Sharma'}</Text> •{' '}
-              {user?.phone || activeVendor?.owner_phone || '+91 9876543210'}
+              Owner: <Text style={styles.boldText}>{activeVendor?.owner_name || 'Partner'}</Text>
+              {Boolean(user?.phone || activeVendor?.owner_phone) && (
+                <> • {user?.phone || activeVendor?.owner_phone}</>
+              )}
             </Text>
             <View style={styles.metaRow}>
               <View style={styles.scorePill}>
-                <Text style={styles.scoreText}>⭐ {activeVendor?.score || 4.8}</Text>
+                <Text style={styles.scoreText}>⭐ {activeVendor?.score || 5.0}</Text>
               </View>
               <View style={styles.categoryPill}>
-                <Text style={styles.categoryText}>{activeVendor?.category || 'Vegetables & Fruits'}</Text>
+                <Text style={styles.categoryText}>{activeVendor?.category || 'Groceries'}</Text>
               </View>
               <TouchableOpacity onPress={handleSwitchStore} style={styles.switchPill}>
                 <Text style={styles.switchPillText}>⇄ Switch</Text>

@@ -30,7 +30,7 @@ export const VendorEarningsScreen: React.FC = () => {
         todaySalesPaise: 425000,
         commissionDeductedPaise: 34000,
         netPayoutPendingPaise: 391000,
-        payoutVpa: 'ramesh.sharma@okaxis',
+        payoutVpa: '',
         settlementSchedule: 'Daily 09:30 PM Batch',
         recentSettlements: [
           { date: 'Yesterday', amountPaise: 512000, status: 'Credited (Ref: UPI-98412)' },
@@ -113,7 +113,7 @@ export const VendorEarningsScreen: React.FC = () => {
               <Text style={styles.verifiedTagText}>VERIFIED</Text>
             </View>
           </View>
-          <Text style={styles.upiId}>UPI ID: {earnings?.payoutVpa || 'ramesh.sharma@okaxis'}</Text>
+          <Text style={styles.upiId}>UPI ID: {earnings?.payoutVpa || 'Linked at Onboarding'}</Text>
           <Text style={styles.bankSub}>
             Settlement is triggered automatically ({earnings?.settlementSchedule || 'Daily 09:30 PM Batch'}) once customer delivery OTP is verified.
           </Text>
