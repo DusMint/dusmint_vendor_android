@@ -32,15 +32,6 @@ interface VendorOnboardingProps {
   navigation: any;
 }
 
-const CATEGORIES = [
-  { id: 'vegetables', label: 'Vegetables', icon: 'leaf-outline' },
-  { id: 'fruits', label: 'Fruits', icon: 'nutrition-outline' },
-  { id: 'dairy', label: 'Dairy & Milk', icon: 'water-outline' },
-  { id: 'groceries', label: 'Groceries & Kirana', icon: 'basket-outline' },
-  { id: 'bakery', label: 'Bakery', icon: 'cafe-outline' },
-  { id: 'meat_poultry', label: 'Meat & Poultry', icon: 'restaurant-outline' },
-];
-
 export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   route,
   navigation,
@@ -57,7 +48,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   const [ownerName, setOwnerName] = useState(user?.fullName || '');
   const [email, setEmail] = useState('');
   const [shopName, setShopName] = useState('');
-  const [category, setCategory] = useState('vegetables');
+  const category = 'groceries'; // Default category sent to backend
   const [address, setAddress] = useState('');
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -217,7 +208,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
     }
   };
 
-  // Exit App handler (does NOT log out; cleanly closes app so user returns to saved progress)
+  // Exit App handler
   const handleExitApp = () => {
     Alert.alert('Close App', 'Do you want to exit DusMint? Your progress will be saved.', [
       { text: 'Cancel', style: 'cancel' },
@@ -253,24 +244,23 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      {/* Matching OTP Back Button */}
-      <TouchableOpacity
-        onPress={() => setActiveStep(null)}
-        style={styles.backButton}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="arrow-back" size={22} color="#0F172A" />
-      </TouchableOpacity>
-
-      {/* Left-aligned Title & Subtitle */}
-      <Text style={styles.subStepTitle}>Owner Profile</Text>
-      <Text style={styles.subStepSubtitle}>Your personal contact details</Text>
+      {/* Header beside back icon, no description below */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => setActiveStep(null)}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Owner Profile</Text>
+      </View>
 
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>FULL NAME *</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. Ramesh Kumar"
+          placeholder="Enter your full name"
           placeholderTextColor="#94A3B8"
           value={ownerName}
           onChangeText={setOwnerName}
@@ -293,7 +283,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         <Text style={styles.fieldLabel}>EMAIL ADDRESS (OPTIONAL)</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. ramesh@gmail.com"
+          placeholder="Enter your email address"
           placeholderTextColor="#94A3B8"
           value={email}
           onChangeText={setEmail}
@@ -314,7 +304,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
   );
 
   // =========================================================================
-  // SUB-STEP 2: SHOP DETAILS & OLA MAPS LOCATION
+  // SUB-STEP 2: SHOP DETAILS & LOCATION
   // =========================================================================
   const renderStep2 = () => (
     <ScrollView
@@ -323,25 +313,24 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      {/* Matching OTP Back Button */}
-      <TouchableOpacity
-        onPress={() => setActiveStep(null)}
-        style={styles.backButton}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="arrow-back" size={22} color="#0F172A" />
-      </TouchableOpacity>
-
-      {/* Left-aligned Title & Subtitle */}
-      <Text style={styles.subStepTitle}>Shop & Location</Text>
-      <Text style={styles.subStepSubtitle}>Store name, category, and pickup address</Text>
+      {/* Header beside back icon, no description below */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => setActiveStep(null)}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Shop & Location</Text>
+      </View>
 
       {/* Shop Name */}
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>SHOP / DUKAAN NAME *</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. Gupta Sabzi Mandi"
+          placeholder="Enter your shop name"
           placeholderTextColor="#94A3B8"
           value={shopName}
           onChangeText={setShopName}
@@ -349,79 +338,40 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         />
       </View>
 
-      {/* Primary Category */}
+      {/* Address with prominent Fetch Button and locked/auto-filled display */}
       <View style={styles.fieldBox}>
-        <Text style={styles.fieldLabel}>PRIMARY CATEGORY *</Text>
-        <View style={styles.categoryChipsRow}>
-          {CATEGORIES.map((cat) => {
-            const isSelected = category === cat.id;
-            return (
-              <TouchableOpacity
-                key={cat.id}
-                onPress={() => setCategory(cat.id)}
-                style={[styles.catChip, isSelected && styles.catChipSelected]}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={cat.icon as any}
-                  size={15}
-                  color={isSelected ? '#047A36' : '#64748B'}
-                  style={{ marginRight: 6 }}
-                />
-                <Text style={[styles.catChipText, isSelected && styles.catChipTextSelected]}>
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
+        <Text style={styles.fieldLabel}>SHOP COMPLETE ADDRESS *</Text>
 
-      {/* Sleek Ola Maps Auto-Locate Button */}
-      <View style={styles.locateCard}>
-        <View style={styles.locateCardLeft}>
-          <Ionicons name="navigate-circle-outline" size={24} color="#047A36" />
-          <View style={{ marginLeft: 10, flex: 1 }}>
-            <Text style={styles.locateCardTitle}>Ola Maps Auto-Locate</Text>
-            <Text style={styles.locateCardSub}>Fetch current shop GPS & address</Text>
-          </View>
-        </View>
         <TouchableOpacity
-          style={styles.autoLocateBtn}
+          style={styles.fetchAddressLargeBtn}
           onPress={handleAutoLocate}
           disabled={locating}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           {locating ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.autoLocateBtnText}>Detect</Text>
+            <>
+              <Ionicons name="navigate" size={17} color="#FFFFFF" style={{ marginRight: 8 }} />
+              <Text style={styles.fetchAddressLargeBtnText}>
+                {address ? 'Fetch Address Again' : 'Fetch Current Address'}
+              </Text>
+            </>
           )}
         </TouchableOpacity>
-      </View>
 
-      {/* Address Input */}
-      <View style={styles.fieldBox}>
-        <Text style={styles.fieldLabel}>SHOP COMPLETE ADDRESS *</Text>
-        <TextInput
-          style={[styles.textInput, styles.textArea]}
-          placeholder="Stall No, Market, Road, Area, Pincode"
-          placeholderTextColor="#94A3B8"
-          value={address}
-          onChangeText={setAddress}
-          multiline
-          numberOfLines={3}
-        />
-      </View>
-
-      {lat && lng && (
-        <View style={styles.coordsBadge}>
-          <Ionicons name="pin" size={13} color="#047A36" style={{ marginRight: 4 }} />
-          <Text style={styles.coordsText}>
-            GPS: {lat.toFixed(4)}, {lng.toFixed(4)}
-          </Text>
+        <View style={[styles.lockedAddressBox, Boolean(address) && styles.lockedAddressBoxActive]}>
+          <TextInput
+            style={styles.lockedAddressInput}
+            placeholder="Shop address will be auto-filled by tapping above"
+            placeholderTextColor="#94A3B8"
+            value={address}
+            editable={false}
+            multiline
+            numberOfLines={3}
+          />
         </View>
-      )}
+      </View>
 
       <TouchableOpacity
         style={[styles.saveBtn, !isStep2Done && styles.btnDisabled]}
@@ -443,18 +393,17 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       contentContainerStyle={styles.subStepContent}
       showsVerticalScrollIndicator={false}
     >
-      {/* Matching OTP Back Button */}
-      <TouchableOpacity
-        onPress={() => setActiveStep(null)}
-        style={styles.backButton}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="arrow-back" size={22} color="#0F172A" />
-      </TouchableOpacity>
-
-      {/* Left-aligned Title & Subtitle */}
-      <Text style={styles.subStepTitle}>Shop Photo</Text>
-      <Text style={styles.subStepSubtitle}>Clear photo of your stall or storefront</Text>
+      {/* Header beside back icon, no description below */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => setActiveStep(null)}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Shop Photo</Text>
+      </View>
 
       {shopPhotoUri ? (
         <View style={styles.photoPreviewCard}>
@@ -484,7 +433,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
             <Ionicons name="camera-outline" size={32} color="#047A36" />
           </View>
           <Text style={styles.uploadPromptTitle}>Attach Shop Photo</Text>
-          <Text style={styles.uploadPromptSub}>Take a photo of your dukaan counter or upload from gallery</Text>
+          <Text style={styles.uploadPromptSub}>Take a photo of your shop or choose from gallery</Text>
 
           <View style={styles.uploadActionsRow}>
             <TouchableOpacity
@@ -529,24 +478,23 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      {/* Matching OTP Back Button */}
-      <TouchableOpacity
-        onPress={() => setActiveStep(null)}
-        style={styles.backButton}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="arrow-back" size={22} color="#0F172A" />
-      </TouchableOpacity>
-
-      {/* Left-aligned Title & Subtitle */}
-      <Text style={styles.subStepTitle}>Payout & UPI</Text>
-      <Text style={styles.subStepSubtitle}>Direct daily earnings settlement</Text>
+      {/* Header beside back icon, no description below */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          onPress={() => setActiveStep(null)}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={22} color="#0F172A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Payout & UPI</Text>
+      </View>
 
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>UPI ID (VPA) *</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. 8010939887@paytm or vendor@okaxis"
+          placeholder="Enter your UPI ID"
           placeholderTextColor="#94A3B8"
           value={bankOrUpi}
           onChangeText={setBankOrUpi}
@@ -559,19 +507,12 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         <Text style={styles.fieldLabel}>ACCOUNT HOLDER NAME (OPTIONAL)</Text>
         <TextInput
           style={styles.textInput}
-          placeholder="e.g. Ramesh Kumar"
+          placeholder="Enter account holder name"
           placeholderTextColor="#94A3B8"
           value={accountHolder}
           onChangeText={setAccountHolder}
           autoCapitalize="words"
         />
-      </View>
-
-      <View style={styles.payoutTrustBadge}>
-        <Ionicons name="shield-checkmark-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
-        <Text style={styles.payoutTrustText}>
-          Earnings are settled directly to your UPI ID daily.
-        </Text>
       </View>
 
       <TouchableOpacity
@@ -601,14 +542,14 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       title: 'Shop & Location',
       sub: isStep2Done
         ? `${shopName} • ${address.slice(0, 24)}...`
-        : 'Name, category & pickup address',
+        : 'Shop name & pickup address',
       icon: 'storefront-outline',
       isDone: isStep2Done,
     },
     {
       id: 3,
       title: 'Shop Photo',
-      sub: isStep3Done ? 'Photo attached' : 'Stall or shop counter photo',
+      sub: isStep3Done ? 'Photo attached' : 'Shop counter or front photo',
       icon: 'camera-outline',
       isDone: isStep3Done,
     },
@@ -649,7 +590,6 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
                 </Text>
               </View>
 
-              {/* Clean Close App Action (styled like the OTP back button) */}
               <TouchableOpacity
                 onPress={handleExitApp}
                 style={styles.exitBtn}
@@ -765,7 +705,6 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 4,
   },
-  // Same button shape as OTP screen back button
   exitBtn: {
     width: 44,
     height: 44,
@@ -904,10 +843,15 @@ const styles = StyleSheet.create({
   },
   subStepContent: {
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: 16,
     paddingBottom: 40,
   },
-  // Exact OTP screen back button style
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 28,
+    gap: 14,
+  },
   backButton: {
     width: 44,
     height: 44,
@@ -917,23 +861,15 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
   },
-  // Left-aligned header titles
-  subStepTitle: {
-    fontSize: 24,
+  headerTitle: {
+    fontSize: 20,
     fontWeight: '800',
     color: '#0F172A',
-    letterSpacing: -0.5,
-  },
-  subStepSubtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    marginTop: 4,
-    marginBottom: 24,
+    letterSpacing: -0.4,
   },
   fieldBox: {
-    marginBottom: 18,
+    marginBottom: 20,
   },
   fieldLabel: {
     fontSize: 11,
@@ -953,8 +889,42 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   textArea: {
-    height: 84,
+    height: 88,
     textAlignVertical: 'top',
+  },
+  fetchAddressLargeBtn: {
+    backgroundColor: '#047A36',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 13,
+    borderRadius: 14,
+    marginBottom: 12,
+  },
+  fetchAddressLargeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  lockedAddressBox: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 88,
+  },
+  lockedAddressBoxActive: {
+    borderColor: '#BBF7D0',
+    backgroundColor: '#F0FDF4',
+  },
+  lockedAddressInput: {
+    fontSize: 14,
+    color: '#0F172A',
+    lineHeight: 20,
+    padding: 0,
   },
   lockedFieldRow: {
     flexDirection: 'row',
@@ -982,87 +952,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#15803D',
-  },
-  categoryChipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  catChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#F8FAFC',
-  },
-  catChipSelected: {
-    borderColor: '#047A36',
-    backgroundColor: '#F0FDF4',
-  },
-  catChipText: {
-    fontSize: 13,
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  catChipTextSelected: {
-    color: '#047A36',
-    fontWeight: '700',
-  },
-  locateCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 18,
-  },
-  locateCardLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: 10,
-  },
-  locateCardTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#047A36',
-  },
-  locateCardSub: {
-    fontSize: 11,
-    color: '#166534',
-    marginTop: 2,
-  },
-  autoLocateBtn: {
-    backgroundColor: '#047A36',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  autoLocateBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  coordsBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 18,
-  },
-  coordsText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#047A36',
   },
   photoPreviewCard: {
     borderRadius: 16,
@@ -1161,21 +1050,6 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontSize: 13,
     fontWeight: '700',
-  },
-  payoutTrustBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 20,
-  },
-  payoutTrustText: {
-    fontSize: 12,
-    color: '#64748B',
-    flex: 1,
   },
   saveBtn: {
     backgroundColor: '#047A36',
