@@ -6,8 +6,6 @@ export interface VendorOptionItem {
   id: string;
   label: string;
   iconName: string;
-  badgeText?: string;
-  badgeType?: 'green' | 'neutral' | 'orange';
 }
 
 interface Props {
@@ -41,32 +39,6 @@ export const VendorOptionsCard: React.FC<Props> = ({ options, onOptionPress }) =
               </View>
 
               <View style={styles.right}>
-                {Boolean(option.badgeText) && (
-                  <View
-                    style={[
-                      styles.badge,
-                      option.badgeType === 'orange'
-                        ? styles.badgeOrange
-                        : option.badgeType === 'neutral'
-                        ? styles.badgeNeutral
-                        : styles.badgeGreen,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.badgeText,
-                        option.badgeType === 'orange'
-                          ? styles.badgeTextOrange
-                          : option.badgeType === 'neutral'
-                          ? styles.badgeTextNeutral
-                          : styles.badgeTextGreen,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {option.badgeText}
-                    </Text>
-                  </View>
-                )}
                 <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
               </View>
             </TouchableOpacity>
@@ -105,14 +77,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconCircle: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   label: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '600',
     color: '#0F172A',
     letterSpacing: -0.2,
@@ -120,35 +94,6 @@ const styles = StyleSheet.create({
   right: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    maxWidth: '48%',
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  badgeGreen: {
-    backgroundColor: '#DCFCE7',
-  },
-  badgeOrange: {
-    backgroundColor: '#FFF7ED',
-  },
-  badgeNeutral: {
-    backgroundColor: '#F1F5F9',
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  badgeTextGreen: {
-    color: '#15803D',
-  },
-  badgeTextOrange: {
-    color: '#EA580C',
-  },
-  badgeTextNeutral: {
-    color: '#475569',
   },
   divider: {
     height: 1,

@@ -4,18 +4,16 @@ import { View, Text, StyleSheet } from 'react-native';
 interface Props {
   version?: string;
   build?: string;
-  cluster?: string;
 }
 
 export const VendorAppFooter: React.FC<Props> = ({
   version = '1.0.0',
   build = '42',
-  cluster = 'Indore Mandi Cluster',
 }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
-        DusMint Partner App v{version} ({build}) • {cluster}
+        DusMint Partner App v{version} ({build})
       </Text>
     </View>
   );

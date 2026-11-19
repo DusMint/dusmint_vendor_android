@@ -39,8 +39,10 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : insets.top;
   const [menuVisible, setMenuVisible] = useState(false);
 
-  const phoneDigits = phone ? phone.replace(/[^0-9]/g, '') : '';
-  const cleanPhone = phoneDigits.length >= 10 ? `+91 ${phoneDigits.slice(-10)}` : phone;
+  // Prefer vendor's owner_phone if present, otherwise logged-in phone
+  const rawPhone = vendor?.owner_phone || phone;
+  const phoneDigits = rawPhone ? rawPhone.replace(/[^0-9]/g, '') : '';
+  const cleanPhone = phoneDigits.length >= 10 ? `+91 ${phoneDigits.slice(-10)}` : rawPhone;
 
   return (
     <View style={[styles.container, { paddingTop: statusBarHeight + 12 }]}>
@@ -57,12 +59,9 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </Svg>
       </View>
 
-      {/* Top Action Row */}
+      {/* Top Action Row (Clean - no partner terminal badge) */}
       <View style={styles.topRow}>
-        <View style={styles.brandBadge}>
-          <Text style={styles.brandBadgeIcon}>🏪</Text>
-          <Text style={styles.brandBadgeText}>PARTNER TERMINAL</Text>
-        </View>
+        <View />
 
         <View style={styles.rightActions}>
           {/* Change Language Pill */}
@@ -108,28 +107,15 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </View>
 
         <Text style={styles.ownerText}>
-          Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Dukaan Partner'}</Text>
+          Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Partner'}</Text>
           {Boolean(cleanPhone) && ` • ${cleanPhone}`}
         </Text>
 
-        {/* Badges Row */}
+        {/* Minimal verified badge - no hardcoded groceries or indore */}
         <View style={styles.metaRow}>
           <View style={styles.verifiedMiniBadge}>
             <Ionicons name="checkmark-circle" size={12} color="#059669" />
             <Text style={styles.verifiedMiniText}>Verified Partner</Text>
-          </View>
-
-          <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>
-              {vendor?.category ? vendor.category.toUpperCase() : 'GROCERIES'}
-            </Text>
-          </View>
-
-          <View style={styles.clusterPill}>
-            <Ionicons name="location-sharp" size={10} color="#64748B" style={{ marginRight: 2 }} />
-            <Text style={styles.clusterText}>
-              {vendor?.cluster_city || 'Indore'}
-            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -219,26 +205,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  brandBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  brandBadgeIcon: {
-    fontSize: 13,
-    marginRight: 6,
-  },
-  brandBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#047A36',
-    letterSpacing: 0.6,
   },
   rightActions: {
     flexDirection: 'row',
@@ -332,33 +298,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#059669',
     fontWeight: '600',
-  },
-  categoryPill: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  categoryText: {
-    fontSize: 10,
-    color: '#475569',
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
-  clusterPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 0.5,
-    borderColor: '#E2E8F0',
-  },
-  clusterText: {
-    fontSize: 10,
-    color: '#64748B',
-    fontWeight: '500',
   },
   menuOverlay: {
     flex: 1,
