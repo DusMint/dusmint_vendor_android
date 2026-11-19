@@ -16,13 +16,15 @@ interface VendorAuthState {
   user: VendorUser | null;
   selectedLanguage: string | null;
   isAuthenticated: boolean;
+  hasActiveVendor: boolean;
   isLoading: boolean;
   isHydrated: boolean;
 
   // Actions
   setHydrated: (val: boolean) => void;
   setLanguage: (lang: string) => void;
-  setAuth: (token: string, user: any) => void;
+  setHasActiveVendor: (val: boolean) => void;
+  setAuth: (token: string, user: any, hasActiveVendor?: boolean) => void;
   logout: () => void;
 }
 
@@ -84,6 +86,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       user: null,
       selectedLanguage: null,
       isAuthenticated: false,
+      hasActiveVendor: false,
       isLoading: false,
       // If native storage is not compiled into the APK, start hydrated to avoid blocking the UI
       isHydrated: !hasNativeAsyncStorage,
@@ -94,12 +97,17 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         set({ selectedLanguage: lang });
       },
 
-      setAuth: (token: string, user: any) => {
+      setHasActiveVendor: (val: boolean) => {
+        set({ hasActiveVendor: val });
+      },
+
+      setAuth: (token: string, user: any, hasActiveVendor = false) => {
         dusmintApi.setAuthToken(token);
         set({
           token,
           user,
           isAuthenticated: true,
+          hasActiveVendor,
           selectedLanguage: user?.preferredLanguage || 'en',
         });
       },
@@ -110,6 +118,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
           token: null,
           user: null,
           isAuthenticated: false,
+          hasActiveVendor: false,
         });
       },
     }),
@@ -127,6 +136,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         user: state.user,
         selectedLanguage: state.selectedLanguage,
         isAuthenticated: state.isAuthenticated,
+        hasActiveVendor: state.hasActiveVendor,
       }),
     }
   )

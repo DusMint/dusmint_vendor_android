@@ -38,14 +38,15 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
 }) => {
   const { phone: routePhone, authUserId } = route.params || {};
   const user = useVendorAuthStore((s) => s.user);
+  const setHasActiveVendor = useVendorAuthStore((s) => s.setHasActiveVendor);
 
-  const phone = routePhone || user?.phone || '+91 8010939887';
+  const phone = routePhone || user?.phone || '';
 
   // Sub-step state: null = Collective Hub, 1 = Owner, 2 = Shop, 3 = Photo, 4 = UPI
   const [activeStep, setActiveStep] = useState<number | null>(null);
 
-  // Form Fields
-  const [ownerName, setOwnerName] = useState(user?.fullName || '');
+  // Form Fields - Always start fresh without auto-filling previous names
+  const [ownerName, setOwnerName] = useState('');
   const [email, setEmail] = useState('');
   const [shopName, setShopName] = useState('');
   const category = 'groceries'; // Default category sent to backend

@@ -160,6 +160,7 @@ export default function App() {
 
   const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
   const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
+  const hasActiveVendor = useVendorAuthStore((s) => s.hasActiveVendor);
   const isHydrated = useVendorAuthStore((s) => s.isHydrated);
 
   if (!fontsLoaded || !isHydrated) {
@@ -174,6 +175,8 @@ export default function App() {
     ? 'LanguageSelect'
     : !isAuthenticated
     ? 'VendorLogin'
+    : !hasActiveVendor
+    ? 'VendorOnboarding'
     : 'Tabs';
 
   return (

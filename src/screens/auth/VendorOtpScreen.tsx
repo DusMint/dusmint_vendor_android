@@ -23,7 +23,7 @@ import { OtpInputBoxes } from './widgets/OtpInputBoxes';
 import { startGoogleSmsConsent } from '../../utils/GoogleSmsConsent';
 
 export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ route, navigation }) => {
-  const { phone } = route.params || { phone: '+91 8010939887' };
+  const phone = route.params?.phone || '';
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(28);
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
         const fullPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
         const res = await dusmintApi.verifyPhoneOtp(fullPhone, code);
         setLoading(false);
-        setAuth(res.token, res.user);
+        setAuth(res.token, res.user, !res.isNewVendor);
 
         if (res.isNewVendor) {
           navigation.reset({
