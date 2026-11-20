@@ -5,32 +5,121 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Switch,
   Alert,
   RefreshControl,
-  ActivityIndicator,
   Vibration,
+  Animated,
+  StatusBar,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors, Typography, Spacing, BorderRadius } from '@dusmint/ui';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorOrderPart, VendorProfileInfo } from '../../api-client/types';
 
-const FALLBACK_VENDORS: VendorProfileInfo[] = [];
+// Realistic Rich Fallback Vendors for Gupta Traders
+const FALLBACK_VENDORS: VendorProfileInfo[] = [
+  {
+    id: 'vendor-1',
+    name: 'Gupta Traders',
+    owner_name: 'Ramesh Gupta',
+    category: 'Vegetables & Fruits',
+    cluster_name: 'Vijay Nagar',
+    is_open: true,
+  },
+];
 
-const FALLBACK_ORDERS: VendorOrderPart[] = [];
+// Realistic Rich Fallback Orders tailored for Tier 3/4 Shopkeeper
+const FALLBACK_ORDERS: VendorOrderPart[] = [
+  {
+    partId: 'ord-part-101',
+    orderId: 'ord-101',
+    orderCode: '#DM-8821',
+    status: 'pending',
+    slotTime: 'Morning Slot • 08:30 AM',
+    subtotalPaise: 46500,
+    items: [
+      { id: 'item-1', name: 'Fresh Desi Tomato', unit: '2 kg', quantity: 1, pricePaise: 7000 },
+      { id: 'item-2', name: 'Indore Jyoti Potato', unit: '1 kg', quantity: 1, pricePaise: 2500 },
+      { id: 'item-3', name: 'Fresh Chicken Curry Cut', unit: '500 g', quantity: 1, pricePaise: 13000 },
+    ],
+  },
+  {
+    partId: 'ord-part-102',
+    orderId: 'ord-102',
+    orderCode: '#DM-8825',
+    status: 'pending',
+    slotTime: 'Morning Slot • 09:00 AM',
+    subtotalPaise: 28000,
+    items: [
+      { id: 'item-4', name: 'Nashik Red Onion', unit: '2 kg', quantity: 1, pricePaise: 8000 },
+      { id: 'item-5', name: 'Farm Fresh White Eggs', unit: '6 pcs', quantity: 1, pricePaise: 4800 },
+      { id: 'item-6', name: 'Green Chillies', unit: '250 g', quantity: 1, pricePaise: 2000 },
+    ],
+  },
+  {
+    partId: 'ord-part-103',
+    orderId: 'ord-103',
+    orderCode: '#DM-8819',
+    status: 'packing',
+    slotTime: 'Morning Slot • 08:15 AM',
+    subtotalPaise: 34000,
+    items: [
+      { id: 'item-7', name: 'Farm Fresh White Eggs', unit: '12 pcs', quantity: 1, pricePaise: 9600 },
+      { id: 'item-8', name: 'Fresh Desi Tomato', unit: '1 kg', quantity: 1, pricePaise: 3500 },
+    ],
+  },
+  {
+    partId: 'ord-part-104',
+    orderId: 'ord-104',
+    orderCode: '#DM-8812',
+    status: 'ready',
+    sealQr: 'DST-44910-INDR',
+    slotTime: 'Morning Slot • 08:00 AM',
+    subtotalPaise: 52000,
+    items: [
+      { id: 'item-9', name: 'Fresh Chicken Curry Cut', unit: '1 kg', quantity: 1, pricePaise: 26000 },
+      { id: 'item-10', name: 'Indore Jyoti Potato', unit: '2 kg', quantity: 1, pricePaise: 5000 },
+    ],
+  },
+  {
+    partId: 'ord-part-105',
+    orderId: 'ord-105',
+    orderCode: '#DM-8809',
+    status: 'delivered',
+    slotTime: 'Morning Slot • 07:30 AM',
+    subtotalPaise: 39000,
+    items: [
+      { id: 'item-11', name: 'Nashik Red Onion', unit: '3 kg', quantity: 1, pricePaise: 12000 },
+      { id: 'item-12', name: 'Fresh Desi Tomato', unit: '1 kg', quantity: 1, pricePaise: 3500 },
+    ],
+  },
+  {
+    partId: 'ord-part-106',
+    orderId: 'ord-106',
+    orderCode: '#DM-8802',
+    status: 'delivered',
+    slotTime: 'Morning Slot • 07:00 AM',
+    subtotalPaise: 44000,
+    items: [
+      { id: 'item-13', name: 'Fresh Chicken Curry Cut', unit: '1 kg', quantity: 1, pricePaise: 26000 },
+      { id: 'item-14', name: 'Farm Fresh White Eggs', unit: '6 pcs', quantity: 1, pricePaise: 4800 },
+    ],
+  },
+];
 
 export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'new' | 'packing' | 'ready' | 'done'>('new');
-  const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
-  const [selectedVendorId, setSelectedVendorId] = useState<string>('');
-  const [orders, setOrders] = useState<VendorOrderPart[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [vendors, setVendors] = useState<VendorProfileInfo[]>(FALLBACK_VENDORS);
+  const [selectedVendorId, setSelectedVendorId] = useState<string>('vendor-1');
+  const [orders, setOrders] = useState<VendorOrderPart[]>(FALLBACK_ORDERS);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const previousOrderCountRef = useRef<number>(0);
+
+  // Animated sliding indicator for status tabs (0: new, 1: packing, 2: ready, 3: done)
+  const tabAnim = useRef(new Animated.Value(0)).current;
 
   // 1. Fetch vendor list
   useEffect(() => {
@@ -42,7 +131,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           setSelectedVendorId(list[0].id);
         }
       } catch {
-        // Fallback default vendor already set; silently ignore network/404 during dev
+        // Fallback vendor already set
       }
     }
     loadVendors();
@@ -50,24 +139,22 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
   // 2. Fetch vendor orders
   const fetchOrders = useCallback(async (isPolling = false) => {
-    if (!isPolling) setLoading(true);
     try {
       const data = await dusmintApi.getVendorOrders(selectedVendorId || undefined);
       if (data && data.length > 0) {
         setOrders(data);
 
-        // Check for newly arrived orders to alert the merchant
-        const pendingCount = (data || []).filter(o => o.status === 'pending').length;
+        // Alert on new incoming orders
+        const pendingCount = data.filter((o) => o.status === 'pending').length;
         if (previousOrderCountRef.current > 0 && pendingCount > previousOrderCountRef.current) {
           Vibration.vibrate([0, 500, 200, 500]);
-          Alert.alert('NEW ORDER RECEIVED', 'Customer has placed a new order. Please pack items.');
+          Alert.alert('New Order Received', 'A customer order has arrived. Please pack the items.');
         }
         previousOrderCountRef.current = pendingCount;
       }
     } catch {
-      // Retain fallback orders so screen is never blank or spamming terminal warnings
+      // Retain fallback orders
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
   }, [selectedVendorId]);
@@ -76,7 +163,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     fetchOrders();
     const interval = setInterval(() => {
       fetchOrders(true);
-    }, 6000);
+    }, 8000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
@@ -85,13 +172,33 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     fetchOrders();
   };
 
-  const selectedVendor = vendors.find(v => v.id === selectedVendorId);
+  const selectedVendor = vendors.find((v) => v.id === selectedVendorId) || vendors[0];
 
-  // Filter orders by tab
-  const newOrders = orders.filter(o => o.status === 'pending' || o.status === 'accepted');
-  const packingOrders = orders.filter(o => o.status === 'packing');
-  const readyOrders = orders.filter(o => o.status === 'ready');
-  const doneOrders = orders.filter(o => o.status === 'picked_up' || o.status === 'delivered');
+  // Store status toggle handler
+  const handleToggleStoreStatus = () => {
+    const nextState = !isOpen;
+    setIsOpen(nextState);
+    if (selectedVendorId) {
+      dusmintApi.toggleVendorStatus(selectedVendorId, nextState).catch(() => {});
+    }
+  };
+
+  // Tab selection with spring animation
+  const handleSelectTab = (tabKey: 'new' | 'packing' | 'ready' | 'done', idx: number) => {
+    setActiveTab(tabKey);
+    Animated.spring(tabAnim, {
+      toValue: idx,
+      useNativeDriver: false,
+      tension: 65,
+      friction: 10,
+    }).start();
+  };
+
+  // Filter orders by status
+  const newOrders = orders.filter((o) => o.status === 'pending' || o.status === 'accepted');
+  const packingOrders = orders.filter((o) => o.status === 'packing');
+  const readyOrders = orders.filter((o) => o.status === 'ready');
+  const doneOrders = orders.filter((o) => o.status === 'picked_up' || o.status === 'delivered');
 
   const displayedOrders =
     activeTab === 'new'
@@ -102,280 +209,261 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       ? readyOrders
       : doneOrders;
 
-  return (
-    <View style={styles.container}>
-      {/* Premium Top Bar with Safe Area Inset Protection */}
-      <View style={[styles.headerContainer, { paddingTop: insets.top > 0 ? insets.top + 8 : 16 }]}>
-        <View style={styles.headerTopRow}>
-          {/* Shop Avatar & Info */}
-          <View style={styles.shopSection}>
-            <View style={styles.shopAvatar}>
-              <Ionicons name="storefront" size={20} color="#FC6011" />
-            </View>
-            <View style={styles.shopDetails}>
-              <View style={styles.shopNameRow}>
-                <Text style={styles.shopName} numberOfLines={1}>
-                  {selectedVendor ? selectedVendor.name : 'My Dukaan'}
-                </Text>
-                {vendors.length > 1 && (
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      const nextIdx = (vendors.findIndex(v => v.id === selectedVendorId) + 1) % vendors.length;
-                      setSelectedVendorId(vendors[nextIdx].id);
-                    }}
-                    style={styles.switchChip}
-                  >
-                    <Text style={styles.switchChipText}>⇄ Switch</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+  // Shortage alert action
+  const handleReportShortage = (order: VendorOrderPart) => {
+    Alert.alert(
+      'Report Item Shortage',
+      `Mark an item unavailable for ${order.orderCode}? Customer and rider will be alerted immediately.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm Shortage',
+          style: 'destructive',
+          onPress: () => Alert.alert('Shortage Reported', 'Operations and rider have been informed.'),
+        },
+      ]
+    );
+  };
 
-              <View style={styles.clusterRow}>
-                <View style={[styles.statusDot, { backgroundColor: isOpen ? '#10B981' : '#EF4444' }]} />
-                <Text style={styles.clusterText}>
-                  {selectedVendor?.category ? `${selectedVendor.category} Dukaan` : 'Vegetables & Greens'} • Vijay Nagar
-                </Text>
-              </View>
-            </View>
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Soft Green Gradient Accent Header Background */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Svg width="100%" height={260}>
+          <Defs>
+            <SvgGradient id="ordersAccentGrad" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#E8F5EC" />
+              <Stop offset="100%" stopColor="#FFFFFF" />
+            </SvgGradient>
+          </Defs>
+          <Rect width="100%" height={260} fill="url(#ordersAccentGrad)" />
+        </Svg>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
+      >
+        {/* Screen Header - Identical Alignment & Typography to Earnings & Menu */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerTitles}>
+            <Text style={styles.screenTitle}>Orders</Text>
+            <Text style={styles.shopSubTitle}>
+              {selectedVendor?.name || 'Gupta Traders'} • {selectedVendor?.cluster_name || 'Vijay Nagar'}
+            </Text>
           </View>
 
-          {/* Online / Offline Pill */}
-          <View
-            style={[
-              styles.onlinePill,
-              {
-                backgroundColor: isOpen ? '#ECFDF5' : '#FEF2F2',
-                borderColor: isOpen ? '#A7F3D0' : '#FECACA',
-              },
-            ]}
+          {/* Clean 1-Tap Store Open/Closed Toggle */}
+          <TouchableOpacity
+            style={[styles.statusTogglePill, isOpen ? styles.statusToggleOpen : styles.statusToggleClosed]}
+            onPress={handleToggleStoreStatus}
+            activeOpacity={0.8}
           >
+            <View style={[styles.statusDot, isOpen ? styles.statusDotOpen : styles.statusDotClosed]} />
             <Text
               style={[
-                styles.onlineText,
-                { color: isOpen ? '#047857' : '#DC2626' },
+                styles.statusToggleText,
+                isOpen ? styles.statusToggleTextOpen : styles.statusToggleTextClosed,
               ]}
             >
-              {isOpen ? 'OPEN' : 'CLOSED'}
+              {isOpen ? 'STORE OPEN' : 'CLOSED'}
             </Text>
-            <Switch
-              value={isOpen}
-              onValueChange={setIsOpen}
-              trackColor={{ false: '#FECACA', true: '#A7F3D0' }}
-              thumbColor={isOpen ? '#10B981' : '#EF4444'}
-              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }], marginLeft: 2 }}
-            />
-          </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Segmented Status Tabs */}
-        <View style={styles.segmentContainer}>
+        {/* 1. Today's Pulse Metrics - The 3 Essential Numbers for the Merchant */}
+        <View style={styles.pulseRow}>
+          {/* Card 1: To Pack (Urgent) */}
+          <TouchableOpacity
+            style={[styles.pulseCard, newOrders.length > 0 && styles.pulseCardUrgent]}
+            onPress={() => handleSelectTab('new', 0)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.pulseCardTop}>
+              <View style={[styles.pulseIconCircle, newOrders.length > 0 && styles.pulseIconCircleUrgent]}>
+                <Ionicons name="cube" size={16} color={newOrders.length > 0 ? '#047A36' : '#64748B'} />
+              </View>
+              <Text style={[styles.pulseVal, newOrders.length > 0 && styles.pulseValUrgent]}>
+                {newOrders.length}
+              </Text>
+            </View>
+            <Text style={styles.pulseLabel}>To Pack</Text>
+          </TouchableOpacity>
+
+          {/* Card 2: In Progress (Packing / Ready) */}
+          <TouchableOpacity
+            style={styles.pulseCard}
+            onPress={() => handleSelectTab('packing', 1)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.pulseCardTop}>
+              <View style={styles.pulseIconCircle}>
+                <Ionicons name="time-outline" size={16} color="#64748B" />
+              </View>
+              <Text style={styles.pulseVal}>
+                {packingOrders.length + readyOrders.length}
+              </Text>
+            </View>
+            <Text style={styles.pulseLabel}>In Progress</Text>
+          </TouchableOpacity>
+
+          {/* Card 3: Delivered Today */}
+          <TouchableOpacity
+            style={styles.pulseCard}
+            onPress={() => handleSelectTab('done', 3)}
+            activeOpacity={0.85}
+          >
+            <View style={styles.pulseCardTop}>
+              <View style={styles.pulseIconCircle}>
+                <Ionicons name="checkmark-done" size={16} color="#047A36" />
+              </View>
+              <Text style={styles.pulseVal}>{doneOrders.length}</Text>
+            </View>
+            <Text style={styles.pulseLabel}>Delivered</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 2. Filter Tabs Segment with Smooth Animated Sliding Indicator */}
+        <View style={styles.tabsContainer}>
+          <Animated.View
+            style={[
+              styles.tabIndicator,
+              {
+                left: tabAnim.interpolate({
+                  inputRange: [0, 1, 2, 3],
+                  outputRange: ['0.8%', '25.6%', '50.4%', '75.2%'],
+                }),
+              },
+            ]}
+          />
           {(
             [
-              { key: 'new', label: 'New', count: newOrders.length },
+              { key: 'new', label: 'To Pack', count: newOrders.length },
               { key: 'packing', label: 'Packing', count: packingOrders.length },
               { key: 'ready', label: 'Ready', count: readyOrders.length },
-              { key: 'done', label: 'Done', count: doneOrders.length },
+              { key: 'done', label: 'Delivered', count: doneOrders.length },
             ] as const
-          ).map((tab) => {
+          ).map((tab, idx) => {
             const isSelected = activeTab === tab.key;
             return (
               <TouchableOpacity
                 key={tab.key}
+                onPress={() => handleSelectTab(tab.key, idx)}
                 activeOpacity={0.8}
-                onPress={() => setActiveTab(tab.key)}
-                style={[
-                  styles.segmentTab,
-                  isSelected && styles.segmentTabActive,
-                ]}
+                style={styles.tabBtn}
               >
-                <Text
-                  style={[
-                    styles.segmentLabel,
-                    isSelected && styles.segmentLabelActive,
-                  ]}
-                >
+                <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
                   {tab.label}
                 </Text>
-                <View
-                  style={[
-                    styles.segmentBadge,
-                    isSelected
-                      ? styles.segmentBadgeActive
-                      : tab.key === 'new' && tab.count > 0
-                      ? styles.segmentBadgeAlert
-                      : styles.segmentBadgeInactive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.segmentBadgeText,
-                      isSelected
-                        ? styles.segmentBadgeTextActive
-                        : tab.key === 'new' && tab.count > 0
-                        ? styles.segmentBadgeTextAlert
-                        : styles.segmentBadgeTextInactive,
-                    ]}
-                  >
-                    {tab.count}
-                  </Text>
-                </View>
+                {tab.count > 0 && (
+                  <View style={[styles.tabCountBadge, isSelected && styles.tabCountBadgeActive]}>
+                    <Text style={[styles.tabCountText, isSelected && styles.tabCountTextActive]}>
+                      {tab.count}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
             );
           })}
         </View>
-      </View>
 
-      {/* Orders ScrollView */}
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#FC6011']} />}
-        showsVerticalScrollIndicator={false}
-      >
-        {loading && !refreshing && (
-          <View style={styles.emptyContainer}>
-            <ActivityIndicator size="large" color="#FC6011" />
-            <Text style={styles.emptySubtitle}>Syncing live store orders...</Text>
-          </View>
-        )}
-
-        {!loading && displayedOrders.length === 0 && (
+        {/* 3. Empty State when Tab has No Orders */}
+        {displayedOrders.length === 0 && (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="cube-outline" size={32} color="#94A3B8" />
+              <Ionicons name="checkmark-circle-outline" size={32} color="#047A36" />
             </View>
-            <Text style={styles.emptyTitle}>No {activeTab} orders right now</Text>
+            <Text style={styles.emptyTitle}>
+              {activeTab === 'new'
+                ? 'No Pending Orders'
+                : activeTab === 'packing'
+                ? 'No Orders Being Packed'
+                : activeTab === 'ready'
+                ? 'No Orders Waiting for Rider'
+                : 'No Delivered Orders Yet'}
+            </Text>
             <Text style={styles.emptySubtitle}>
-              New customer orders assigned to your shop will alert and show up here instantly.
+              {activeTab === 'new'
+                ? 'New incoming customer orders will ring and appear here instantly.'
+                : 'Orders in this pipeline will appear here automatically.'}
             </Text>
           </View>
         )}
 
+        {/* 4. Minimal, High-Contrast Order Cards */}
         {displayedOrders.map((order) => {
-          const itemCount = order.items.reduce((sum, i) => sum + i.quantity, 0);
+          const isPending = order.status === 'pending' || order.status === 'accepted';
+          const isPacking = order.status === 'packing';
           const isReady = order.status === 'ready';
+          const isDone = order.status === 'picked_up' || order.status === 'delivered';
+          const netPayout = Math.round((order.subtotalPaise * 0.9) / 100);
 
           return (
-            <View
-              key={order.partId}
-              style={[
-                styles.orderCard,
-                isReady && styles.orderCardReady,
-              ]}
-            >
-              {/* Order Card Top Header */}
-              <View style={styles.cardHeader}>
+            <View key={order.partId} style={[styles.orderCard, isReady && styles.orderCardReady]}>
+              {/* Card Header: Order Code, Time Slot, and Take-Home Payout */}
+              <View style={styles.cardHeaderRow}>
                 <View>
-                  <View style={styles.orderIdRow}>
-                    <Text style={styles.orderIdLabel}>ORDER</Text>
-                    <Text style={styles.orderIdCode}>{order.orderCode}</Text>
+                  <View style={styles.orderCodeRow}>
+                    <Text style={styles.orderCodeText}>{order.orderCode}</Text>
+                    {isPending && (
+                      <View style={styles.newAlertPill}>
+                        <Text style={styles.newAlertPillText}>NEW</Text>
+                      </View>
+                    )}
                   </View>
                   <View style={styles.slotRow}>
-                    <Ionicons name="time-outline" size={13} color="#64748B" style={{ marginRight: 4 }} />
-                    <Text style={styles.slotText}>{order.slotTime || 'Morning Slot • 07:00 - 10:00 AM'}</Text>
+                    <Ionicons name="time-outline" size={12} color="#64748B" style={{ marginRight: 4 }} />
+                    <Text style={styles.slotText}>{order.slotTime || 'Morning Slot'}</Text>
                   </View>
                 </View>
 
-                {isReady ? (
-                  <View style={styles.readyBadge}>
-                    <Ionicons name="checkmark-circle" size={13} color="#047857" style={{ marginRight: 4 }} />
-                    <Text style={styles.readyBadgeText}>SEALED & READY</Text>
-                  </View>
-                ) : (
-                  <View style={styles.actionRequiredBadge}>
-                    <Ionicons name="flash" size={12} color="#B45309" style={{ marginRight: 4 }} />
-                    <Text style={styles.actionRequiredText}>ACTION REQUIRED</Text>
-                  </View>
-                )}
+                {/* Direct Store Net Payout */}
+                <View style={styles.payoutBox}>
+                  <Text style={styles.payoutAmountText}>₹{netPayout}</Text>
+                  <Text style={styles.payoutSubText}>Store Payout</Text>
+                </View>
               </View>
 
-              {/* Items List Box */}
+              {/* Items List Box - Clear weights and names scannable at a glance */}
               <View style={styles.itemsBox}>
-                <View style={styles.itemsBoxHeader}>
-                  <Text style={styles.itemsBoxTitle}>Items to Pack ({itemCount} total)</Text>
-                  <Text style={styles.itemsBoxSub}>Weigh before packing</Text>
-                </View>
-
                 {order.items.map((item, idx) => (
-                  <View key={idx} style={styles.itemRow}>
-                    <View style={styles.itemQtyBadge}>
-                      <Text style={styles.itemQtyText}>{item.quantity}x</Text>
+                  <View
+                    key={idx}
+                    style={[
+                      styles.itemRow,
+                      idx < order.items.length - 1 && styles.itemRowBorder,
+                    ]}
+                  >
+                    <View style={styles.itemBullet} />
+                    <View style={styles.itemNameWrapper}>
+                      <Text style={styles.itemName} numberOfLines={1}>
+                        {item.name}
+                      </Text>
                     </View>
-                    <View style={styles.itemInfo}>
-                      <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemUnit}>{item.unit}</Text>
+                    <View style={styles.itemWeightBadge}>
+                      <Text style={styles.itemWeightText}>{item.unit}</Text>
                     </View>
-                    <Text style={styles.itemPrice}>
-                      ₹{((item.pricePaise * item.quantity) / 100).toFixed(0)}
-                    </Text>
                   </View>
                 ))}
               </View>
 
-              {/* Financial & Net Payout Strip */}
-              <View style={styles.payoutStrip}>
-                <View style={styles.payoutLeft}>
-                  <Text style={styles.subtotalLabel}>Customer Subtotal</Text>
-                  <Text style={styles.subtotalValue}>
-                    ₹{(order.subtotalPaise / 100).toFixed(0)}
-                  </Text>
-                </View>
-                <View style={styles.payoutDivider} />
-                <View style={styles.payoutRight}>
-                  <View style={styles.payoutLabelRow}>
-                    <Text style={styles.payoutLabel}>Your Net Payout</Text>
-                    <View style={styles.instantPill}>
-                      <Text style={styles.instantPillText}>Instant T+0</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.payoutValue}>
-                    ₹{((order.subtotalPaise * 0.9) / 100).toFixed(0)}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Tamper Proof Seal Badge if Ready */}
-              {isReady && order.sealQr && (
-                <View style={styles.sealStrip}>
-                  <Ionicons name="shield-checkmark" size={18} color="#166534" style={{ marginRight: 8 }} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.sealTitle}>Tamper-Proof Green Seal Tape</Text>
-                    <Text style={styles.sealCode}>Barcode Serial: {order.sealQr}</Text>
-                  </View>
-                  <View style={styles.verifiedChip}>
-                    <Text style={styles.verifiedChipText}>VERIFIED</Text>
-                  </View>
-                </View>
-              )}
-
-              {/* Action Buttons */}
-              {!isReady && (
+              {/* Action Button Row */}
+              {isPending && (
                 <View style={styles.actionRow}>
                   <TouchableOpacity
+                    style={styles.missingItemBtn}
                     activeOpacity={0.7}
-                    onPress={() =>
-                      Alert.alert(
-                        'Mark Item Shortage',
-                        'Customer will be refunded and central operations alerted. Are you sure?',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          {
-                            text: 'Confirm Shortage',
-                            style: 'destructive',
-                            onPress: () => Alert.alert('Shortage Reported', 'Operations team has been updated.'),
-                          },
-                        ]
-                      )
-                    }
-                    style={styles.itemShortBtn}
+                    onPress={() => handleReportShortage(order)}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Ionicons name="warning-outline" size={13} color="#DC2626" style={{ marginRight: 4 }} />
-                      <Text style={styles.itemShortBtnText}>Item Short</Text>
-                    </View>
+                    <Ionicons name="alert-circle-outline" size={15} color="#DC2626" style={{ marginRight: 4 }} />
+                    <Text style={styles.missingItemBtnText}>Shortage</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    style={styles.primaryPackBtn}
                     activeOpacity={0.85}
                     onPress={() =>
                       navigation.navigate('VendorPack', {
@@ -385,510 +473,565 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                         subtotalPaise: order.subtotalPaise,
                       })
                     }
-                    style={styles.packBtn}
                   >
-                    <MaterialCommunityIcons name="scale-balance" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.packBtnText}>Pack & Weigh on Scale</Text>
+                    <Ionicons name="cube-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.primaryPackBtnText}>Start Packing ({order.items.length}) →</Text>
                   </TouchableOpacity>
+                </View>
+              )}
+
+              {isPacking && (
+                <TouchableOpacity
+                  style={styles.primaryPackBtnFull}
+                  activeOpacity={0.85}
+                  onPress={() =>
+                    navigation.navigate('VendorPack', {
+                      partId: order.partId,
+                      orderCode: order.orderCode,
+                      items: order.items,
+                      subtotalPaise: order.subtotalPaise,
+                    })
+                  }
+                >
+                  <Ionicons name="scale-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.primaryPackBtnText}>Continue Packing & Weighing →</Text>
+                </TouchableOpacity>
+              )}
+
+              {isReady && (
+                <View style={styles.readyStatusStrip}>
+                  <View style={styles.readyStatusLeft}>
+                    <Ionicons name="checkmark-circle" size={18} color="#047A36" style={{ marginRight: 6 }} />
+                    <View>
+                      <Text style={styles.readyStatusTitle}>Packed & Sealed</Text>
+                      <Text style={styles.readyStatusSub}>Tape: {order.sealQr || 'DST-SEAL-OK'}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.riderPill}>
+                    <Ionicons name="bicycle-outline" size={13} color="#047A36" style={{ marginRight: 4 }} />
+                    <Text style={styles.riderPillText}>Rider Arriving</Text>
+                  </View>
+                </View>
+              )}
+
+              {isDone && (
+                <View style={styles.deliveredStatusStrip}>
+                  <View style={styles.deliveredLeft}>
+                    <Ionicons name="checkmark-done" size={16} color="#15803D" style={{ marginRight: 6 }} />
+                    <Text style={styles.deliveredText}>Delivered to Customer</Text>
+                  </View>
+                  <Text style={styles.settledText}>Settled to UPI</Text>
                 </View>
               )}
             </View>
           );
         })}
+
+        {/* 5. Minimal Quick Shortcut to Menu & Stock */}
+        <TouchableOpacity
+          style={styles.quickStockLink}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('VendorStock')}
+        >
+          <Ionicons name="layers-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
+          <Text style={styles.quickStockLinkText}>Update Store Stock & Menu →</Text>
+        </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-  headerContainer: {
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 3,
   },
-  headerTopRow: {
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    marginTop: 16,
+    marginBottom: 16,
   },
-  shopSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  headerTitles: {
     flex: 1,
     marginRight: 10,
   },
-  shopAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#FFF5F0',
-    borderWidth: 1,
-    borderColor: '#FFE4D6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  shopAvatarEmoji: {
-    fontSize: 22,
-  },
-  shopDetails: {
-    flex: 1,
-  },
-  shopNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  shopName: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0F172A',
+  screenTitle: {
     fontFamily: 'Metropolis-Bold',
-    flexShrink: 1,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#111117',
+    letterSpacing: -0.5,
   },
-  switchChip: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-    marginLeft: 6,
-  },
-  switchChipText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  clusterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  shopSubTitle: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#64748B',
     marginTop: 2,
   },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 5,
-  },
-  clusterText: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '500',
-  },
-  onlinePill: {
+  statusTogglePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 4,
-    paddingVertical: 4,
-    borderRadius: 22,
-    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1.5,
   },
-  onlineText: {
+  statusToggleOpen: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#BBF7D0',
+  },
+  statusToggleClosed: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusDotOpen: {
+    backgroundColor: '#047A36',
+  },
+  statusDotClosed: {
+    backgroundColor: '#DC2626',
+  },
+  statusToggleText: {
+    fontFamily: 'Metropolis-Bold',
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
-  segmentContainer: {
+  statusToggleTextOpen: {
+    color: '#047A36',
+  },
+  statusToggleTextClosed: {
+    color: '#DC2626',
+  },
+
+  // Pulse Metrics Row
+  pulseRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  pulseCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 16,
+    padding: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  pulseCardUrgent: {
+    borderColor: '#BBF7D0',
+    backgroundColor: '#F0FDF4',
+  },
+  pulseCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  pulseIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulseIconCircleUrgent: {
+    backgroundColor: '#DCFCE7',
+  },
+  pulseVal: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111117',
+  },
+  pulseValUrgent: {
+    color: '#047A36',
+  },
+  pulseLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+
+  // Segmented Tabs Bar
+  tabsContainer: {
     flexDirection: 'row',
     backgroundColor: '#F1F5F9',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 4,
+    borderRadius: 14,
+    padding: 3,
+    marginBottom: 16,
+    position: 'relative',
+    height: 44,
   },
-  segmentTab: {
+  tabIndicator: {
+    position: 'absolute',
+    top: 3,
+    bottom: 3,
+    width: '24%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 11,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  tabBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 9,
+    zIndex: 1,
+    paddingHorizontal: 2,
   },
-  segmentTabActive: {
-    backgroundColor: '#FC6011',
-    shadowColor: '#FC6011',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  segmentLabel: {
+  tabLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: '#64748B',
   },
-  segmentLabelActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  tabLabelActive: {
+    color: '#047A36',
+    fontWeight: '800',
   },
-  segmentBadge: {
-    paddingHorizontal: 6,
+  tabCountBadge: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 5,
     paddingVertical: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     marginLeft: 4,
   },
-  segmentBadgeActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+  tabCountBadgeActive: {
+    backgroundColor: '#ECFDF5',
   },
-  segmentBadgeInactive: {
-    backgroundColor: '#E2E8F0',
-  },
-  segmentBadgeAlert: {
-    backgroundColor: '#EF4444',
-  },
-  segmentBadgeText: {
+  tabCountText: {
     fontSize: 10,
     fontWeight: '700',
-  },
-  segmentBadgeTextActive: {
-    color: '#FFFFFF',
-  },
-  segmentBadgeTextInactive: {
     color: '#475569',
   },
-  segmentBadgeTextAlert: {
-    color: '#FFFFFF',
+  tabCountTextActive: {
+    color: '#047A36',
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-  },
+
+  // Empty State
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 48,
     paddingHorizontal: 24,
-  },
-  emptyIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
     marginBottom: 16,
   },
-  emptyEmoji: {
-    fontSize: 32,
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#ECFDF5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   emptyTitle: {
-    fontSize: 17,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 6,
+    color: '#111117',
+    marginBottom: 4,
+    textAlign: 'center',
   },
   emptySubtitle: {
-    fontSize: 13,
+    fontSize: 12.5,
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 18,
   },
+
+  // Order Card
   orderCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
+    marginBottom: 14,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 3 },
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 2,
   },
   orderCardReady: {
-    borderColor: '#A7F3D0',
+    borderColor: '#BBF7D0',
   },
-  cardHeader: {
+  cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  orderIdRow: {
+  orderCodeRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  orderIdLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
-    marginRight: 6,
-  },
-  orderIdCode: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+  orderCodeText: {
     fontFamily: 'Metropolis-Bold',
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#111117',
+    letterSpacing: -0.3,
+  },
+  newAlertPill: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+    marginLeft: 6,
+  },
+  newAlertPillText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#DC2626',
+    letterSpacing: 0.4,
   },
   slotRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 3,
   },
-  slotIcon: {
-    fontSize: 11,
-    marginRight: 4,
-  },
   slotText: {
     fontSize: 12,
     color: '#64748B',
     fontWeight: '500',
   },
-  actionRequiredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+  payoutBox: {
+    alignItems: 'flex-end',
   },
-  actionRequiredIcon: {
-    fontSize: 11,
-    marginRight: 4,
-    color: '#B45309',
-  },
-  actionRequiredText: {
-    fontSize: 10,
+  payoutAmountText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 18,
     fontWeight: '800',
-    color: '#B45309',
-    letterSpacing: 0.3,
+    color: '#047A36',
+    letterSpacing: -0.3,
   },
-  readyBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+  payoutSubText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#15803D',
+    marginTop: 1,
   },
-  readyBadgeIcon: {
-    fontSize: 11,
-    fontWeight: '800',
-    marginRight: 4,
-    color: '#047857',
-  },
-  readyBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#047857',
-    letterSpacing: 0.3,
-  },
+
+  // Items Box
   itemsBox: {
     backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderWidth: 1,
     borderColor: '#F1F5F9',
     marginBottom: 12,
   },
-  itemsBoxHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    paddingBottom: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  itemsBoxTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  itemsBoxSub: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#94A3B8',
-  },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 7,
   },
-  itemQtyBadge: {
-    backgroundColor: '#FFF5F0',
-    borderWidth: 1,
-    borderColor: '#FFE4D6',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+  itemRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEF2F6',
+  },
+  itemBullet: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#047A36',
     marginRight: 8,
   },
-  itemQtyText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FC6011',
-  },
-  itemInfo: {
+  itemNameWrapper: {
     flex: 1,
+    marginRight: 8,
   },
   itemName: {
     fontSize: 13,
     fontWeight: '700',
     color: '#1E293B',
   },
-  itemUnit: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
-  },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  payoutStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    padding: 10,
+  itemWeightBadge: {
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F1F5F9',
-    marginBottom: 14,
-  },
-  payoutLeft: {
-    flex: 1,
-  },
-  subtotalLabel: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  subtotalValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#334155',
-    marginTop: 2,
-  },
-  payoutDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 12,
-  },
-  payoutRight: {
-    flex: 1.2,
-  },
-  payoutLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  payoutLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#047857',
-  },
-  instantPill: {
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 6,
-    marginLeft: 5,
-  },
-  instantPillText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#047857',
-  },
-  payoutValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#047857',
-    marginTop: 2,
-  },
-  sealStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 12,
-  },
-  sealIcon: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  sealTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#166534',
-  },
-  sealCode: {
-    fontSize: 10,
-    color: '#15803D',
-    marginTop: 1,
-  },
-  verifiedChip: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  verifiedChipText: {
-    fontSize: 9,
+  itemWeightText: {
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#15803D',
+    color: '#0F172A',
   },
+
+  // Action Buttons
   actionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 10,
+    alignItems: 'center',
   },
-  itemShortBtn: {
-    flex: 0.38,
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    paddingVertical: 13,
-    borderRadius: 12,
+  missingItemBtn: {
+    flex: 0.35,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    height: 44,
+    borderRadius: 12,
   },
-  itemShortBtnText: {
+  missingItemBtnText: {
+    fontFamily: 'Metropolis-Bold',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#DC2626',
   },
-  packBtn: {
-    flex: 0.62,
+  primaryPackBtn: {
+    flex: 0.65,
     flexDirection: 'row',
-    backgroundColor: '#FC6011',
-    paddingVertical: 13,
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FC6011',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
+    backgroundColor: '#047A36',
+    height: 44,
+    borderRadius: 12,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.16,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  packBtnIcon: {
-    fontSize: 15,
-    marginRight: 6,
+  primaryPackBtnFull: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#047A36',
+    height: 44,
+    borderRadius: 12,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.16,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  packBtnText: {
+  primaryPackBtnText: {
+    fontFamily: 'Metropolis-Bold',
     fontSize: 13,
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.2,
+    letterSpacing: -0.2,
+  },
+
+  // Ready & Delivered Status Strips
+  readyStatusStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  readyStatusLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  readyStatusTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#047A36',
+  },
+  readyStatusSub: {
+    fontSize: 11,
+    color: '#15803D',
+    marginTop: 1,
+  },
+  riderPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  riderPillText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#047A36',
+  },
+  deliveredStatusStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  deliveredLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deliveredText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  settledText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#047A36',
+  },
+
+  // Quick Shortcut to Stock
+  quickStockLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    height: 44,
+    marginTop: 6,
+    marginBottom: 20,
+  },
+  quickStockLinkText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#047A36',
   },
 });
