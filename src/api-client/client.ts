@@ -324,7 +324,7 @@ export class DusmintApiClient {
 
   async updateVendorStock(
     itemId: string,
-    payload: { inStock?: boolean; price?: number; stockKg?: number }
+    payload: { inStock?: boolean; price?: number; stockKg?: number; stockGrams?: number }
   ): Promise<{ success: boolean }> {
     try {
       const res = await this.client.put(`/vendor/stock/${itemId}`, payload);

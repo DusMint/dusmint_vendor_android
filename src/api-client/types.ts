@@ -208,6 +208,7 @@ export interface VendorStockItem {
   isInStock: boolean;
   photoUrl?: string;
   stockKg?: number;
+  stockGrams?: number;
   reservedKg?: number;
 }
 
