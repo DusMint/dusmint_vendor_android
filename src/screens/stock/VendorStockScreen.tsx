@@ -779,7 +779,7 @@ export const VendorStockScreen: React.FC = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
       >
         {/* Screen Header - Aligned to exact vertical position & typography of Earnings & Profile */}
-        <Text style={styles.screenTitle}>Inventory</Text>
+        <Text style={styles.screenTitle}>Stock</Text>
 
         {/* 1. Boxes of Active Inventory & Out of Stock */}
         <View style={styles.metricsRow}>

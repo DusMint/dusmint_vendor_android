@@ -1,11 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, LogBox, Animated, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  LogBox,
+  Animated,
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  Modal,
+  Vibration,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@dusmint/ui';
 import { VendorOrdersScreen } from './src/screens/orders/VendorOrdersScreen';
@@ -28,6 +39,7 @@ const Stack = createNativeStackNavigator();
 function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const bottomOffset = insets.bottom > 0 ? insets.bottom + 6 : 14;
   const [barWidth, setBarWidth] = useState(0);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
 
   // Animated sliding indicator value tracking route index (0, 1, 2, 3)
   const slideAnim = useRef(new Animated.Value(state.index)).current;
@@ -39,6 +51,9 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
     new Animated.Value(state.index === 2 ? 1.16 : 1.0),
     new Animated.Value(state.index === 3 ? 1.16 : 1.0),
   ]).current;
+
+  // Pulsing animation for the Voice Assistant visualizer ring
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     // 1. Smooth spring slide of the gray pill
@@ -60,119 +75,247 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
     });
   }, [state.index, slideAnim, scaleAnims]);
 
-  const numTabs = state.routes.length;
-  const tabWidth = barWidth > 0 ? (barWidth - 12) / numTabs : 0;
+  useEffect(() => {
+    if (isVoiceModalOpen) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.25,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [isVoiceModalOpen, pulseAnim]);
+
+  // 5 slots: Slot 0 (Orders), Slot 1 (Inventory), Slot 2 (Mic), Slot 3 (Earnings), Slot 4 (Profile)
+  const numSlots = 5;
+  const slotWidth = barWidth > 0 ? (barWidth - 12) / numSlots : 0;
+
+  const renderTabButton = (route: any, index: number) => {
+    const { options } = descriptors[route.key];
+    const isFocused = state.index === index;
+
+    const label =
+      options.tabBarLabel !== undefined
+        ? options.tabBarLabel
+        : options.title !== undefined
+        ? options.title
+        : route.name;
+
+    let iconName: keyof typeof Ionicons.glyphMap = 'receipt-outline';
+    if (route.name === 'VendorOrders') {
+      iconName = isFocused ? 'receipt' : 'receipt-outline';
+    } else if (route.name === 'VendorStock') {
+      iconName = isFocused ? 'grid' : 'grid-outline';
+    } else if (route.name === 'VendorEarnings') {
+      iconName = isFocused ? 'wallet' : 'wallet-outline';
+    } else if (route.name === 'VendorProfile') {
+      iconName = isFocused ? 'person' : 'person-outline';
+    }
+
+    const onPress = () => {
+      const event = navigation.emit({
+        type: 'tabPress',
+        target: route.key,
+        canPreventDefault: true,
+      });
+
+      if (!isFocused && !event.defaultPrevented) {
+        navigation.navigate(route.name);
+      }
+    };
+
+    const onLongPress = () => {
+      navigation.emit({
+        type: 'tabLongPress',
+        target: route.key,
+      });
+    };
+
+    return (
+      <TouchableOpacity
+        key={route.key}
+        accessibilityRole="button"
+        accessibilityState={isFocused ? { selected: true } : {}}
+        accessibilityLabel={options.tabBarAccessibilityLabel}
+        testID={options.tabBarTestID}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        style={styles.tabButton}
+        activeOpacity={0.8}
+      >
+        <View style={styles.tabContent}>
+          <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
+            <Ionicons
+              name={iconName}
+              size={20}
+              color={isFocused ? '#047A36' : '#94A3B8'}
+            />
+          </Animated.View>
+          <Text
+            style={[
+              styles.tabLabel,
+              isFocused ? styles.tabLabelActive : styles.tabLabelInactive,
+            ]}
+            numberOfLines={1}
+          >
+            {label as string}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View style={[styles.floatingWrapper, { bottom: bottomOffset }]}>
-      <View
-        onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
-        style={styles.floatingBar}
-      >
-        {/* Smooth Sliding Capsule Pill Track */}
-        {tabWidth > 0 && (
-          <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Animated.View
-              style={[
-                styles.sliderTrack,
-                {
-                  left: 6,
-                  width: tabWidth,
-                  transform: [
-                    {
-                      translateX: slideAnim.interpolate({
-                        inputRange: [0, 1, 2, 3],
-                        outputRange: [0, tabWidth, tabWidth * 2, tabWidth * 3],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <View style={styles.grayPill} />
-            </Animated.View>
-          </View>
-        )}
-
-        {/* Tab Buttons */}
-        <View style={styles.tabButtonsRow}>
-          {state.routes.map((route, index) => {
-            const { options } = descriptors[route.key];
-            const isFocused = state.index === index;
-
-            const label =
-              options.tabBarLabel !== undefined
-                ? options.tabBarLabel
-                : options.title !== undefined
-                ? options.title
-                : route.name;
-
-            let iconName: keyof typeof Ionicons.glyphMap = 'receipt-outline';
-            if (route.name === 'VendorOrders') {
-              iconName = isFocused ? 'receipt' : 'receipt-outline';
-            } else if (route.name === 'VendorStock') {
-              iconName = isFocused ? 'grid' : 'grid-outline';
-            } else if (route.name === 'VendorEarnings') {
-              iconName = isFocused ? 'wallet' : 'wallet-outline';
-            } else if (route.name === 'VendorProfile') {
-              iconName = isFocused ? 'person' : 'person-outline';
-            }
-
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            };
-
-            const onLongPress = () => {
-              navigation.emit({
-                type: 'tabLongPress',
-                target: route.key,
-              });
-            };
-
-            return (
-              <TouchableOpacity
-                key={route.key}
-                accessibilityRole="button"
-                accessibilityState={isFocused ? { selected: true } : {}}
-                accessibilityLabel={options.tabBarAccessibilityLabel}
-                testID={options.tabBarTestID}
-                onPress={onPress}
-                onLongPress={onLongPress}
-                style={styles.tabButton}
-                activeOpacity={0.8}
+    <>
+      <View style={[styles.floatingWrapper, { bottom: bottomOffset }]}>
+        <View
+          onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+          style={styles.floatingBar}
+        >
+          {/* Smooth Sliding Capsule Pill Track (Skips center slot 2 where Mic sits) */}
+          {slotWidth > 0 && (
+            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+              <Animated.View
+                style={[
+                  styles.sliderTrack,
+                  {
+                    left: 6,
+                    width: slotWidth,
+                    transform: [
+                      {
+                        translateX: slideAnim.interpolate({
+                          inputRange: [0, 1, 2, 3],
+                          outputRange: [0, slotWidth, slotWidth * 3, slotWidth * 4],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
               >
-                <View style={styles.tabContent}>
-                  <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
-                    <Ionicons
-                      name={iconName}
-                      size={20}
-                      color={isFocused ? '#047A36' : '#94A3B8'}
-                    />
-                  </Animated.View>
-                  <Text
-                    style={[
-                      styles.tabLabel,
-                      isFocused ? styles.tabLabelActive : styles.tabLabelInactive,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {label as string}
-                  </Text>
-                </View>
+                <View style={styles.grayPill} />
+              </Animated.View>
+            </View>
+          )}
+
+          {/* 5-Slot Tab Row: [Orders] [Inventory] [Popped-Out Mic] [Earnings] [Profile] */}
+          <View style={styles.tabButtonsRow}>
+            {/* Slot 0: Orders */}
+            {state.routes[0] && renderTabButton(state.routes[0], 0)}
+
+            {/* Slot 1: Inventory */}
+            {state.routes[1] && renderTabButton(state.routes[1], 1)}
+
+            {/* Slot 2: Popped-Out Center AI Mic Button */}
+            <View style={styles.micSlotContainer}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => {
+                  Vibration.vibrate(35);
+                  setIsVoiceModalOpen(true);
+                }}
+                style={styles.micPoppedButton}
+              >
+                <Ionicons name="mic" size={24} color="#047A36" />
               </TouchableOpacity>
-            );
-          })}
+              <Text style={styles.micSubLabel}>Ask AI</Text>
+            </View>
+
+            {/* Slot 3: Earnings */}
+            {state.routes[2] && renderTabButton(state.routes[2], 2)}
+
+            {/* Slot 4: Profile */}
+            {state.routes[3] && renderTabButton(state.routes[3], 3)}
+          </View>
         </View>
       </View>
-    </View>
+
+      {/* DusMint Voice Assistant Preview Modal */}
+      <Modal
+        visible={isVoiceModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsVoiceModalOpen(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setIsVoiceModalOpen(false)}
+          />
+          <View style={styles.voiceSheet}>
+            {/* Sheet Handle */}
+            <View style={styles.sheetHandle} />
+
+            {/* Header */}
+            <View style={styles.voiceHeader}>
+              <Text style={styles.voiceTitle}>Ask AI Assistant</Text>
+              <Text style={styles.voiceSubtitle}>
+                Speak your store commands in Hindi or English
+              </Text>
+            </View>
+
+            {/* Pulsing Mic Visualizer */}
+            <View style={styles.visualizerContainer}>
+              <Animated.View
+                style={[
+                  styles.pulseRing,
+                  {
+                    transform: [{ scale: pulseAnim }],
+                    opacity: pulseAnim.interpolate({
+                      inputRange: [1, 1.25],
+                      outputRange: [0.6, 0],
+                    }),
+                  },
+                ]}
+              />
+              <View style={styles.micCircleBig}>
+                <Ionicons name="mic" size={32} color="#047A36" />
+              </View>
+            </View>
+
+            {/* Listening State */}
+            <View style={styles.listeningBadge}>
+              <View style={styles.listeningDot} />
+              <Text style={styles.listeningText}>Listening for voice commands...</Text>
+            </View>
+
+            {/* Example Prompt Chips */}
+            <Text style={styles.examplesLabel}>TRY SAYING</Text>
+            <View style={styles.exampleChipsRow}>
+              {[
+                'Add 5 kg Fresh Desi Tomato',
+                'Check today payout balance',
+                'Pack order #DM-8821',
+                'Mark store closed for lunch',
+              ].map((cmd, idx) => (
+                <View key={idx} style={styles.exampleChip}>
+                  <Text style={styles.exampleChipText}>"{cmd}"</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeVoiceBtn}
+              onPress={() => setIsVoiceModalOpen(false)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.closeVoiceBtnText}>Close Assistant</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -280,13 +423,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
     position: 'relative',
   },
   sliderTrack: {
@@ -297,9 +440,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   grayPill: {
-    width: 68,
-    height: 46,
-    borderRadius: 23,
+    width: 58,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -320,7 +463,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 9.5,
     marginTop: 2,
     letterSpacing: -0.2,
   },
@@ -331,6 +474,178 @@ const styles = StyleSheet.create({
   tabLabelInactive: {
     fontWeight: '600',
     color: '#94A3B8',
+  },
+
+  // Popped-Out Center Mic Button
+  micSlotContainer: {
+    flex: 1,
+    height: 62,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  micPoppedButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -22,
+    borderWidth: 2.5,
+    borderColor: '#047A36',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  micSubLabel: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#047A36',
+    marginTop: 2,
+    letterSpacing: -0.2,
+  },
+
+  // Voice Assistant Preview Modal
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    justifyContent: 'flex-end',
+  },
+  voiceSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  sheetHandle: {
+    width: 38,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E2E8F0',
+    marginBottom: 16,
+  },
+  voiceHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  voiceTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#111117',
+    marginBottom: 4,
+  },
+  voiceSubtitle: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  visualizerContainer: {
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  pulseRing: {
+    position: 'absolute',
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#BBF7D0',
+  },
+  micCircleBig: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2.5,
+    borderColor: '#047A36',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  listeningBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  listeningDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#047A36',
+    marginRight: 6,
+  },
+  listeningText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#047A36',
+  },
+  examplesLabel: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+  },
+  exampleChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 24,
+    width: '100%',
+  },
+  exampleChip: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  exampleChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  closeVoiceBtn: {
+    width: '100%',
+    backgroundColor: '#F1F5F9',
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeVoiceBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#475569',
   },
 });
 

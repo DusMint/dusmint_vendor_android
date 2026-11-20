@@ -16,6 +16,7 @@ import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorOrderPart, VendorProfileInfo } from '../../api-client/types';
+import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
 // Realistic Rich Fallback Vendors for Gupta Traders
 const FALLBACK_VENDORS: VendorProfileInfo[] = [
@@ -146,6 +147,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
         // Alert on new incoming orders
         const pendingCount = data.filter((o) => o.status === 'pending').length;
+        useVendorAuthStore.getState().setPendingOrdersCount(pendingCount);
         if (previousOrderCountRef.current > 0 && pendingCount > previousOrderCountRef.current) {
           Vibration.vibrate([0, 500, 200, 500]);
           Alert.alert('New Order Received', 'A customer order has arrived. Please pack the items.');

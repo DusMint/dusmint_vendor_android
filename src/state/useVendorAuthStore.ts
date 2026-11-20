@@ -22,9 +22,11 @@ interface VendorAuthState {
   hasActiveVendor: boolean;
   isLoading: boolean;
   isHydrated: boolean;
+  pendingOrdersCount: number;
 
   // Actions
   setHydrated: (val: boolean) => void;
+  setPendingOrdersCount: (count: number) => void;
   setLanguage: (lang: string) => void;
   setStorePhotoUri: (uri: string | null) => void;
   setActiveVendor: (vendor: VendorProfileInfo | null) => void;
@@ -97,8 +99,10 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       isLoading: false,
       // If native storage is not compiled into the APK, start hydrated to avoid blocking the UI
       isHydrated: !hasNativeAsyncStorage,
+      pendingOrdersCount: 2,
 
       setHydrated: (val: boolean) => set({ isHydrated: val }),
+      setPendingOrdersCount: (count: number) => set({ pendingOrdersCount: count }),
 
       setLanguage: (lang: string) => {
         set({ selectedLanguage: lang });
