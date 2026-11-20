@@ -781,16 +781,22 @@ export const VendorStockScreen: React.FC = () => {
         {/* Screen Header - Aligned to exact vertical position & typography of Earnings & Profile */}
         <Text style={styles.screenTitle}>Stock</Text>
 
-        {/* 1. Boxes of Active Inventory & Out of Stock (Clean single-line label & number) */}
+        {/* 1. Boxes of Active Inventory & Out of Stock (Clean single-line label & number with background watermark icon) */}
         <View style={styles.metricsRow}>
           {/* Active Inventory Box */}
           <View style={styles.metricBoxActive}>
+            <View style={styles.metricBgWatermark} pointerEvents="none">
+              <Ionicons name="checkmark-circle" size={44} color="#047A36" style={{ opacity: 0.14 }} />
+            </View>
             <Text style={styles.metricLabelActive}>Active in Stock</Text>
             <Text style={styles.metricValActive}>{inStockCount}</Text>
           </View>
 
           {/* Out of Inventory Box */}
           <View style={styles.metricBoxOut}>
+            <View style={styles.metricBgWatermark} pointerEvents="none">
+              <Ionicons name="alert-circle" size={44} color="#DC2626" style={{ opacity: 0.14 }} />
+            </View>
             <Text style={styles.metricLabelOut}>Out of Stock</Text>
             <Text style={styles.metricValOut}>{outOfStockCount}</Text>
           </View>
@@ -929,6 +935,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
     shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -946,11 +954,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
+  },
+  metricBgWatermark: {
+    position: 'absolute',
+    left: 8,
+    top: '50%',
+    transform: [{ translateY: -22 }],
+    zIndex: 0,
   },
   metricValActive: {
     fontFamily: 'Metropolis-Bold',

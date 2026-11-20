@@ -323,17 +323,6 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   const [configuringItem, setConfiguringItem] = useState<MasterCatalogueItem | null>(null);
   const [sellingPriceStr, setSellingPriceStr] = useState('');
   const [initialKg, setInitialKg] = useState(20);
-  const [initialGrams, setInitialGrams] = useState(0);
-
-  // Helper to adjust initial stock with 1000g rollover
-  const adjustInitialStock = (deltaKg: number, deltaG: number) => {
-    try {
-      Vibration.vibrate(15);
-    } catch {}
-    const totalG = Math.max(0, initialKg * 1000 + initialGrams + deltaKg * 1000 + deltaG);
-    setInitialKg(Math.floor(totalG / 1000));
-    setInitialGrams(totalG % 1000);
-  };
 
   // Filtered Master Database Items - Auto-sorted alphabetically from A to Z
   const filteredCatalogue = useMemo(() => {
@@ -364,7 +353,6 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
     setConfiguringItem(item);
     setSellingPriceStr((item.defaultPricePaise / 100).toString());
     setInitialKg(20);
-    setInitialGrams(0);
   };
 
   // Confirm and Add to Store
@@ -546,16 +534,14 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                   <Image source={{ uri: configuringItem.photoUrl }} style={styles.dialogImg} />
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={styles.dialogItemName}>{configuringItem.nameEn}</Text>
-                    <Text style={styles.dialogItemMeta}>
-                      Unit: {configuringItem.unit} • Mandi: {configuringItem.mandiRateText}
-                    </Text>
+                    <Text style={styles.dialogItemMeta}>{configuringItem.category}</Text>
                   </View>
                 </View>
               )}
 
               {/* Input 1: Set Selling Rate */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Your Selling Rate (₹ / unit)</Text>
+                <Text style={styles.inputLabel}>Your Selling Rate (₹)</Text>
                 <View style={styles.textInputBox}>
                   <Text style={styles.rupeePrefix}>₹</Text>
                   <TextInput
@@ -568,124 +554,67 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                 </View>
               </View>
 
-              {/* Input 2: Set Initial Inventory (Kg and Grams) */}
+              {/* Input 2: Set Initial Stock (Direct and Clean for Tier 3/4 Vendors) */}
               <View style={styles.inputGroup}>
-                <View style={styles.inputLabelRow}>
-                  <Text style={styles.inputLabel}>Initial Inventory Stock</Text>
-                  <Text style={styles.liveWeightBadge}>
-                    {configuringItem && (configuringItem.unit.includes('dozen') || configuringItem.unit.includes('pc'))
-                      ? `${initialKg} ${configuringItem.unit.includes('dozen') ? 'doz' : 'pcs'}`
-                      : `${initialKg} kg ${initialGrams.toString().padStart(3, '0')} g`}
-                  </Text>
+                <Text style={styles.inputLabel}>Initial Stock</Text>
+                <View style={styles.simpleStockRow}>
+                  <TouchableOpacity
+                    style={styles.stockStepBtn}
+                    onPress={() => setInitialKg((prev) => Math.max(1, prev - 1))}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="remove" size={20} color="#0F172A" />
+                  </TouchableOpacity>
+
+                  <TextInput
+                    value={initialKg.toString()}
+                    onChangeText={(t) => setInitialKg(Math.max(0, parseInt(t, 10) || 0))}
+                    keyboardType="numeric"
+                    style={styles.simpleStockInput}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.stockStepBtn}
+                    onPress={() => setInitialKg((prev) => prev + 1)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="add" size={20} color="#0F172A" />
+                  </TouchableOpacity>
+
+                  <View style={styles.stockUnitBadge}>
+                    <Text style={styles.stockUnitText}>
+                      {configuringItem?.unit?.toLowerCase().includes('dozen')
+                        ? 'Dozen'
+                        : configuringItem?.unit?.toLowerCase().includes('pc') || configuringItem?.unit?.toLowerCase().includes('piece')
+                        ? 'Pieces'
+                        : 'Kg'}
+                    </Text>
+                  </View>
                 </View>
 
-                {configuringItem && (configuringItem.unit.includes('dozen') || configuringItem.unit.includes('pc')) ? (
-                  <View style={styles.inventoryStepperRow}>
-                    <TouchableOpacity
-                      style={styles.stepBtn}
-                      onPress={() => setInitialKg(Math.max(1, initialKg - 1))}
-                    >
-                      <Text style={styles.stepBtnText}>- 1</Text>
-                    </TouchableOpacity>
-
-                    <TextInput
-                      value={initialKg.toString()}
-                      onChangeText={(t) => setInitialKg(Math.max(0, parseInt(t, 10) || 0))}
-                      keyboardType="numeric"
-                      style={styles.inventoryInput}
-                    />
-                    <Text style={styles.kgSuffix}>{configuringItem.unit.includes('dozen') ? 'doz' : 'pcs'}</Text>
-
-                    <TouchableOpacity
-                      style={styles.stepBtn}
-                      onPress={() => setInitialKg(initialKg + 1)}
-                    >
-                      <Text style={styles.stepBtnText}>+ 1</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View>
-                    <View style={styles.dualModalStepperRow}>
-                      {/* Kilograms Controller: [- 1 +] */}
-                      <View style={styles.modalStepperCol}>
-                        <Text style={styles.stepperSubLabel}>KILOS (KG)</Text>
-                        <View style={styles.innerStepperRow}>
-                          <TouchableOpacity
-                            style={styles.stepBtn}
-                            onPress={() => adjustInitialStock(-1, 0)}
-                          >
-                            <Ionicons name="remove" size={16} color="#0F172A" />
-                          </TouchableOpacity>
-
-                          <TextInput
-                            value={initialKg.toString()}
-                            onChangeText={(t) => setInitialKg(Math.max(0, parseInt(t, 10) || 0))}
-                            keyboardType="numeric"
-                            style={styles.inventoryInput}
-                          />
-
-                          <TouchableOpacity
-                            style={styles.stepBtn}
-                            onPress={() => adjustInitialStock(1, 0)}
-                          >
-                            <Ionicons name="add" size={16} color="#0F172A" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-
-                      {/* Grams Controller: [- 000 +] */}
-                      <View style={styles.modalStepperCol}>
-                        <Text style={styles.stepperSubLabel}>GRAMS (G)</Text>
-                        <View style={styles.innerStepperRow}>
-                          <TouchableOpacity
-                            style={styles.stepBtn}
-                            onPress={() => adjustInitialStock(0, -100)}
-                          >
-                            <Ionicons name="remove" size={16} color="#0F172A" />
-                          </TouchableOpacity>
-
-                          <TextInput
-                            value={initialGrams.toString().padStart(3, '0')}
-                            onChangeText={(t) => {
-                              const val = Math.max(0, parseInt(t, 10) || 0);
-                              if (val >= 1000) {
-                                setInitialKg(initialKg + Math.floor(val / 1000));
-                                setInitialGrams(val % 1000);
-                              } else {
-                                setInitialGrams(val);
-                              }
-                            }}
-                            keyboardType="numeric"
-                            style={styles.inventoryInput}
-                          />
-
-                          <TouchableOpacity
-                            style={styles.stepBtn}
-                            onPress={() => adjustInitialStock(0, 100)}
-                          >
-                            <Ionicons name="add" size={16} color="#0F172A" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Quick Preset Chips for Grams: +10g, +100g, +200g, +1000g */}
-                    <View style={styles.quickPresetRow}>
-                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 10)}>
-                        <Text style={styles.presetChipText}>+10 g</Text>
+                {/* Quick Add Presets (5, 10, 20, 50) */}
+                <View style={styles.quickPresetRow}>
+                  {[5, 10, 20, 50].map((amt) => {
+                    const isSelected = initialKg === amt;
+                    const unitSuffix = configuringItem?.unit?.toLowerCase().includes('dozen')
+                      ? 'doz'
+                      : configuringItem?.unit?.toLowerCase().includes('pc') || configuringItem?.unit?.toLowerCase().includes('piece')
+                      ? 'pcs'
+                      : 'kg';
+                    return (
+                      <TouchableOpacity
+                        key={amt}
+                        style={[styles.presetChip, isSelected && styles.presetChipActive]}
+                        onPress={() => setInitialKg(amt)}
+                        activeOpacity={0.75}
+                      >
+                        <Text style={[styles.presetChipText, isSelected && styles.presetChipTextActive]}>
+                          {amt} {unitSuffix}
+                        </Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 100)}>
-                        <Text style={styles.presetChipText}>+100 g</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 200)}>
-                        <Text style={styles.presetChipText}>+200 g</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 1000)}>
-                        <Text style={styles.presetChipText}>+1000 g (+1kg)</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
+                    );
+                  })}
+                </View>
               </View>
 
               {/* Confirm Button */}
@@ -844,16 +773,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0F172A',
   },
-  itemUnitText: {
-    fontSize: 13.5,
-    color: '#334155',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  mandiRateText: {
+  itemCategoryText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#047A36',
+    color: '#64748B',
+    fontWeight: '600',
     marginTop: 2,
   },
   addBtn: {
@@ -958,12 +881,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#0F172A',
   },
-  liveWeightBadge: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#047A36',
-  },
   textInputBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -973,6 +890,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 46,
+    marginTop: 6,
   },
   rupeePrefix: {
     fontFamily: 'Metropolis-Bold',
@@ -987,80 +905,80 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0F172A',
   },
-  inventoryStepperRow: {
+  simpleStockRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginTop: 6,
   },
-  dualModalStepperRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  modalStepperCol: {
-    flex: 1,
-  },
-  stepperSubLabel: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#334155',
-    marginBottom: 4,
-  },
-  innerStepperRow: {
-    flexDirection: 'row',
+  stockStepBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
   },
-  quickPresetRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 10,
-  },
-  presetChip: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  presetChipText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#047A36',
-  },
-  stepBtn: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  stepBtnText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  inventoryInput: {
-    width: 64,
-    height: 44,
+  simpleStockInput: {
+    flex: 1,
+    height: 48,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
     borderColor: '#A7F3D0',
-    borderRadius: 10,
+    borderRadius: 12,
     textAlign: 'center',
     fontFamily: 'Metropolis-Bold',
     fontSize: 20,
     fontWeight: '800',
     color: '#0F172A',
   },
-  kgSuffix: {
+  stockUnitBadge: {
+    height: 48,
+    paddingHorizontal: 14,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stockUnitText: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  quickPresetRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 10,
+  },
+  presetChip: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  presetChipActive: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#047A36',
+    borderWidth: 1.5,
+  },
+  presetChipText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12.5,
     fontWeight: '700',
+    color: '#475569',
+  },
+  presetChipTextActive: {
     color: '#047A36',
-    marginLeft: 4,
+    fontWeight: '800',
   },
   confirmBtn: {
     backgroundColor: '#047A36',
