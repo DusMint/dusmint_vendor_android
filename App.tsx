@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Image, StyleSheet, LogBox, ActivityIndicator } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, LogBox, Animated, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,91 +25,187 @@ LogBox.ignoreAllLogs(true);
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function VendorTabs() {
-  const insets = useSafeAreaInsets();
+function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const bottomInset = insets.bottom > 0 ? insets.bottom : 8;
+  const [barWidth, setBarWidth] = useState(0);
+
+  // Animated sliding indicator value tracking route index (0, 1, 2, 3)
+  const slideAnim = useRef(new Animated.Value(state.index)).current;
+
+  // Scale animation for each of the 4 tabs
+  const scaleAnims = useRef([
+    new Animated.Value(state.index === 0 ? 1.18 : 1.0),
+    new Animated.Value(state.index === 1 ? 1.18 : 1.0),
+    new Animated.Value(state.index === 2 ? 1.18 : 1.0),
+    new Animated.Value(state.index === 3 ? 1.18 : 1.0),
+  ]).current;
+
+  useEffect(() => {
+    // 1. Smooth spring slide of the gray pill
+    Animated.spring(slideAnim, {
+      toValue: state.index,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 10,
+    }).start();
+
+    // 2. Smooth scale enlargement for active tab, smooth scale down for others
+    scaleAnims.forEach((anim, i) => {
+      Animated.spring(anim, {
+        toValue: i === state.index ? 1.18 : 1.0,
+        useNativeDriver: true,
+        tension: 90,
+        friction: 8,
+      }).start();
+    });
+  }, [state.index, slideAnim, scaleAnims]);
+
+  const numTabs = state.routes.length;
+  const tabWidth = barWidth > 0 ? barWidth / numTabs : 0;
 
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: '#047A36',
-        tabBarInactiveTintColor: '#94A3B8',
-        tabBarStyle: {
+    <View
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+      style={[
+        styles.tabBarContainer,
+        {
           height: 60 + bottomInset,
           paddingBottom: bottomInset,
-          paddingTop: 8,
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#F1F5F9',
-          elevation: 10,
-          shadowColor: '#0F172A',
-          shadowOffset: { width: 0, height: -3 },
-          shadowOpacity: 0.05,
-          shadowRadius: 8,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-          marginTop: 2,
-        },
+      ]}
+    >
+      {/* Smooth Sliding Gray Pill Track */}
+      {tabWidth > 0 && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Animated.View
+            style={[
+              styles.sliderTrack,
+              {
+                width: tabWidth,
+                transform: [
+                  {
+                    translateX: slideAnim.interpolate({
+                      inputRange: [0, 1, 2, 3],
+                      outputRange: [0, tabWidth, tabWidth * 2, tabWidth * 3],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.grayPill} />
+          </Animated.View>
+        </View>
+      )}
+
+      {/* Tab Buttons */}
+      <View style={styles.tabButtonsRow}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+
+          let iconName: keyof typeof Ionicons.glyphMap = 'receipt-outline';
+          if (route.name === 'VendorOrders') {
+            iconName = isFocused ? 'receipt' : 'receipt-outline';
+          } else if (route.name === 'VendorStock') {
+            iconName = isFocused ? 'grid' : 'grid-outline';
+          } else if (route.name === 'VendorEarnings') {
+            iconName = isFocused ? 'wallet' : 'wallet-outline';
+          } else if (route.name === 'VendorProfile') {
+            iconName = isFocused ? 'person' : 'person-outline';
+          }
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.tabButton}
+              activeOpacity={0.8}
+            >
+              <View style={styles.tabContent}>
+                <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
+                  <Ionicons
+                    name={iconName}
+                    size={21}
+                    color={isFocused ? '#047A36' : '#94A3B8'}
+                  />
+                </Animated.View>
+                <Text
+                  style={[
+                    styles.tabLabel,
+                    isFocused ? styles.tabLabelActive : styles.tabLabelInactive,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {label as string}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function VendorTabs() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <CustomVendorTabBar {...props} />}
+      screenOptions={{
+        headerShown: false,
       }}
     >
       <Tab.Screen
         name="VendorOrders"
         component={VendorOrdersScreen}
-        options={{
-          tabBarLabel: 'Orders',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'receipt' : 'receipt-outline'}
-              size={23}
-              color={color}
-            />
-          ),
-        }}
+        options={{ tabBarLabel: 'Orders' }}
       />
       <Tab.Screen
         name="VendorStock"
         component={VendorStockScreen}
-        options={{
-          tabBarLabel: 'Menu & Stock',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'grid' : 'grid-outline'}
-              size={23}
-              color={color}
-            />
-          ),
-        }}
+        options={{ tabBarLabel: 'Inventory' }}
       />
       <Tab.Screen
         name="VendorEarnings"
         component={VendorEarningsScreen}
-        options={{
-          tabBarLabel: 'Earnings',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'wallet' : 'wallet-outline'}
-              size={23}
-              color={color}
-            />
-          ),
-        }}
+        options={{ tabBarLabel: 'Earnings' }}
       />
       <Tab.Screen
         name="VendorProfile"
         component={VendorProfileScreen}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'person' : 'person-outline'}
-              size={23}
-              color={color}
-            />
-          ),
-        }}
+        options={{ tabBarLabel: 'Profile' }}
       />
     </Tab.Navigator>
   );
@@ -172,5 +268,62 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    elevation: 10,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    position: 'relative',
+  },
+  sliderTrack: {
+    position: 'absolute',
+    top: 6,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  grayPill: {
+    width: '88%',
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  tabButtonsRow: {
+    flexDirection: 'row',
+    flex: 1,
+    paddingTop: 6,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 48,
+  },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabLabel: {
+    fontSize: 10.5,
+    marginTop: 2,
+    letterSpacing: -0.2,
+  },
+  tabLabelActive: {
+    fontWeight: '800',
+    color: '#047A36',
+  },
+  tabLabelInactive: {
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+});
 
 

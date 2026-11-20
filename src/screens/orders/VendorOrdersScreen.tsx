@@ -515,14 +515,14 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           );
         })}
 
-        {/* 5. Minimal Quick Shortcut to Menu & Stock */}
+        {/* 5. Minimal Quick Shortcut to Inventory */}
         <TouchableOpacity
           style={styles.quickStockLink}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('VendorStock')}
         >
           <Ionicons name="layers-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
-          <Text style={styles.quickStockLinkText}>Update Store Stock & Menu →</Text>
+          <Text style={styles.quickStockLinkText}>Update Store Inventory →</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
