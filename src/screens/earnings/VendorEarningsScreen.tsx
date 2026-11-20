@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Modal,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
   StatusBar,
+  Animated,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -43,7 +43,32 @@ export const VendorEarningsScreen: React.FC = () => {
   // Range filter: "today" | "week" | "month" (Default: "week" matching Riksho Buddy)
   const [range, setRange] = useState<'today' | 'week' | 'month'>('week');
   const [page, setPage] = useState(1);
-  const [showPolicyModal, setShowPolicyModal] = useState(false);
+
+  // Smooth tab switching animations
+  const tabAnim = useRef(new Animated.Value(1)).current; // 0: today, 1: week, 2: month
+  const contentFadeAnim = useRef(new Animated.Value(1)).current;
+
+  const handleSelectRange = (r: 'today' | 'week' | 'month', idx: number) => {
+    if (range === r) return;
+    setRange(r);
+    setPage(1);
+
+    // Smooth sliding pill indicator
+    Animated.spring(tabAnim, {
+      toValue: idx,
+      tension: 65,
+      friction: 9,
+      useNativeDriver: false,
+    }).start();
+
+    // Smooth content fade transition
+    contentFadeAnim.setValue(0.4);
+    Animated.timing(contentFadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
 
   // Active verified UPI account
   const payoutUpi = useMemo(() => {
@@ -267,20 +292,28 @@ export const VendorEarningsScreen: React.FC = () => {
         {/* Screen Header - Simple and Bold */}
         <Text style={styles.screenTitle}>Earnings</Text>
 
-        {/* Range Filter Segment - [ Today | This Week | This Month ] */}
+        {/* Range Filter Segment with Smooth Animated Sliding Indicator */}
         <View style={styles.rangeFilterContainer}>
-          {(['today', 'week', 'month'] as const).map((r) => {
+          <Animated.View
+            style={[
+              styles.activeTabIndicator,
+              {
+                left: tabAnim.interpolate({
+                  inputRange: [0, 1, 2],
+                  outputRange: ['0.8%', '33.8%', '67%'],
+                }),
+              },
+            ]}
+          />
+          {(['today', 'week', 'month'] as const).map((r, idx) => {
             const isSelected = range === r;
             const label = r === 'today' ? 'Today' : r === 'week' ? 'This Week' : 'This Month';
             return (
               <TouchableOpacity
                 key={r}
-                onPress={() => {
-                  setRange(r);
-                  setPage(1);
-                }}
-                activeOpacity={0.7}
-                style={[styles.rangeTab, isSelected && styles.rangeTabActive]}
+                onPress={() => handleSelectRange(r, idx)}
+                activeOpacity={0.8}
+                style={styles.rangeTab}
               >
                 <Text style={[styles.rangeTabText, isSelected && styles.rangeTabTextActive]}>
                   {label}
@@ -296,7 +329,7 @@ export const VendorEarningsScreen: React.FC = () => {
             <Text style={styles.loadingText}>Loading earnings ledger...</Text>
           </View>
         ) : (
-          <View>
+          <Animated.View style={{ opacity: contentFadeAnim }}>
             {/* 1. Hero Earnings Card */}
             <View style={styles.heroCard}>
               <View style={styles.heroTopRow}>
@@ -332,13 +365,13 @@ export const VendorEarningsScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* 3. Recent Settlements Ledger */}
+            {/* 3. Recent Settlements Ledger (Strict 5 items per page) */}
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Recent Settlements</Text>
               {filteredTransactions.length > 0 && (
                 <Text style={styles.sectionCountText}>
-                  {filteredTransactions.length}{' '}
-                  {filteredTransactions.length === 1 ? 'settlement' : 'settlements'}
+                  Showing {Math.min((page - 1) * ITEMS_PER_PAGE + 1, filteredTransactions.length)}–
+                  {Math.min(page * ITEMS_PER_PAGE, filteredTransactions.length)} of {filteredTransactions.length}
                 </Text>
               )}
             </View>
@@ -376,7 +409,7 @@ export const VendorEarningsScreen: React.FC = () => {
                   </View>
                 ))}
 
-                {/* Pagination Controls */}
+                {/* 5-Item Pagination Controls */}
                 {totalPages > 1 && (
                   <View style={styles.paginationRow}>
                     <TouchableOpacity
@@ -385,12 +418,27 @@ export const VendorEarningsScreen: React.FC = () => {
                       activeOpacity={0.7}
                       style={[styles.pageBtn, page === 1 && styles.pageBtnDisabled]}
                     >
-                      <Text style={styles.pageBtnText}>Previous</Text>
+                      <Ionicons name="chevron-back" size={14} color={page === 1 ? '#9CA3AF' : '#111117'} style={{ marginRight: 2 }} />
+                      <Text style={[styles.pageBtnText, page === 1 && styles.pageBtnTextDisabled]}>Previous</Text>
                     </TouchableOpacity>
 
-                    <Text style={styles.pageIndicatorText}>
-                      Page {page} of {totalPages}
-                    </Text>
+                    <View style={styles.pagePillsRow}>
+                      {Array.from({ length: totalPages }).map((_, i) => {
+                        const pageNum = i + 1;
+                        const isCurrent = pageNum === page;
+                        return (
+                          <TouchableOpacity
+                            key={pageNum}
+                            onPress={() => setPage(pageNum)}
+                            style={[styles.pageNumberPill, isCurrent && styles.pageNumberPillActive]}
+                          >
+                            <Text style={[styles.pageNumberText, isCurrent && styles.pageNumberTextActive]}>
+                              {pageNum}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
 
                     <TouchableOpacity
                       onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
@@ -398,97 +446,16 @@ export const VendorEarningsScreen: React.FC = () => {
                       activeOpacity={0.7}
                       style={[styles.pageBtn, page === totalPages && styles.pageBtnDisabled]}
                     >
-                      <Text style={styles.pageBtnText}>Next</Text>
+                      <Text style={[styles.pageBtnText, page === totalPages && styles.pageBtnTextDisabled]}>Next</Text>
+                      <Ionicons name="chevron-forward" size={14} color={page === totalPages ? '#9CA3AF' : '#111117'} style={{ marginLeft: 2 }} />
                     </TouchableOpacity>
                   </View>
                 )}
               </View>
             )}
-
-            {/* 4. Bottom Policy Link Bar */}
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setShowPolicyModal(true)}
-              style={styles.policyBar}
-            >
-              <View style={styles.policyBarLeft}>
-                <View style={styles.policyIconCircle}>
-                  <Ionicons name="shield-checkmark-outline" size={16} color="#111117" />
-                </View>
-                <Text style={styles.policyBarText} numberOfLines={1}>
-                  Read about our 0% commission & T+0 settlement policy
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={15} color="#111117" />
-            </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
       </ScrollView>
-
-      {/* Policy Modal Dialogue */}
-      <Modal
-        visible={showPolicyModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowPolicyModal(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            {/* Modal Header */}
-            <View style={styles.modalHeaderRow}>
-              <View style={styles.modalHeaderLeft}>
-                <View style={styles.modalIconBox}>
-                  <Ionicons name="shield-checkmark-outline" size={22} color="#047A36" />
-                </View>
-                <View>
-                  <Text style={styles.modalTitle}>0% Commission Policy</Text>
-                  <Text style={styles.modalSub}>Direct Partner Settlement Model</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => setShowPolicyModal(false)}
-                style={styles.modalCloseBtn}
-              >
-                <Ionicons name="close" size={18} color="#64748B" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Policy Points */}
-            <View style={styles.policyPointsContainer}>
-              <View style={styles.policyPointCard}>
-                <Text style={styles.policyPointTitle}>• 0% Platform Commission</Text>
-                <Text style={styles.policyPointDesc}>
-                  You keep 100% of your retail sales value. DusMint charges ₹0 platform commission during our promotional launch.
-                </Text>
-              </View>
-
-              <View style={styles.policyPointCard}>
-                <Text style={styles.policyPointTitle}>• Direct UPI Transfers</Text>
-                <Text style={styles.policyPointDesc}>
-                  Funds are credited automatically to your verified UPI account ({payoutUpi}) upon rider delivery confirmation.
-                </Text>
-              </View>
-
-              <View style={styles.policyPointCard}>
-                <Text style={styles.policyPointTitle}>• Same-Day T+0 Auto Payout</Text>
-                <Text style={styles.policyPointDesc}>
-                  No manual withdrawal requests or waiting for weekly payouts. Settlements run 365 days a year without delay.
-                </Text>
-              </View>
-            </View>
-
-            {/* Got It Button */}
-            <TouchableOpacity
-              onPress={() => setShowPolicyModal(false)}
-              activeOpacity={0.85}
-              style={styles.modalActionBtn}
-            >
-              <Text style={styles.modalActionBtnText}>Got It</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -511,27 +478,36 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   rangeFilterContainer: {
+    position: 'relative',
     flexDirection: 'row',
     backgroundColor: '#E8F5EC',
     borderRadius: 16,
-    padding: 4,
+    padding: 3,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#D1FAE5',
+    alignItems: 'center',
+    height: 44,
+  },
+  activeTabIndicator: {
+    position: 'absolute',
+    top: 3,
+    bottom: 3,
+    width: '32.4%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 13,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   rangeTab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  rangeTabActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    justifyContent: 'center',
+    height: '100%',
+    zIndex: 2,
   },
   rangeTabText: {
     fontSize: 12.5,
@@ -756,165 +732,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    marginTop: 14,
+    marginBottom: 20,
+    paddingHorizontal: 2,
   },
   pageBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#FFFFFF',
   },
   pageBtnDisabled: {
-    backgroundColor: '#F3F4F6',
-    borderColor: '#E5E7EB',
-    opacity: 0.5,
+    backgroundColor: '#F9FAFB',
+    borderColor: '#F3F4F6',
+    opacity: 0.6,
   },
   pageBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#374151',
+    color: '#111117',
   },
-  pageIndicatorText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#6B7280',
+  pageBtnTextDisabled: {
+    color: '#9CA3AF',
   },
-  policyBar: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 18,
+  pagePillsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 5,
-    elevation: 2,
-    marginTop: 10,
+    gap: 6,
   },
-  policyBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    paddingRight: 10,
-  },
-  policyIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: 'rgba(4, 122, 54, 0.08)',
+  pageNumberPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    backgroundColor: '#F3F4F6',
   },
-  policyBarText: {
+  pageNumberPillActive: {
+    backgroundColor: '#047A36',
+  },
+  pageNumberText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#111117',
-    flex: 1,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    width: '100%',
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  modalHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  modalIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: 'rgba(4, 122, 54, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalTitle: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#111117',
-  },
-  modalSub: {
-    fontSize: 11.5,
-    color: '#6B7280',
-    marginTop: 1,
-  },
-  modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  policyPointsContainer: {
-    gap: 10,
-    marginBottom: 20,
-  },
-  policyPointCard: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
-  },
-  policyPointTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#111117',
-    marginBottom: 4,
-  },
-  policyPointDesc: {
-    fontSize: 11.5,
     color: '#4B5563',
-    lineHeight: 16,
   },
-  modalActionBtn: {
-    backgroundColor: '#047A36',
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#047A36',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  modalActionBtnText: {
+  pageNumberTextActive: {
     color: '#FFFFFF',
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 14,
-    fontWeight: '800',
   },
 });
