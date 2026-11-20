@@ -211,6 +211,9 @@ export const VendorEarningsScreen: React.FC = () => {
   // Payout Screen Modal State
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
 
+  // Order Details Cute Dialog State
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState<CompletedOrderRecord | null>(null);
+
   // Smooth tab switching & content animations
   const tabAnim = useRef(new Animated.Value(1)).current; // 0: today, 1: week, 2: month
   const ordersFadeAnim = useRef(new Animated.Value(1)).current;
@@ -420,16 +423,15 @@ export const VendorEarningsScreen: React.FC = () => {
           </View>
         ) : (
           <View>
-            {/* 1. Hero Earnings Card - Tag and 'Today' removed as requested */}
+            {/* 1. Hero Earnings Card - Direct and Clean without Decimals */}
             <View style={styles.heroCard}>
               <Text style={styles.heroTopLabel}>TOTAL EARNINGS</Text>
               <Text style={styles.heroAmountText}>
-                ₹{animatedAmount.toFixed(2)}
+                {formatRupee(animatedAmount)}
               </Text>
-              <Text style={styles.heroSubText}>Direct Store Payouts Settled (T+0)</Text>
             </View>
 
-            {/* 2. New Metric Boxes: Total Orders & Remaining Settlement */}
+            {/* 2. Metric Boxes: Total Orders & Remaining Settlement */}
             <View style={styles.metricRow}>
               {/* Card 1: Total Orders */}
               <View style={styles.metricCard}>
@@ -449,12 +451,12 @@ export const VendorEarningsScreen: React.FC = () => {
                 </View>
                 <Text style={styles.metricLabel}>Remaining Settlement</Text>
                 <Text style={styles.metricValue}>
-                  ₹{Math.round(animatedRemaining)}
+                  {formatRupee(animatedRemaining)}
                 </Text>
               </View>
             </View>
 
-            {/* 3. Payout Details & Request Button taking to the Payout page */}
+            {/* 3. Request Earned Money (Clean & Easy to Understand) */}
             <TouchableOpacity
               style={styles.payoutActionCard}
               onPress={() => setIsPayoutModalOpen(true)}
@@ -462,12 +464,9 @@ export const VendorEarningsScreen: React.FC = () => {
             >
               <View style={styles.payoutActionLeft}>
                 <View style={styles.payoutActionIconBox}>
-                  <Ionicons name="card-outline" size={20} color="#0F172A" />
+                  <Ionicons name="cash-outline" size={20} color="#0F172A" />
                 </View>
-                <View style={{ marginLeft: 12 }}>
-                  <Text style={styles.payoutActionTitle}>Payout & Settlement Settings</Text>
-                  <Text style={styles.payoutActionSub}>Instant early requests • Linked {payoutUpi}</Text>
-                </View>
+                <Text style={styles.payoutActionTitle}>Request Earned Money</Text>
               </View>
               <View style={styles.payoutActionArrowCircle}>
                 <Ionicons name="chevron-forward" size={16} color="#0F172A" />
@@ -490,7 +489,7 @@ export const VendorEarningsScreen: React.FC = () => {
                 <Ionicons name="receipt-outline" size={28} color="#94A3B8" style={{ marginBottom: 8 }} />
                 <Text style={styles.emptyTitle}>No Orders {rangeMetrics.label}</Text>
                 <Text style={styles.emptySub}>
-                  Delivered orders for this period will appear here.
+                  Orders for this period will appear here.
                 </Text>
               </View>
             ) : (
@@ -500,30 +499,37 @@ export const VendorEarningsScreen: React.FC = () => {
                     opacity: ordersFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }),
                   }}
                 >
-                  {paginatedOrders.map((ord, idx) => (
-                    <View key={ord.id}>
-                      <View style={styles.orderRow}>
-                        <View style={styles.orderTopRow}>
-                          <View style={styles.orderCodeBadge}>
-                            <Text style={styles.orderCodeText}>{ord.orderCode}</Text>
-                          </View>
-                          <Text style={styles.orderDate}>{ord.dateStr}</Text>
-                          <Text style={styles.orderAmount}>+₹{ord.payoutAmount.toFixed(2)}</Text>
-                        </View>
+                  {paginatedOrders.map((ord, idx) => {
+                    const isEarned = ord.payoutAmount > 0;
+                    return (
+                      <View key={ord.id}>
+                        <TouchableOpacity
+                          style={styles.orderRow}
+                          activeOpacity={0.7}
+                          onPress={() => setSelectedOrderDetail(ord)}
+                        >
+                          <View style={styles.orderLeftCol}>
+                            <View style={styles.orderCodeDateRow}>
+                              <View style={styles.orderCodeBadge}>
+                                <Text style={styles.orderCodeText}>{ord.orderCode}</Text>
+                              </View>
+                              <Text style={styles.orderDate}>{ord.dateStr}</Text>
+                            </View>
 
-                        <View style={styles.orderBottomRow}>
-                          <Text style={styles.orderItemsSummary} numberOfLines={1}>
-                            {ord.itemsSummary}
-                          </Text>
-                          <View style={styles.orderStatusPill}>
-                            <View style={styles.greenDot} />
-                            <Text style={styles.orderStatusText}>{ord.status}</Text>
+                            <View style={styles.viewOrderBtn}>
+                              <Text style={styles.viewOrderText}>View Order Details</Text>
+                              <Ionicons name="chevron-forward" size={12} color="#047A36" style={{ marginLeft: 2 }} />
+                            </View>
                           </View>
-                        </View>
+
+                          <Text style={[styles.orderAmount, !isEarned && styles.orderAmountZero]}>
+                            {isEarned ? `+${formatRupee(ord.payoutAmount)}` : '+₹0'}
+                          </Text>
+                        </TouchableOpacity>
+                        {idx < paginatedOrders.length - 1 && <View style={styles.rowDivider} />}
                       </View>
-                      {idx < paginatedOrders.length - 1 && <View style={styles.rowDivider} />}
-                    </View>
-                  ))}
+                    );
+                  })}
                 </Animated.View>
               </View>
             )}
@@ -581,6 +587,103 @@ export const VendorEarningsScreen: React.FC = () => {
         payoutUpi={payoutUpi}
         remainingSettlement={rangeMetrics.remainingSettlement}
       />
+
+      {/* Cute Minimal Order Detail Dialog */}
+      <Modal
+        visible={Boolean(selectedOrderDetail)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedOrderDetail(null)}
+      >
+        <View style={styles.dialogOverlay}>
+          <TouchableOpacity
+            style={styles.dialogBackdrop}
+            activeOpacity={1}
+            onPress={() => setSelectedOrderDetail(null)}
+          />
+
+          <View style={styles.dialogCard}>
+            {/* Header */}
+            <View style={styles.dialogHeader}>
+              <View>
+                <View style={styles.dialogCodeRow}>
+                  <Text style={styles.dialogOrderCode}>{selectedOrderDetail?.orderCode}</Text>
+                  <View
+                    style={[
+                      styles.dialogStatusBadge,
+                      selectedOrderDetail?.status === 'Cancelled' && styles.dialogStatusCancelled,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.dialogStatusText,
+                        selectedOrderDetail?.status === 'Cancelled' && styles.dialogStatusCancelledText,
+                      ]}
+                    >
+                      {selectedOrderDetail?.status}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.dialogOrderDate}>{selectedOrderDetail?.dateStr}</Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.dialogCloseCircle}
+                onPress={() => setSelectedOrderDetail(null)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="close" size={20} color="#0F172A" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Direct Minimal Items Table Header */}
+            <View style={styles.tableHeaderRow}>
+              <Text style={[styles.tableColHeader, { flex: 2 }]}>ITEM</Text>
+              <Text style={[styles.tableColHeader, { flex: 1.5, textAlign: 'center' }]}>RATE / QTY</Text>
+              <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'right' }]}>TOTAL</Text>
+            </View>
+
+            {/* Direct Table Rows */}
+            <ScrollView style={styles.tableItemsScroll} showsVerticalScrollIndicator={false}>
+              {selectedOrderDetail?.items.map((it, idx) => (
+                <View key={idx} style={styles.tableRow}>
+                  <Text style={styles.tableItemName} numberOfLines={1}>
+                    {it.name}
+                  </Text>
+                  <Text style={styles.tableItemRate}>
+                    {it.qtyText} @ {it.rateText}
+                  </Text>
+                  <Text style={styles.tableItemTotal}>{formatRupee(it.itemTotal)}</Text>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={styles.dialogDivider} />
+
+            {/* Final Price Payout Row */}
+            <View style={styles.dialogTotalRow}>
+              <Text style={styles.dialogTotalLabel}>Total Order Payout</Text>
+              <Text
+                style={[
+                  styles.dialogTotalAmount,
+                  selectedOrderDetail?.payoutAmount === 0 && { color: '#94A3B8' },
+                ]}
+              >
+                {formatRupee(selectedOrderDetail?.payoutAmount ?? 0)}
+              </Text>
+            </View>
+
+            {/* Done Action Button */}
+            <TouchableOpacity
+              style={styles.dialogDoneBtn}
+              onPress={() => setSelectedOrderDetail(null)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.dialogDoneBtnText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -819,8 +922,8 @@ const styles = StyleSheet.create({
   },
   unifiedCard: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E8ECF2',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 2,
@@ -833,21 +936,27 @@ const styles = StyleSheet.create({
   },
   orderRow: {
     paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   rowDivider: {
     height: 1,
     backgroundColor: '#F1F5F9',
   },
-  orderTopRow: {
+  orderLeftCol: {
+    flex: 1,
+    marginRight: 12,
+  },
+  orderCodeDateRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
   orderCodeBadge: {
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   orderCodeText: {
@@ -857,11 +966,27 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   orderDate: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '600',
     color: '#334155',
     marginLeft: 8,
-    flex: 1,
+  },
+  viewOrderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    marginTop: 2,
+  },
+  viewOrderText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#047A36',
   },
   orderAmount: {
     fontFamily: 'Metropolis-Bold',
@@ -869,37 +994,165 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#047A36',
   },
-  orderBottomRow: {
+  orderAmountZero: {
+    color: '#94A3B8',
+  },
+  dialogOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  dialogBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+  },
+  dialogCard: {
+    backgroundColor: '#FFFFFF',
+    width: '100%',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  dialogHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  dialogCodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  dialogOrderCode: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  dialogStatusBadge: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  dialogStatusText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#047A36',
+  },
+  dialogStatusCancelled: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  dialogStatusCancelledText: {
+    color: '#EF4444',
+  },
+  dialogOrderDate: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  dialogCloseCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tableHeaderRow: {
+    flexDirection: 'row',
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    marginBottom: 8,
+  },
+  tableColHeader: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  tableItemsScroll: {
+    maxHeight: 180,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  tableItemName: {
+    flex: 2,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  tableItemRate: {
+    flex: 1.5,
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#475569',
+    textAlign: 'center',
+  },
+  tableItemTotal: {
+    flex: 1,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'right',
+  },
+  dialogDivider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 12,
+  },
+  dialogTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 18,
   },
-  orderItemsSummary: {
-    fontSize: 14,
-    color: '#334155',
-    fontWeight: '600',
-    flex: 1,
-    marginRight: 8,
+  dialogTotalLabel: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
   },
-  orderStatusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  greenDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#047A36',
-    marginRight: 5,
-  },
-  orderStatusText: {
-    fontSize: 12,
+  dialogTotalAmount: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 22,
     fontWeight: '800',
     color: '#047A36',
+  },
+  dialogDoneBtn: {
+    backgroundColor: '#047A36',
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  dialogDoneBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   paginationRow: {
     flexDirection: 'row',

@@ -14,6 +14,12 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 
+// Indian Currency Formatter with commas and NO decimals
+const formatRupee = (val: number): string => {
+  const rounded = Math.round(val);
+  return '₹' + rounded.toLocaleString('en-IN');
+};
+
 interface Props {
   visible: boolean;
   onClose: () => void;
