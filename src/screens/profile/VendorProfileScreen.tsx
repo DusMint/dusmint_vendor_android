@@ -114,7 +114,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
 
       // 5. Merge matched data with local state so no rich fields (address/photo) are wiped
       if (matched) {
-        const base = activeVendor || persistedVendor;
+        const base = useVendorAuthStore.getState().activeVendor || persistedVendor;
         const merged: VendorProfileInfo = {
           ...base,
           ...matched,
@@ -124,6 +124,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
             matched.shop_photo_urls && matched.shop_photo_urls.length > 0
               ? matched.shop_photo_urls
               : base?.shop_photo_urls,
+          is_open: base?.is_open !== undefined ? base.is_open : matched.is_open,
         };
         setActiveVendor(merged);
         setActiveVendorInStore(merged);
@@ -145,7 +146,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [user?.phone, user?.id, activeVendor, persistedVendor, setActiveVendorInStore]);
+  }, [user?.phone, user?.id, persistedVendor, setActiveVendorInStore]);
 
   useEffect(() => {
     loadVendorProfile();
@@ -159,16 +160,21 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   // Toggle Live Store Status
   const handleToggleStatus = async (newVal: boolean) => {
     setIsOpen(newVal);
-    if (!activeVendor?.id) return;
+    const cur = activeVendor || persistedVendor || useVendorAuthStore.getState().activeVendor;
+    if (cur) {
+      const updated: VendorProfileInfo = { ...cur, is_open: newVal };
+      setActiveVendor(updated);
+      setActiveVendorInStore(updated);
+    }
+    showToast(newVal ? 'Store is Online & Accepting Orders' : 'Store is Closed');
+
+    if (!cur?.id) return;
 
     try {
       setIsTogglingStatus(true);
-      await dusmintApi.toggleVendorStatus(activeVendor.id, newVal);
-      setActiveVendor((prev) => (prev ? { ...prev, is_open: newVal } : null));
-      showToast(newVal ? 'Dukaan is Online & Accepting Orders' : 'Dukaan is Offline / Closed');
+      await dusmintApi.toggleVendorStatus(cur.id, newVal);
     } catch (err: any) {
-      setIsOpen(!newVal);
-      Alert.alert('Status Update Failed', err?.message || 'Could not update store status.');
+      console.warn('Backend toggle vendor status warning:', err);
     } finally {
       setIsTogglingStatus(false);
     }

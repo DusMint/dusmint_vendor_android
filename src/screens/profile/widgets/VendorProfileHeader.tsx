@@ -66,7 +66,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
   const cleanPhone = phoneDigits.length >= 10 ? `+91 ${phoneDigits.slice(-10)}` : rawPhone;
 
   return (
-    <View style={[styles.container, { paddingTop: statusBarHeight + 12 }]}>
+    <View style={[styles.container, { paddingTop: statusBarHeight + 18 }]}>
       {/* Background Gradient */}
       <View style={StyleSheet.absoluteFill}>
         <Svg width="100%" height="100%">
@@ -278,8 +278,8 @@ export const VendorProfileHeader: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 22,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     overflow: 'hidden',
@@ -289,7 +289,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginTop: 4,
+    marginBottom: 24,
   },
   screenTitle: {
     fontFamily: 'Metropolis-Bold',

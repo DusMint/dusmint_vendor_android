@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 import { dusmintApi } from '../../api-client/client';
@@ -243,6 +244,19 @@ export const VendorEarningsScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" />
 
+      {/* Soft Green Gradient Accent Header Background */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <Svg width="100%" height={260}>
+          <Defs>
+            <SvgGradient id="earningsAccentGrad" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0%" stopColor="#E8F5EC" />
+              <Stop offset="100%" stopColor="#FFFFFF" />
+            </SvgGradient>
+          </Defs>
+          <Rect width="100%" height={260} fill="url(#earningsAccentGrad)" />
+        </Svg>
+      </View>
+
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
@@ -302,7 +316,7 @@ export const VendorEarningsScreen: React.FC = () => {
               {/* Card 1: Orders Delivered */}
               <View style={styles.metricCard}>
                 <View style={styles.metricIconBox}>
-                  <Ionicons name="bag-check-outline" size={20} color="#111117" />
+                  <Ionicons name="bag-check-outline" size={20} color="#047A36" />
                 </View>
                 <Text style={styles.metricLabel}>Orders Delivered</Text>
                 <Text style={styles.metricValue}>{rangeMetrics.orderCount}</Text>
@@ -311,7 +325,7 @@ export const VendorEarningsScreen: React.FC = () => {
               {/* Card 2: Average Order Value */}
               <View style={styles.metricCard}>
                 <View style={styles.metricIconBox}>
-                  <Ionicons name="trending-up-outline" size={20} color="#111117" />
+                  <Ionicons name="trending-up-outline" size={20} color="#047A36" />
                 </View>
                 <Text style={styles.metricLabel}>Avg Order Value</Text>
                 <Text style={styles.metricValue}>₹{rangeMetrics.avgOrderValue}</Text>
@@ -498,10 +512,12 @@ const styles = StyleSheet.create({
   },
   rangeFilterContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E8F5EC',
     borderRadius: 16,
     padding: 4,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#D1FAE5',
   },
   rangeTab: {
     flex: 1,
@@ -537,16 +553,16 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1FAE5',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
     borderRadius: 24,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#064E3B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
   },
   heroTopRow: {
     flexDirection: 'row',
@@ -555,9 +571,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   commissionTag: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: '#86EFAC',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
@@ -571,8 +587,8 @@ const styles = StyleSheet.create({
   },
   rangeLabelText: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#9CA3AF',
+    fontWeight: '600',
+    color: '#059669',
   },
   heroAmountText: {
     fontFamily: 'Metropolis-Bold',
@@ -584,8 +600,8 @@ const styles = StyleSheet.create({
   },
   heroSubText: {
     fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: '#047A36',
+    fontWeight: '600',
   },
   metricRow: {
     flexDirection: 'row',
@@ -594,24 +610,24 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#E8F5EC',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 5,
+    elevation: 2,
   },
   metricIconBox: {
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(4, 122, 54, 0.07)',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
