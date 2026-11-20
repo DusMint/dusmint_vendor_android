@@ -39,7 +39,7 @@ export const VendorOptionsCard: React.FC<Props> = ({ options, onOptionPress }) =
               </View>
 
               <View style={styles.right}>
-                <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+                <Ionicons name="chevron-forward" size={18} color="#475569" />
               </View>
             </TouchableOpacity>
             {!isLast && <View style={styles.divider} />}
@@ -86,8 +86,8 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   label: {
-    fontSize: 14.5,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#0F172A',
     letterSpacing: -0.2,
   },

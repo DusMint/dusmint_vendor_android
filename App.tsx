@@ -160,7 +160,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
               <Ionicons
                 name={iconName}
                 size={24}
-                color={isFocused ? '#047A36' : '#94A3B8'}
+                color={isFocused ? '#047A36' : '#475569'}
               />
             </Animated.View>
             {route.name === 'VendorOrders' && pendingOrdersCount > 0 && (
@@ -493,8 +493,8 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
   tabLabel: {
-    fontFamily: 'Metropolis-Medium',
-    fontSize: 11,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12,
     marginTop: 3,
     letterSpacing: -0.2,
   },
@@ -503,8 +503,8 @@ const styles = StyleSheet.create({
     color: '#047A36',
   },
   tabLabelInactive: {
-    fontWeight: '600',
-    color: '#94A3B8',
+    fontWeight: '700',
+    color: '#475569',
   },
 
   // Popped-Out Center Mic Button
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   micSubLabel: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: '#047A36',
     marginTop: 3,
