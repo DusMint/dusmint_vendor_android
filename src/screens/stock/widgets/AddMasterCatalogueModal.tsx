@@ -13,13 +13,16 @@ import {
   Vibration,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { VendorStockItem } from '../../../api-client/types';
+
+export type MasterCategory = 'Vegetables' | 'Fruits' | 'Poultry / Meat' | 'Dairy';
 
 export interface MasterCatalogueItem {
   id: string;
   nameEn: string;
-  category: 'Vegetables' | 'Fruits' | 'Dairy' | 'Meat' | 'Staples';
+  category: MasterCategory;
   unit: string;
   defaultPricePaise: number;
   mrpPaise: number;

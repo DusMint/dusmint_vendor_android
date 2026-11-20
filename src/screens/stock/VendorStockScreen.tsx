@@ -20,8 +20,8 @@ import { VendorStockItem } from '../../api-client/types';
 import { VendorAppFooter } from '../profile/widgets/VendorAppFooter';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 
-// Categories Filter
-const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Meat', 'Staples'] as const;
+// Categories Filter - Limited strictly to Vegetables, Fruits, Poultry / Meat, Dairy
+const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry / Meat', 'Dairy'] as const;
 type CategoryType = (typeof CATEGORIES)[number];
 
 // Default Rich Store Inventory for Gupta Traders with live Kilos & Reserved quantities
@@ -112,15 +112,15 @@ const INITIAL_STORE_STOCK: VendorStockItem[] = [
   },
   {
     id: 'stock-8',
-    nameEn: 'Aashirvaad Chakki Atta',
-    category: 'Staples',
-    unit: '5 kg',
-    pricePaise: 24500,
-    mrpPaise: 27500,
+    nameEn: 'Farm Fresh White Eggs',
+    category: 'Poultry / Meat',
+    unit: '6 pcs',
+    pricePaise: 4800,
+    mrpPaise: 5400,
     isInStock: true,
-    photoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80',
-    stockKg: 15,
-    reservedKg: 0,
+    photoUrl: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=200&q=80',
+    stockKg: 20,
+    reservedKg: 2.0,
   },
   {
     id: 'stock-9',
@@ -133,6 +133,18 @@ const INITIAL_STORE_STOCK: VendorStockItem[] = [
     photoUrl: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=200&q=80',
     stockKg: 0,
     reservedKg: 0,
+  },
+  {
+    id: 'stock-10',
+    nameEn: 'Fresh Chicken Curry Cut',
+    category: 'Poultry / Meat',
+    unit: '500 g',
+    pricePaise: 13000,
+    mrpPaise: 15000,
+    isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=200&q=80',
+    stockKg: 10,
+    reservedKg: 1.5,
   },
 ];
 
@@ -405,40 +417,45 @@ export const VendorStockScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
       >
-        {/* Screen Header - Exact font & vertical position as Earnings and Profile */}
-        <View style={styles.headerRow}>
-          <Text style={styles.screenTitle}>Menu & Stock</Text>
+        {/* Screen Header - Exact font & vertical position as Earnings */}
+        <Text style={styles.screenTitle}>Menu & Stock</Text>
 
-          {/* 1. Small Compact Active & Out of Stock Pills */}
-          <View style={styles.miniStatsRow}>
-            <View style={styles.miniPillIn}>
-              <View style={styles.dotGreen} />
-              <Text style={styles.miniPillTextIn}>{inStockCount} Active</Text>
+        {/* 1. Boxes of Active Inventory & Out of Stock */}
+        <View style={styles.metricsRow}>
+          {/* Active Inventory Box */}
+          <View style={styles.metricBoxActive}>
+            <View style={styles.metricBoxTop}>
+              <View style={styles.metricIconCircleActive}>
+                <Ionicons name="checkmark-circle" size={18} color="#047A36" />
+              </View>
+              <Text style={styles.metricValActive}>{inStockCount}</Text>
             </View>
-            <View style={styles.miniPillOut}>
-              <View style={styles.dotGrey} />
-              <Text style={styles.miniPillTextOut}>{outOfStockCount} Out</Text>
+            <Text style={styles.metricLabelActive}>Active in Stock</Text>
+          </View>
+
+          {/* Out of Inventory Box */}
+          <View style={styles.metricBoxOut}>
+            <View style={styles.metricBoxTop}>
+              <View style={styles.metricIconCircleOut}>
+                <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
+              </View>
+              <Text style={styles.metricValOut}>{outOfStockCount}</Text>
             </View>
+            <Text style={styles.metricLabelOut}>Out of Stock</Text>
           </View>
         </View>
 
-        {/* 2. Prominent "+ Add Vegetable / Fruit / Dairy / Meat" Button (Replaces Search Bar) */}
+        {/* 2. Single Line Left-to-Right Add Button (No extra descriptions) */}
         <TouchableOpacity
           style={styles.addProduceBtn}
           onPress={() => setIsMasterModalOpen(true)}
           activeOpacity={0.85}
         >
-          <View style={styles.addProduceIconBox}>
-            <Ionicons name="add" size={20} color="#FFFFFF" />
-          </View>
-          <View style={styles.addProduceTextBox}>
-            <Text style={styles.addProduceTitle}>+ Add Vegetable, Fruit, Dairy or Meat</Text>
-            <Text style={styles.addProduceSub}>Browse 40+ master catalogue items & set your shop rates</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#047A36" />
+          <Ionicons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
+          <Text style={styles.addProduceBtnText}>+ Add Vegetable, Fruit, Poultry or Dairy</Text>
         </TouchableOpacity>
 
-        {/* 3. Category Filter Pills */}
+        {/* 3. Limited Category Filter Pills */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -523,108 +540,109 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 16,
-  },
   screenTitle: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 26,
     fontWeight: '800',
     color: '#111117',
+    marginVertical: 16,
     letterSpacing: -0.5,
   },
-  miniStatsRow: {
+  metricsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    gap: 12,
+    marginBottom: 16,
   },
-  miniPillIn: {
+  metricBoxActive: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    borderRadius: 18,
+    padding: 14,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  metricBoxOut: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 18,
+    padding: 14,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  metricBoxTop: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  metricIconCircleActive: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dotGreen: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#047A36',
-    marginRight: 4,
+  metricIconCircleOut: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FEF2F2',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  miniPillTextIn: {
-    fontSize: 11,
-    fontWeight: '700',
+  metricValActive: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: '#047A36',
   },
-  miniPillOut: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  metricValOut: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#DC2626',
   },
-  dotGrey: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#94A3B8',
-    marginRight: 4,
-  },
-  miniPillTextOut: {
-    fontSize: 11,
+  metricLabelActive: {
+    fontSize: 12.5,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#1F2937',
+  },
+  metricLabelOut: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#6B7280',
   },
   addProduceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#A7F3D0',
-    borderRadius: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 14,
+    justifyContent: 'center',
+    backgroundColor: '#047A36',
+    borderRadius: 14,
+    height: 48,
+    marginBottom: 16,
     shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
     elevation: 3,
   },
-  addProduceIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#047A36',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  addProduceTextBox: {
-    flex: 1,
-  },
-  addProduceTitle: {
+  addProduceBtnText: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 13.5,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#FFFFFF',
     letterSpacing: -0.2,
-  },
-  addProduceSub: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
   },
   categoryScroll: {
     paddingBottom: 14,
