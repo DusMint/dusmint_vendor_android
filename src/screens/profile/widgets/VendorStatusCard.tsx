@@ -50,11 +50,6 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
                 ]}
               />
             </View>
-            <Text style={styles.subtitle}>
-              {isOpen
-                ? 'Online on customer app • Live delivery slots'
-                : 'Paused • Customers cannot order from your dukaan'}
-            </Text>
           </View>
         </View>
 

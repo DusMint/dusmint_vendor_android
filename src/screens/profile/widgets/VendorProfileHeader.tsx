@@ -291,6 +291,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  screenTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#111117',
+    letterSpacing: -0.5,
+  },
   rightActions: {
     flexDirection: 'row',
     alignItems: 'center',
