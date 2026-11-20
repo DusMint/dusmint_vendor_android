@@ -105,23 +105,22 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* Step 1: Scale Bluetooth Live Reading */}
+        {/* Step 1: Scale Live Weight */}
         <View style={styles.card}>
           <View style={styles.stepTitleRow}>
-            <Text style={styles.stepNum}>STEP 1 • DIGITAL SCALE READING</Text>
+            <Text style={styles.stepNum}>STEP 1: SCALE WEIGHT</Text>
             <View style={styles.bleStatus}>
               <View style={styles.bleDotView} />
-              <Text style={styles.bleText}>Scale BLE Active</Text>
+              <Text style={styles.bleText}>Scale Connected</Text>
             </View>
           </View>
 
-          <Text style={styles.cardHeading}>Live Scale Reading</Text>
           <View style={styles.scaleDisplay}>
             <Text style={styles.scaleValue}>{liveScaleWeight}</Text>
-            <Text style={styles.scaleUnit}>GRAMS</Text>
+            <Text style={styles.scaleUnit}>GRAMS (g)</Text>
           </View>
 
-          {/* Quick Weight Adjuster for Testing */}
+          {/* Quick Weight Adjuster */}
           <View style={styles.weightAdjustRow}>
             <TouchableOpacity
               onPress={() => setLiveScaleWeight((w) => Math.max(100, w - 100))}
@@ -142,58 +141,50 @@ export const VendorPackScreen: React.FC<{ navigation: any; route: any }> = ({
               <Text style={styles.weightAdjustText}>Tare 2,000g</Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.weightTolerance}>
-            Target Weight: ~2,000 g • Variation: ±2.0% within tolerance
-          </Text>
         </View>
 
         {/* Step 2: Photo on Scale */}
         <View style={styles.card}>
-          <Text style={styles.stepNum}>STEP 2 • PACKING PROOF</Text>
-          <Text style={styles.cardHeading}>Photo of Bag on Scale</Text>
-          <Text style={styles.cardDesc}>
-            Take a clear photo showing the Dusmint eco-bag resting on the scale platform.
-          </Text>
+          <Text style={styles.stepNum}>STEP 2: BAG PHOTO</Text>
+          <Text style={styles.cardHeading}>Photo of Packed Bag</Text>
 
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => setPhotoTaken(!photoTaken)}
             style={[styles.boxCta, photoTaken && styles.boxCtaDone]}
           >
-            <Ionicons
-              name={photoTaken ? "checkmark-circle" : "camera-outline"}
-              size={32}
-              color={photoTaken ? "#047857" : "#334155"}
-              style={{ marginBottom: 6 }}
-            />
+            <View style={styles.boxIconCircle}>
+              <Ionicons
+                name={photoTaken ? "checkmark-circle-outline" : "camera-outline"}
+                size={26}
+                color={photoTaken ? "#047A36" : "#0F172A"}
+              />
+            </View>
             <Text style={[styles.ctaLabel, photoTaken && styles.ctaLabelDone]}>
-              {photoTaken ? 'Scale Photo Captured (Tap to Retake)' : 'Take Photo with Camera'}
+              {photoTaken ? 'Photo Captured (Tap to Retake)' : 'Snap Photo on Scale'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Step 3: Scan QR Seal Tape */}
         <View style={styles.card}>
-          <Text style={styles.stepNum}>STEP 3 • TAMPER-PROOF SECURITY</Text>
-          <Text style={styles.cardHeading}>Scan Tamper-Proof Seal Tape</Text>
-          <Text style={styles.cardDesc}>
-            Apply the serialized green Dusmint tape across bag handles and scan barcode.
-          </Text>
+          <Text style={styles.stepNum}>STEP 3: TAPE SEAL</Text>
+          <Text style={styles.cardHeading}>Security Tape Seal</Text>
 
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleScanSeal}
             style={[styles.boxCta, sealCode ? styles.boxCtaDone : null]}
           >
-            <Ionicons
-              name={sealCode ? "shield-checkmark" : "qr-code-outline"}
-              size={32}
-              color={sealCode ? "#047857" : "#334155"}
-              style={{ marginBottom: 6 }}
-            />
+            <View style={styles.boxIconCircle}>
+              <Ionicons
+                name={sealCode ? "shield-checkmark-outline" : "qr-code-outline"}
+                size={26}
+                color={sealCode ? "#047A36" : "#0F172A"}
+              />
+            </View>
             <Text style={[styles.ctaLabel, sealCode ? styles.ctaLabelDone : null]}>
-              {sealCode ? `Seal Attached: #${sealCode}` : 'Scan Tape QR / Barcode'}
+              {sealCode ? `Seal Attached: #${sealCode}` : 'Attach Green Tape & Scan'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -363,31 +354,40 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   boxCta: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    borderStyle: 'dashed',
-    paddingVertical: 20,
+    borderColor: '#E2E8F0',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 14,
+    marginTop: 8,
   },
   boxCtaDone: {
     backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
-    borderStyle: 'solid',
+    borderColor: '#86EFAC',
   },
-  ctaEmoji: {
-    fontSize: 28,
-    marginBottom: 6,
+  boxIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   ctaLabel: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#334155',
+    color: '#0F172A',
+    flex: 1,
   },
   ctaLabelDone: {
-    color: '#047857',
+    color: '#047A36',
+    fontWeight: '800',
   },
   bottomBar: {
     position: 'absolute',
@@ -406,20 +406,20 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   readyBtn: {
-    backgroundColor: '#FC6011',
+    backgroundColor: '#047A36',
     paddingVertical: 15,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FC6011',
+    shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 3,
   },
   readyBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 16.5,
     fontWeight: '800',
     letterSpacing: 0.3,
   },

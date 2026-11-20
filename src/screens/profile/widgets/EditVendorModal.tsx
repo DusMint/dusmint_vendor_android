@@ -361,7 +361,7 @@ export const EditVendorModal: React.FC<Props> = ({
                         onPress={() => handlePickPhoto(true)}
                         activeOpacity={0.8}
                       >
-                        <Ionicons name="camera" size={14} color="#047A36" style={{ marginRight: 4 }} />
+                        <Ionicons name="camera-outline" size={14} color="#0F172A" style={{ marginRight: 4 }} />
                         <Text style={styles.photoActionText}>Take New</Text>
                       </TouchableOpacity>
                       <TouchableOpacity

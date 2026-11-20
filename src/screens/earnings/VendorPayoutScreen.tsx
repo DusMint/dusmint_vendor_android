@@ -170,7 +170,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
 
             {/* Standard Daily Batch Settlement Notice */}
             <View style={styles.infoBanner}>
-              <Ionicons name="time-outline" size={16} color="#047A36" style={{ marginRight: 8, marginTop: 1 }} />
+              <Ionicons name="time-outline" size={16} color="#0F172A" style={{ marginRight: 8, marginTop: 1 }} />
               <Text style={styles.infoBannerText}>
                 Standard daily settlement triggers automatically every evening at 09:30 PM (Daily Batch) directly to your linked UPI.
               </Text>
@@ -250,7 +250,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
             <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setConfirmModalVisible(false)} />
             <View style={styles.modalContent}>
               <View style={styles.modalIconCircle}>
-                <Ionicons name="card" size={26} color="#047A36" />
+                <Ionicons name="card-outline" size={26} color="#0F172A" />
               </View>
 
               <Text style={styles.modalTitle}>Confirm Instant Payout</Text>
@@ -350,10 +350,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   balanceLabel: {
-    fontSize: 10.5,
+    fontSize: 12,
     fontWeight: '800',
     color: '#047A36',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
   },
   verifiedTag: {
     flexDirection: 'row',
@@ -362,44 +362,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   verifiedTagText: {
-    fontSize: 10.5,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     color: '#047A36',
   },
   balanceAmountText: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -1,
   },
   balanceSubText: {
-    fontSize: 12.5,
-    color: '#64748B',
-    marginTop: 4,
-    marginBottom: 14,
+    fontSize: 14,
+    color: '#334155',
+    fontWeight: '600',
+    marginTop: 6,
+    marginBottom: 16,
   },
   infoBanner: {
     flexDirection: 'row',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#ECFDF5',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#A7F3D0',
   },
   infoBannerText: {
-    fontSize: 11.5,
-    color: '#475569',
-    lineHeight: 17,
+    fontSize: 13,
+    color: '#047A36',
+    lineHeight: 18,
     flex: 1,
+    fontWeight: '600',
   },
   actionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#E8ECF2',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
     padding: 16,
     marginBottom: 16,
     shadowColor: '#000000',

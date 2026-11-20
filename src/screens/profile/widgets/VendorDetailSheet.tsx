@@ -207,7 +207,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="location" size={20} color="#047A36" />
+                  <Ionicons name="location-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Shop Address</Text>
               </View>
@@ -246,7 +246,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             </View>
 
             <View style={styles.tipBox}>
-              <Ionicons name="bicycle" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Ionicons name="bicycle-outline" size={18} color="#0F172A" style={{ marginRight: 8 }} />
               <Text style={styles.tipText}>
                 Delivery riders will come to this shop address to pick up packed customer orders.
               </Text>
@@ -273,7 +273,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="card" size={20} color="#047A36" />
+                  <Ionicons name="card-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Payment UPI Account</Text>
               </View>
@@ -302,7 +302,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             </View>
 
             <View style={styles.tipBox}>
-              <Ionicons name="shield-checkmark" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Ionicons name="shield-checkmark-outline" size={18} color="#0F172A" style={{ marginRight: 8 }} />
               <Text style={styles.tipText}>
                 Daily sales earnings are auto-transferred directly to this UPI account upon rider order pickup.
               </Text>
@@ -329,7 +329,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="time" size={20} color="#047A36" />
+                  <Ionicons name="time-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Delivery Slot Timings</Text>
               </View>
@@ -359,7 +359,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             </View>
 
             <View style={[styles.tipBox, { marginTop: 14 }]}>
-              <Ionicons name="cube-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
+              <Ionicons name="cube-outline" size={18} color="#0F172A" style={{ marginRight: 8 }} />
               <Text style={styles.tipText}>
                 Pack orders promptly so riders can collect and deliver without delays.
               </Text>
@@ -374,7 +374,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="notifications" size={20} color="#047A36" />
+                  <Ionicons name="notifications-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Order Alert Ringtone</Text>
               </View>
@@ -417,7 +417,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="globe" size={20} color="#047A36" />
+                  <Ionicons name="globe-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>App Language</Text>
               </View>
@@ -482,7 +482,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="headset" size={20} color="#047A36" />
+                  <Ionicons name="headset-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Help & Support</Text>
               </View>
@@ -532,7 +532,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="shield-checkmark" size={20} color="#047A36" />
+                  <Ionicons name="shield-checkmark-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Partner Terms & Policy</Text>
               </View>
@@ -642,7 +642,9 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#E8F5EC',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
   },

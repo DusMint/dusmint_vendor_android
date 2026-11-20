@@ -224,7 +224,7 @@ const QuickWeightAdjustModal: React.FC<QuickWeightModalProps> = ({
               <Image source={{ uri: item.photoUrl }} style={styles.modalItemImg} resizeMode="cover" />
             ) : (
               <View style={styles.modalItemPlaceholder}>
-                <Ionicons name="basket-outline" size={20} color="#047A36" />
+                <Ionicons name="basket-outline" size={20} color="#0F172A" />
               </View>
             )}
             <View style={{ flex: 1, marginLeft: 12 }}>
@@ -345,7 +345,7 @@ const StockInventoryCard: React.FC<{
             <Image source={{ uri: item.photoUrl }} style={styles.itemImg} resizeMode="cover" />
           ) : (
             <View style={styles.imgPlaceholder}>
-              <Ionicons name="basket-outline" size={22} color="#047A36" />
+              <Ionicons name="basket-outline" size={22} color="#0F172A" />
             </View>
           )}
         </View>
@@ -410,7 +410,7 @@ const StockInventoryCard: React.FC<{
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="add" size={16} color="#047A36" />
+                  <Ionicons name="add" size={16} color="#0F172A" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -485,7 +485,7 @@ const StockInventoryCard: React.FC<{
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="add" size={16} color="#047A36" />
+                  <Ionicons name="add" size={16} color="#0F172A" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -528,7 +528,7 @@ const StockInventoryCard: React.FC<{
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="add" size={16} color="#047A36" />
+                  <Ionicons name="add" size={16} color="#0F172A" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -787,7 +787,7 @@ export const VendorStockScreen: React.FC = () => {
           <View style={styles.metricBoxActive}>
             <View style={styles.metricBoxTop}>
               <View style={styles.metricIconCircleActive}>
-                <Ionicons name="checkmark-circle" size={18} color="#047A36" />
+                <Ionicons name="checkmark-circle-outline" size={18} color="#0F172A" />
               </View>
               <Text style={styles.metricValActive}>{inStockCount}</Text>
             </View>
@@ -965,6 +965,8 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 10,
     backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -389,7 +389,7 @@ export const VendorEarningsScreen: React.FC = () => {
               {/* Card 1: Total Orders */}
               <View style={styles.metricCard}>
                 <View style={styles.metricIconBox}>
-                  <Ionicons name="bag-check-outline" size={20} color="#047A36" />
+                  <Ionicons name="bag-check-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.metricLabel}>Total Orders</Text>
                 <Text style={styles.metricValue}>
@@ -400,7 +400,7 @@ export const VendorEarningsScreen: React.FC = () => {
               {/* Card 2: Remaining Settlement */}
               <View style={styles.metricCard}>
                 <View style={styles.metricIconBox}>
-                  <Ionicons name="wallet-outline" size={20} color="#047A36" />
+                  <Ionicons name="wallet-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.metricLabel}>Remaining Settlement</Text>
                 <Text style={styles.metricValue}>
@@ -417,7 +417,7 @@ export const VendorEarningsScreen: React.FC = () => {
             >
               <View style={styles.payoutActionLeft}>
                 <View style={styles.payoutActionIconBox}>
-                  <Ionicons name="card" size={20} color="#047A36" />
+                  <Ionicons name="card-outline" size={20} color="#0F172A" />
                 </View>
                 <View style={{ marginLeft: 12 }}>
                   <Text style={styles.payoutActionTitle}>Payout & Settlement Settings</Text>
@@ -425,7 +425,7 @@ export const VendorEarningsScreen: React.FC = () => {
                 </View>
               </View>
               <View style={styles.payoutActionArrowCircle}>
-                <Ionicons name="chevron-forward" size={16} color="#047A36" />
+                <Ionicons name="chevron-forward" size={16} color="#0F172A" />
               </View>
             </TouchableOpacity>
 
@@ -661,6 +661,8 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 10,
     backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -702,26 +704,31 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
   },
   payoutActionTitle: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 13.5,
+    fontSize: 15,
     fontWeight: '800',
     color: '#0F172A',
   },
   payoutActionSub: {
-    fontSize: 11,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#334155',
     marginTop: 2,
+    fontWeight: '600',
   },
   payoutActionArrowCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
     backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
   },

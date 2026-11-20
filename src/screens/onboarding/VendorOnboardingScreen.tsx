@@ -308,7 +308,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       <View style={styles.fieldBox}>
         <Text style={styles.fieldLabel}>MOBILE NUMBER</Text>
         <View style={styles.lockedFieldRow}>
-          <Ionicons name="lock-closed" size={15} color="#047A36" style={{ marginRight: 8 }} />
+          <Ionicons name="lock-closed-outline" size={15} color="#0F172A" style={{ marginRight: 8 }} />
           <Text style={styles.lockedPhoneText}>{phone}</Text>
           <View style={styles.verifiedTag}>
             <Text style={styles.verifiedTagText}>Verified</Text>
@@ -451,7 +451,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
               onPress={() => handlePickPhoto(true)}
               activeOpacity={0.7}
             >
-              <Ionicons name="camera-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
+              <Ionicons name="camera-outline" size={16} color="#0F172A" style={{ marginRight: 6 }} />
               <Text style={styles.retakeBtnText}>Change Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -467,7 +467,7 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       ) : (
         <View style={styles.photoUploadPlaceholder}>
           <View style={styles.photoUploadIconCircle}>
-            <Ionicons name="camera-outline" size={32} color="#047A36" />
+            <Ionicons name="camera-outline" size={32} color="#0F172A" />
           </View>
           <Text style={styles.uploadPromptTitle}>Attach Shop Photo</Text>
           <Text style={styles.uploadPromptSub}>Take a photo of your shop or choose from gallery</Text>
@@ -1039,7 +1039,9 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,

@@ -428,7 +428,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
 
         {/* Search Input Bar */}
         <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
+          <Ionicons name="search-outline" size={18} color="#0F172A" style={{ marginRight: 8 }} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -619,7 +619,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                             style={styles.stepBtn}
                             onPress={() => adjustInitialStock(-1, 0)}
                           >
-                            <Ionicons name="remove" size={16} color="#047A36" />
+                            <Ionicons name="remove" size={16} color="#0F172A" />
                           </TouchableOpacity>
 
                           <TextInput
@@ -633,7 +633,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                             style={styles.stepBtn}
                             onPress={() => adjustInitialStock(1, 0)}
                           >
-                            <Ionicons name="add" size={16} color="#047A36" />
+                            <Ionicons name="add" size={16} color="#0F172A" />
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -646,7 +646,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                             style={styles.stepBtn}
                             onPress={() => adjustInitialStock(0, -100)}
                           >
-                            <Ionicons name="remove" size={16} color="#047A36" />
+                            <Ionicons name="remove" size={16} color="#0F172A" />
                           </TouchableOpacity>
 
                           <TextInput
@@ -668,7 +668,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                             style={styles.stepBtn}
                             onPress={() => adjustInitialStock(0, 100)}
                           >
-                            <Ionicons name="add" size={16} color="#047A36" />
+                            <Ionicons name="add" size={16} color="#0F172A" />
                           </TouchableOpacity>
                         </View>
                       </View>
