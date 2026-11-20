@@ -604,7 +604,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
             </View>
           </KeyboardAvoidingView>
         </Modal>
-      </View>
+      </SafeAreaView>
     </Modal>
   );
 };
