@@ -80,9 +80,9 @@ export const VendorProfileHeader: React.FC<Props> = ({
         </Svg>
       </View>
 
-      {/* Top Action Row */}
+      {/* Top Action Row: Profile Title on Left + Language Pill & Menu on Right */}
       <View style={styles.topRow}>
-        <View />
+        <Text style={styles.screenTitle}>Profile</Text>
 
         <View style={styles.rightActions}>
           {/* Change Language Pill */}
@@ -93,7 +93,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
             accessibilityRole="button"
             accessibilityLabel="Change language"
           >
-            <Ionicons name="language-outline" size={15} color="#22C55E" style={{ marginRight: 5 }} />
+            <Ionicons name="language-outline" size={15} color="#047A36" style={{ marginRight: 5 }} />
             <Text style={styles.langText}>
               {selectedLanguage === 'hi' ? 'Hindi (HI)' : 'English (EN)'}
             </Text>
@@ -147,7 +147,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
           )}
         </TouchableOpacity>
 
-        {/* Store Info on the Right */}
+        {/* Store Info on the Right (No Edit Badge, No Verified Partner Tag) */}
         <TouchableOpacity
           style={styles.userDetails}
           onPress={onEditProfilePress}
@@ -157,23 +157,12 @@ export const VendorProfileHeader: React.FC<Props> = ({
             <Text style={styles.userName} numberOfLines={1}>
               {vendor?.name || 'My Dukaan'}
             </Text>
-            <View style={styles.editBadge}>
-              <Ionicons name="pencil-sharp" size={10} color="#15803D" style={{ marginRight: 3 }} />
-              <Text style={styles.editText}>EDIT</Text>
-            </View>
           </View>
 
           <Text style={styles.ownerText} numberOfLines={1}>
             Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Partner'}</Text>
             {Boolean(cleanPhone) && ` • ${cleanPhone}`}
           </Text>
-
-          <View style={styles.metaRow}>
-            <View style={styles.verifiedMiniBadge}>
-              <Ionicons name="checkmark-circle" size={12} color="#059669" />
-              <Text style={styles.verifiedMiniText}>Verified Partner</Text>
-            </View>
-          </View>
         </TouchableOpacity>
       </View>
 
