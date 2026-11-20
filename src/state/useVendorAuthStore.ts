@@ -23,6 +23,7 @@ interface VendorAuthState {
   isLoading: boolean;
   isHydrated: boolean;
   pendingOrdersCount: number;
+  isStoreOpen: boolean;
 
   // Actions
   setHydrated: (val: boolean) => void;
@@ -31,6 +32,7 @@ interface VendorAuthState {
   setStorePhotoUri: (uri: string | null) => void;
   setActiveVendor: (vendor: VendorProfileInfo | null) => void;
   setHasActiveVendor: (val: boolean) => void;
+  setStoreOpen: (isOpen: boolean) => void;
   setAuth: (token: string, user: any, hasActiveVendor?: boolean, vendor?: any) => void;
   logout: () => void;
 }
@@ -100,6 +102,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       // If native storage is not compiled into the APK, start hydrated to avoid blocking the UI
       isHydrated: !hasNativeAsyncStorage,
       pendingOrdersCount: 2,
+      isStoreOpen: true,
 
       setHydrated: (val: boolean) => set({ isHydrated: val }),
       setPendingOrdersCount: (count: number) => set({ pendingOrdersCount: count }),
@@ -119,12 +122,25 @@ export const useVendorAuthStore = create<VendorAuthState>()(
             : null) || null;
         set((state) => ({
           activeVendor: vendor,
+          isStoreOpen: vendor?.is_open !== undefined ? vendor.is_open : state.isStoreOpen,
           storePhotoUri: photoUri || state.storePhotoUri,
         }));
       },
 
       setHasActiveVendor: (val: boolean) => {
         set({ hasActiveVendor: val });
+      },
+
+      setStoreOpen: (isOpen: boolean) => {
+        set((state) => {
+          const updatedVendor = state.activeVendor
+            ? { ...state.activeVendor, is_open: isOpen }
+            : null;
+          return {
+            isStoreOpen: isOpen,
+            activeVendor: updatedVendor,
+          };
+        });
       },
 
       setAuth: (token: string, user: any, hasActiveVendor = false, vendor?: any) => {
@@ -139,6 +155,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
           isAuthenticated: true,
           hasActiveVendor,
           activeVendor: vendor || state.activeVendor || null,
+          isStoreOpen: vendor?.is_open !== undefined ? vendor.is_open : state.isStoreOpen,
           storePhotoUri: photoUri || state.storePhotoUri,
           selectedLanguage: user?.preferredLanguage || 'en',
         }));
@@ -173,6 +190,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         selectedLanguage: state.selectedLanguage,
         isAuthenticated: state.isAuthenticated,
         hasActiveVendor: state.hasActiveVendor,
+        isStoreOpen: state.isStoreOpen,
       }),
     }
   )

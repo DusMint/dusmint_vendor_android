@@ -781,23 +781,27 @@ export const VendorStockScreen: React.FC = () => {
         {/* Screen Header - Aligned to exact vertical position & typography of Earnings & Profile */}
         <Text style={styles.screenTitle}>Stock</Text>
 
-        {/* 1. Boxes of Active Inventory & Out of Stock (Clean single-line label & number with background watermark icon) */}
+        {/* 1. Boxes of Active Inventory & Out of Stock */}
         <View style={styles.metricsRow}>
           {/* Active Inventory Box */}
           <View style={styles.metricBoxActive}>
-            <View style={styles.metricBgWatermark} pointerEvents="none">
-              <Ionicons name="checkmark-circle" size={44} color="#047A36" style={{ opacity: 0.14 }} />
+            <View style={styles.metricLeftGroup}>
+              <View style={styles.metricMiniIconActive}>
+                <Ionicons name="checkmark" size={13} color="#047A36" />
+              </View>
+              <Text style={styles.metricLabelActive} numberOfLines={1}>Active in Stock</Text>
             </View>
-            <Text style={styles.metricLabelActive}>Active in Stock</Text>
             <Text style={styles.metricValActive}>{inStockCount}</Text>
           </View>
 
           {/* Out of Inventory Box */}
           <View style={styles.metricBoxOut}>
-            <View style={styles.metricBgWatermark} pointerEvents="none">
-              <Ionicons name="alert-circle" size={44} color="#DC2626" style={{ opacity: 0.14 }} />
+            <View style={styles.metricLeftGroup}>
+              <View style={styles.metricMiniIconOut}>
+                <Ionicons name="alert" size={13} color="#DC2626" />
+              </View>
+              <Text style={styles.metricLabelOut} numberOfLines={1}>Out of Stock</Text>
             </View>
-            <Text style={styles.metricLabelOut}>Out of Stock</Text>
             <Text style={styles.metricValOut}>{outOfStockCount}</Text>
           </View>
         </View>
@@ -930,13 +934,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#BBF7D0',
     borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'relative',
-    overflow: 'hidden',
     shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -949,25 +951,44 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'relative',
-    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
   },
-  metricBgWatermark: {
-    position: 'absolute',
-    left: 8,
-    top: '50%',
-    transform: [{ translateY: -22 }],
-    zIndex: 0,
+  metricLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 6,
+  },
+  metricMiniIconActive: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+  },
+  metricMiniIconOut: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
   },
   metricValActive: {
     fontFamily: 'Metropolis-Bold',
@@ -982,14 +1003,16 @@ const styles = StyleSheet.create({
     color: '#DC2626',
   },
   metricLabelActive: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
     color: '#1F2937',
+    flexShrink: 1,
   },
   metricLabelOut: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '700',
     color: '#6B7280',
+    flexShrink: 1,
   },
   addProduceBtn: {
     flexDirection: 'row',
