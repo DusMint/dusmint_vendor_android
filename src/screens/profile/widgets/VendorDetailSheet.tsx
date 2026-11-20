@@ -400,7 +400,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             </Text>
 
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: '#EA580C' }]}
+              style={styles.actionBtn}
               activeOpacity={0.85}
               onPress={handleTestChime}
             >
@@ -494,7 +494,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Toll-Free Helpline</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={styles.phoneHighlightValue}>
                   1800-889-6468
                 </Text>
               </View>
