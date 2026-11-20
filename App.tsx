@@ -26,7 +26,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
-  const bottomInset = insets.bottom > 0 ? insets.bottom : 8;
+  const bottomOffset = insets.bottom > 0 ? insets.bottom + 6 : 14;
   const [barWidth, setBarWidth] = useState(0);
 
   // Animated sliding indicator value tracking route index (0, 1, 2, 3)
@@ -34,10 +34,10 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
 
   // Scale animation for each of the 4 tabs
   const scaleAnims = useRef([
-    new Animated.Value(state.index === 0 ? 1.18 : 1.0),
-    new Animated.Value(state.index === 1 ? 1.18 : 1.0),
-    new Animated.Value(state.index === 2 ? 1.18 : 1.0),
-    new Animated.Value(state.index === 3 ? 1.18 : 1.0),
+    new Animated.Value(state.index === 0 ? 1.16 : 1.0),
+    new Animated.Value(state.index === 1 ? 1.16 : 1.0),
+    new Animated.Value(state.index === 2 ? 1.16 : 1.0),
+    new Animated.Value(state.index === 3 ? 1.16 : 1.0),
   ]).current;
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
     // 2. Smooth scale enlargement for active tab, smooth scale down for others
     scaleAnims.forEach((anim, i) => {
       Animated.spring(anim, {
-        toValue: i === state.index ? 1.18 : 1.0,
+        toValue: i === state.index ? 1.16 : 1.0,
         useNativeDriver: true,
         tension: 90,
         friction: 8,
@@ -61,119 +61,116 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
   }, [state.index, slideAnim, scaleAnims]);
 
   const numTabs = state.routes.length;
-  const tabWidth = barWidth > 0 ? barWidth / numTabs : 0;
+  const tabWidth = barWidth > 0 ? (barWidth - 12) / numTabs : 0;
 
   return (
-    <View
-      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
-      style={[
-        styles.tabBarContainer,
-        {
-          height: 60 + bottomInset,
-          paddingBottom: bottomInset,
-        },
-      ]}
-    >
-      {/* Smooth Sliding Gray Pill Track */}
-      {tabWidth > 0 && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Animated.View
-            style={[
-              styles.sliderTrack,
-              {
-                width: tabWidth,
-                transform: [
-                  {
-                    translateX: slideAnim.interpolate({
-                      inputRange: [0, 1, 2, 3],
-                      outputRange: [0, tabWidth, tabWidth * 2, tabWidth * 3],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
-            <View style={styles.grayPill} />
-          </Animated.View>
-        </View>
-      )}
-
-      {/* Tab Buttons */}
-      <View style={styles.tabButtonsRow}>
-        {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const isFocused = state.index === index;
-
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-              ? options.title
-              : route.name;
-
-          let iconName: keyof typeof Ionicons.glyphMap = 'receipt-outline';
-          if (route.name === 'VendorOrders') {
-            iconName = isFocused ? 'receipt' : 'receipt-outline';
-          } else if (route.name === 'VendorStock') {
-            iconName = isFocused ? 'grid' : 'grid-outline';
-          } else if (route.name === 'VendorEarnings') {
-            iconName = isFocused ? 'wallet' : 'wallet-outline';
-          } else if (route.name === 'VendorProfile') {
-            iconName = isFocused ? 'person' : 'person-outline';
-          }
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name);
-            }
-          };
-
-          const onLongPress = () => {
-            navigation.emit({
-              type: 'tabLongPress',
-              target: route.key,
-            });
-          };
-
-          return (
-            <TouchableOpacity
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={styles.tabButton}
-              activeOpacity={0.8}
+    <View style={[styles.floatingWrapper, { bottom: bottomOffset }]}>
+      <View
+        onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+        style={styles.floatingBar}
+      >
+        {/* Smooth Sliding Capsule Pill Track */}
+        {tabWidth > 0 && (
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Animated.View
+              style={[
+                styles.sliderTrack,
+                {
+                  left: 6,
+                  width: tabWidth,
+                  transform: [
+                    {
+                      translateX: slideAnim.interpolate({
+                        inputRange: [0, 1, 2, 3],
+                        outputRange: [0, tabWidth, tabWidth * 2, tabWidth * 3],
+                      }),
+                    },
+                  ],
+                },
+              ]}
             >
-              <View style={styles.tabContent}>
-                <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
-                  <Ionicons
-                    name={iconName}
-                    size={21}
-                    color={isFocused ? '#047A36' : '#94A3B8'}
-                  />
-                </Animated.View>
-                <Text
-                  style={[
-                    styles.tabLabel,
-                    isFocused ? styles.tabLabelActive : styles.tabLabelInactive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {label as string}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+              <View style={styles.grayPill} />
+            </Animated.View>
+          </View>
+        )}
+
+        {/* Tab Buttons */}
+        <View style={styles.tabButtonsRow}>
+          {state.routes.map((route, index) => {
+            const { options } = descriptors[route.key];
+            const isFocused = state.index === index;
+
+            const label =
+              options.tabBarLabel !== undefined
+                ? options.tabBarLabel
+                : options.title !== undefined
+                ? options.title
+                : route.name;
+
+            let iconName: keyof typeof Ionicons.glyphMap = 'receipt-outline';
+            if (route.name === 'VendorOrders') {
+              iconName = isFocused ? 'receipt' : 'receipt-outline';
+            } else if (route.name === 'VendorStock') {
+              iconName = isFocused ? 'grid' : 'grid-outline';
+            } else if (route.name === 'VendorEarnings') {
+              iconName = isFocused ? 'wallet' : 'wallet-outline';
+            } else if (route.name === 'VendorProfile') {
+              iconName = isFocused ? 'person' : 'person-outline';
+            }
+
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
+
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            };
+
+            const onLongPress = () => {
+              navigation.emit({
+                type: 'tabLongPress',
+                target: route.key,
+              });
+            };
+
+            return (
+              <TouchableOpacity
+                key={route.key}
+                accessibilityRole="button"
+                accessibilityState={isFocused ? { selected: true } : {}}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+                testID={options.tabBarTestID}
+                onPress={onPress}
+                onLongPress={onLongPress}
+                style={styles.tabButton}
+                activeOpacity={0.8}
+              >
+                <View style={styles.tabContent}>
+                  <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
+                    <Ionicons
+                      name={iconName}
+                      size={20}
+                      color={isFocused ? '#047A36' : '#94A3B8'}
+                    />
+                  </Animated.View>
+                  <Text
+                    style={[
+                      styles.tabLabel,
+                      isFocused ? styles.tabLabelActive : styles.tabLabelInactive,
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {label as string}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -270,28 +267,39 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  tabBarContainer: {
+  floatingWrapper: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    zIndex: 999,
+  },
+  floatingBar: {
+    height: 62,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    elevation: 10,
+    borderRadius: 31,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
     shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 10,
     position: 'relative',
   },
   sliderTrack: {
     position: 'absolute',
-    top: 6,
-    height: 48,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
   grayPill: {
-    width: '88%',
-    height: 48,
-    borderRadius: 14,
+    width: 68,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -299,20 +307,20 @@ const styles = StyleSheet.create({
   tabButtonsRow: {
     flexDirection: 'row',
     flex: 1,
-    paddingTop: 6,
+    alignItems: 'center',
   },
   tabButton: {
     flex: 1,
+    height: 46,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 48,
   },
   tabContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabLabel: {
-    fontSize: 10.5,
+    fontSize: 10,
     marginTop: 2,
     letterSpacing: -0.2,
   },

@@ -325,8 +325,8 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         {/* 4. App Version Footer */}
         <VendorAppFooter version="1.0.0" build="42" />
 
-        {/* Bottom padding to clear tab bar */}
-        <View style={{ height: 40 }} />
+        {/* Bottom padding to clear floating tab bar */}
+        <View style={{ height: 110 }} />
       </ScrollView>
 
       {/* Information Detail Sheet (Opens when menu items are clicked) */}
