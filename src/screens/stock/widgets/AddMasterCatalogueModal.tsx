@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,15 @@ import {
   Platform,
   Vibration,
   StatusBar,
+  ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { VendorStockItem } from '../../../api-client/types';
 
-export type MasterCategory = 'Vegetables' | 'Fruits' | 'Poultry or Meat' | 'Dairy';
+export type MasterCategory = 'Vegetables' | 'Fruits' | 'Meat' | 'Dairy';
 
 export interface MasterCatalogueItem {
   id: string;
@@ -248,11 +250,11 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
     photoUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=200&q=80',
   },
 
-  // --- Poultry or Meat ---
+  // --- Meat ---
   {
     id: 'master-meat-1',
     nameEn: 'Fresh Chicken Curry Cut',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '500 g',
     defaultPricePaise: 13000,
     mrpPaise: 15000,
@@ -262,7 +264,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-2',
     nameEn: 'Tender Chicken Breast Boneless',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '500 g',
     defaultPricePaise: 18000,
     mrpPaise: 21000,
@@ -272,7 +274,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-3',
     nameEn: 'Fresh Mutton Curry Cut',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '500 g',
     defaultPricePaise: 39000,
     mrpPaise: 44000,
@@ -282,7 +284,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-4',
     nameEn: 'Farm Fresh White Eggs',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '6 pcs',
     defaultPricePaise: 4800,
     mrpPaise: 5400,
@@ -292,7 +294,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-5',
     nameEn: 'Rohu Fresh Fish Cut',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '500 g',
     defaultPricePaise: 16000,
     mrpPaise: 19000,
@@ -301,7 +303,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
 ];
 
-const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry or Meat', 'Dairy'] as const;
+const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Meat', 'Dairy'] as const;
 
 interface Props {
   visible: boolean;

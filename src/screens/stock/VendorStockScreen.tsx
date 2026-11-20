@@ -23,8 +23,8 @@ import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 
-// Categories Filter - Limited strictly to Vegetables, Fruits, Poultry or Meat, Dairy
-const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry or Meat', 'Dairy'] as const;
+// Categories Filter - Limited strictly to Vegetables, Fruits, Meat, Dairy
+const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Meat', 'Dairy'] as const;
 type CategoryType = (typeof CATEGORIES)[number];
 
 // Default Rich Store Inventory for Gupta Traders with live Kilos & Grams
@@ -116,7 +116,7 @@ const INITIAL_STORE_STOCK: VendorStockItem[] = [
   {
     id: 'stock-8',
     nameEn: 'Farm Fresh White Eggs',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '6 pcs',
     pricePaise: 4800,
     mrpPaise: 5400,
@@ -140,7 +140,7 @@ const INITIAL_STORE_STOCK: VendorStockItem[] = [
   {
     id: 'stock-10',
     nameEn: 'Fresh Chicken Curry Cut',
-    category: 'Poultry or Meat',
+    category: 'Meat',
     unit: '500 g',
     pricePaise: 13000,
     mrpPaise: 15000,
@@ -455,7 +455,7 @@ const StockInventoryCard: React.FC<{
           </View>
         </View>
       ) : (
-        // For weight produce (Vegetables, Fruits, Poultry or Meat): Dual Metric Controllers
+        // For weight produce (Vegetables, Fruits, Meat): Dual Metric Controllers
         <View>
           <View style={styles.dualMetricRow}>
             {/* Left: KILOS (KG) Stepper [- 1 +] */}
@@ -813,10 +813,10 @@ export const VendorStockScreen: React.FC = () => {
           activeOpacity={0.85}
         >
           <Ionicons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.addProduceBtnText}>Add Vegetable, Fruit, Poultry or Meat, Dairy</Text>
+          <Text style={styles.addProduceBtnText}>Add Vegetable, Fruit, Meat, Dairy</Text>
         </TouchableOpacity>
 
-        {/* 3. Limited Category Filter Pills: Strictly Vegetables, Fruits, Poultry or Meat, Dairy */}
+        {/* 3. Limited Category Filter Pills: Strictly Vegetables, Fruits, Meat, Dairy */}
         <View style={styles.categoryNavWrapper}>
           <ScrollView
             horizontal
