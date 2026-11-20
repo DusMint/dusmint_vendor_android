@@ -133,7 +133,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.sheetHeader}>
               <View style={styles.titleRow}>
                 <View style={styles.headerIconCircle}>
-                  <Ionicons name="storefront" size={20} color="#047A36" />
+                  <Ionicons name="storefront-outline" size={20} color="#0F172A" />
                 </View>
                 <Text style={styles.sheetTitle}>Shop Details</Text>
               </View>

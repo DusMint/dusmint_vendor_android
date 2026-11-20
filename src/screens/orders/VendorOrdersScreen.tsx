@@ -281,7 +281,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           >
             <View style={styles.pulseCardTop}>
               <View style={styles.pulseIconCircle}>
-                <Ionicons name="cube" size={16} color="#64748B" />
+                <Ionicons name="cube-outline" size={17} color="#0F172A" />
               </View>
               <Text style={styles.pulseVal}>{newOrders.length}</Text>
             </View>
@@ -296,7 +296,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           >
             <View style={styles.pulseCardTop}>
               <View style={styles.pulseIconCircle}>
-                <Ionicons name="time-outline" size={16} color="#64748B" />
+                <Ionicons name="time-outline" size={17} color="#0F172A" />
               </View>
               <Text style={styles.pulseVal}>
                 {packingOrders.length + readyOrders.length}
@@ -313,7 +313,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           >
             <View style={styles.pulseCardTop}>
               <View style={styles.pulseIconCircle}>
-                <Ionicons name="checkmark-done" size={16} color="#64748B" />
+                <Ionicons name="checkmark-done" size={17} color="#0F172A" />
               </View>
               <Text style={styles.pulseVal}>{doneOrders.length}</Text>
             </View>
@@ -369,7 +369,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         {displayedOrders.length === 0 && (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="checkmark-circle-outline" size={32} color="#047A36" />
+              <Ionicons name="checkmark-circle-outline" size={32} color="#0F172A" />
             </View>
             <Text style={styles.emptyTitle}>
               {activeTab === 'new'
@@ -523,7 +523,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           activeOpacity={0.8}
           onPress={() => navigation.navigate('VendorStock')}
         >
-          <Ionicons name="layers-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
+          <Ionicons name="layers-outline" size={17} color="#0F172A" style={{ marginRight: 6 }} />
           <Text style={styles.quickStockLinkText}>Update Store Stock →</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -621,10 +621,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   pulseIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -717,6 +719,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: '#ECFDF5',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
