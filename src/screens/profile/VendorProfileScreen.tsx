@@ -186,7 +186,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
       text: v.name,
       onPress: () => {
         setActiveVendor(v);
-        setIsOpen(v.is_open ?? true);
+        setStoreOpen(v.is_open ?? true);
         showToast(`Switched to ${v.name}`);
       },
     }));

@@ -111,7 +111,8 @@ const FALLBACK_ORDERS: VendorOrderPart[] = [
 
 export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [isOpen, setIsOpen] = useState(true);
+  const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
+  const setStoreOpen = useVendorAuthStore((s) => s.setStoreOpen);
   const [activeTab, setActiveTab] = useState<'new' | 'packing' | 'ready' | 'done'>('new');
   const [vendors, setVendors] = useState<VendorProfileInfo[]>(FALLBACK_VENDORS);
   const [selectedVendorId, setSelectedVendorId] = useState<string>('vendor-1');
@@ -176,12 +177,17 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
   const selectedVendor = vendors.find((v) => v.id === selectedVendorId) || vendors[0];
 
-  // Store status toggle handler
+  // Store status toggle handler (Synchronized globally across Orders & Profile tabs)
   const handleToggleStoreStatus = () => {
-    const nextState = !isOpen;
-    setIsOpen(nextState);
+    const nextState = !isStoreOpen;
+    setStoreOpen(nextState);
+    try {
+      Vibration.vibrate(20);
+    } catch {}
     if (selectedVendorId) {
-      dusmintApi.toggleVendorStatus(selectedVendorId, nextState).catch(() => {});
+      dusmintApi.toggleVendorStatus(selectedVendorId, nextState).catch((err) => {
+        console.warn('Backend toggle vendor status warning:', err);
+      });
     }
   };
 
@@ -255,18 +261,18 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
           {/* Clean 1-Tap Store Open/Closed Toggle */}
           <TouchableOpacity
-            style={[styles.statusTogglePill, isOpen ? styles.statusToggleOpen : styles.statusToggleClosed]}
+            style={[styles.statusTogglePill, isStoreOpen ? styles.statusToggleOpen : styles.statusToggleClosed]}
             onPress={handleToggleStoreStatus}
             activeOpacity={0.8}
           >
-            <View style={[styles.statusDot, isOpen ? styles.statusDotOpen : styles.statusDotClosed]} />
+            <View style={[styles.statusDot, isStoreOpen ? styles.statusDotOpen : styles.statusDotClosed]} />
             <Text
               style={[
                 styles.statusToggleText,
-                isOpen ? styles.statusToggleTextOpen : styles.statusToggleTextClosed,
+                isStoreOpen ? styles.statusToggleTextOpen : styles.statusToggleTextClosed,
               ]}
             >
-              {isOpen ? 'STORE OPEN' : 'CLOSED'}
+              {isStoreOpen ? 'STORE OPEN' : 'CLOSED'}
             </Text>
           </TouchableOpacity>
         </View>
