@@ -61,7 +61,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
   {
     id: 'master-veg-4',
-    nameEn: 'Fresh Green Palak (Spinach)',
+    nameEn: 'Fresh Green Spinach',
     category: 'Vegetables',
     unit: '250 g',
     defaultPricePaise: 1800,
@@ -73,7 +73,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
     id: 'master-veg-5',
     nameEn: 'Fresh Cauliflower',
     category: 'Vegetables',
-    unit: '1 pc (~500g)',
+    unit: '1 piece ~500g',
     defaultPricePaise: 3000,
     mrpPaise: 3800,
     mandiRateText: '₹24 – ₹34 / pc',
@@ -121,9 +121,9 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
   {
     id: 'master-veg-10',
-    nameEn: 'Bottle Gourd (Lauki)',
+    nameEn: 'Fresh Bottle Gourd',
     category: 'Vegetables',
-    unit: '1 pc (~1kg)',
+    unit: '1 piece ~1kg',
     defaultPricePaise: 3200,
     mrpPaise: 4000,
     mandiRateText: '₹25 – ₹35 / pc',
@@ -163,7 +163,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
   {
     id: 'master-fruit-4',
-    nameEn: 'Alphonso Mango (Ratnagiri)',
+    nameEn: 'Ratnagiri Alphonso Mango',
     category: 'Fruits',
     unit: '1 kg',
     defaultPricePaise: 28000,
@@ -225,7 +225,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
   {
     id: 'master-dairy-4',
-    nameEn: 'Fresh Malai Dahi (Curd)',
+    nameEn: 'Fresh Malai Dahi Curd',
     category: 'Dairy',
     unit: '400 g',
     defaultPricePaise: 4200,
@@ -235,7 +235,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
   {
     id: 'master-dairy-5',
-    nameEn: 'Desi White Makkhan (Butter)',
+    nameEn: 'Fresh White Table Butter',
     category: 'Dairy',
     unit: '100 g',
     defaultPricePaise: 5600,
@@ -546,7 +546,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
           >
             <View style={styles.dialogCard}>
               <View style={styles.dialogHeader}>
-                <Text style={styles.dialogTitle}>Add to My Dukaan</Text>
+                <Text style={styles.dialogTitle}>Add to Store Inventory</Text>
                 <TouchableOpacity
                   style={styles.dialogCloseBtn}
                   onPress={() => setConfiguringItem(null)}
