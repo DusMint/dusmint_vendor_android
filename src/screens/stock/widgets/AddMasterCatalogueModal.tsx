@@ -372,9 +372,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
     if (!configuringItem) return;
 
     const pricePaise = Math.round((parseFloat(sellingPriceStr) || configuringItem.defaultPricePaise / 100) * 100);
-    const isUnit = configuringItem.unit.toLowerCase().includes('dozen') || configuringItem.unit.toLowerCase().includes('pc');
-    const finalKg = isUnit ? Math.max(1, initialKg) : initialKg;
-    const finalGrams = isUnit ? 0 : initialGrams;
+    const finalStock = Math.max(1, initialKg);
 
     const newStockItem: VendorStockItem = {
       id: `stock-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -383,10 +381,10 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
       unit: configuringItem.unit,
       pricePaise,
       mrpPaise: configuringItem.mrpPaise,
-      isInStock: finalKg > 0 || finalGrams > 0,
+      isInStock: finalStock > 0,
       photoUrl: configuringItem.photoUrl,
-      stockKg: finalKg,
-      stockGrams: finalGrams,
+      stockKg: finalStock,
+      stockGrams: 0,
     };
 
     onAddItem(newStockItem);
@@ -492,13 +490,10 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                   resizeMode="cover"
                 />
 
-                {/* 2. Item Name & Details Beside It */}
+                {/* 2. Item Name & Category Beside It */}
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemNameText}>{item.nameEn}</Text>
-                  <Text style={styles.itemUnitText}>
-                    {item.unit} • {item.category}
-                  </Text>
-                  <Text style={styles.mandiRateText}>Govt Mandi: {item.mandiRateText}</Text>
+                  <Text style={styles.itemCategoryText}>{item.category}</Text>
                 </View>
 
                 {/* 3. Add Button on Right */}
