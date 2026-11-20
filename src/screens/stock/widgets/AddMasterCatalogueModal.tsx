@@ -11,8 +11,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Vibration,
+  StatusBar,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { VendorStockItem } from '../../../api-client/types';
@@ -300,7 +301,6 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
 ];
 
-const ALPHABET = ['All', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry / Meat', 'Dairy'] as const;
 
 interface Props {
@@ -316,9 +316,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   onClose,
   onAddItem,
 }) => {
-  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLetter, setSelectedLetter] = useState('All');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   // Config Dialogue state when + Add is pressed on an item
@@ -326,20 +324,15 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   const [sellingPriceStr, setSellingPriceStr] = useState('');
   const [initialInventoryKg, setInitialInventoryKg] = useState('20');
 
-  // Filtered Master Database Items
+  // Filtered Master Database Items - Auto-sorted alphabetically from A to Z
   const filteredCatalogue = useMemo(() => {
-    return MASTER_PRODUCE_DATABASE.filter((item) => {
+    const list = MASTER_PRODUCE_DATABASE.filter((item) => {
       // 1. Category Filter
       if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
 
-      // 2. Alphabet Filter
-      if (selectedLetter !== 'All' && !item.nameEn.toUpperCase().startsWith(selectedLetter)) {
-        return false;
-      }
-
-      // 3. Search Query
+      // 2. Search Query
       if (searchQuery.trim().length > 0) {
         const q = searchQuery.toLowerCase().trim();
         return item.nameEn.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
@@ -347,7 +340,10 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
 
       return true;
     });
-  }, [selectedCategory, selectedLetter, searchQuery]);
+
+    // Auto-sorted alphabetically from A to Z
+    return list.sort((a, b) => a.nameEn.localeCompare(b.nameEn));
+  }, [selectedCategory, searchQuery]);
 
   // Open config dialog when + Add button is tapped
   const handleOpenConfigDialog = (item: MasterCatalogueItem) => {
@@ -384,8 +380,10 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 16 : insets.top + 8 }]}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <StatusBar barStyle="dark-content" />
+
         {/* Soft Green Gradient Accent Header Background */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Svg width="100%" height={260}>
@@ -399,11 +397,18 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
           </Svg>
         </View>
 
-        {/* Header - Simple and Bold, no extra descriptions */}
+        {/* Header Row - Aligned to exact vertical position & typography of Earnings and Menu & Stock */}
         <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>Master Produce Catalogue</Text>
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
-            <Ionicons name="close" size={20} color="#0F172A" />
+          <Text style={styles.screenTitle} numberOfLines={1} adjustsFontSizeToFit>
+            Master Produce Catalogue
+          </Text>
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={onClose}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="close" size={22} color="#111117" />
           </TouchableOpacity>
         </View>
 
@@ -425,51 +430,32 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
           )}
         </View>
 
-        {/* Category Pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
-          {MASTER_CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
-              >
-                <Text style={[styles.categoryPillText, isSelected && styles.categoryPillTextActive]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        {/* Category Filter Navigation Bar - Fully visible, zero overlap */}
+        <View style={styles.categoryNavWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScroll}
+          >
+            {MASTER_CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.categoryPillText, isSelected && styles.categoryPillTextActive]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-        {/* A-Z Alphabetical Index Filter Bar */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.alphaScroll}
-        >
-          {ALPHABET.map((letter) => {
-            const isSelected = selectedLetter === letter;
-            return (
-              <TouchableOpacity
-                key={letter}
-                onPress={() => setSelectedLetter(letter)}
-                style={[styles.alphaPill, isSelected && styles.alphaPillActive]}
-              >
-                <Text style={[styles.alphaPillText, isSelected && styles.alphaPillTextActive]}>
-                  {letter}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* Items Master List */}
+        {/* Items Master List (Auto-sorted A-Z) */}
         <ScrollView
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -633,19 +619,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 14,
+    paddingTop: 10,
+    marginTop: 16,
+    marginBottom: 16,
   },
-  headerTitle: {
+  screenTitle: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '800',
     color: '#111117',
-    letterSpacing: -0.4,
+    letterSpacing: -0.5,
+    flex: 1,
+    marginRight: 10,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -653,9 +643,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
   searchBar: {
     flexDirection: 'row',
@@ -667,7 +657,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     paddingHorizontal: 12,
     height: 44,
-    marginBottom: 10,
+    marginBottom: 12,
     shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
@@ -679,58 +669,42 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#0F172A',
   },
+  categoryNavWrapper: {
+    paddingVertical: 2,
+    marginBottom: 10,
+  },
   categoryScroll: {
     paddingHorizontal: 20,
-    paddingBottom: 8,
     gap: 8,
   },
   categoryPill: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryPillActive: {
     backgroundColor: '#047A36',
     borderColor: '#047A36',
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    elevation: 2,
   },
   categoryPillText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12.5,
+    fontWeight: '700',
     color: '#475569',
   },
   categoryPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
-  },
-  alphaScroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-    gap: 6,
-  },
-  alphaPill: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  alphaPillActive: {
-    backgroundColor: '#047A36',
-    borderColor: '#047A36',
-  },
-  alphaPillText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  alphaPillTextActive: {
-    color: '#FFFFFF',
+    fontWeight: '800',
   },
   listContent: {
     paddingHorizontal: 20,

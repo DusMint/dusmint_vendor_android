@@ -384,10 +384,13 @@ export const VendorStockScreen: React.FC = () => {
     showToast(`${newItem.nameEn} added (${newItem.stockKg} kg @ ₹${(newItem.pricePaise / 100).toFixed(0)})`);
   };
 
-  // Category filter
+  // Category filter + Auto-sorted alphabetically from A to Z
   const filteredItems = useMemo(() => {
-    if (selectedCategory === 'All') return items;
-    return items.filter((i) => i.category.toLowerCase() === selectedCategory.toLowerCase());
+    const list =
+      selectedCategory === 'All'
+        ? items
+        : items.filter((i) => i.category.toLowerCase() === selectedCategory.toLowerCase());
+    return [...list].sort((a, b) => a.nameEn.localeCompare(b.nameEn));
   }, [items, selectedCategory]);
 
   // Small Metrics
@@ -455,27 +458,30 @@ export const VendorStockScreen: React.FC = () => {
           <Text style={styles.addProduceBtnText}>+ Add Vegetable, Fruit, Poultry or Dairy</Text>
         </TouchableOpacity>
 
-        {/* 3. Limited Category Filter Pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                onPress={() => setSelectedCategory(cat)}
-                style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
-              >
-                <Text style={[styles.categoryPillText, isSelected && styles.categoryPillTextActive]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+        {/* 3. Limited Category Filter Pills - Clean, fully visible, zero overlap */}
+        <View style={styles.categoryNavWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScroll}
+          >
+            {CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setSelectedCategory(cat)}
+                  style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.categoryPillText, isSelected && styles.categoryPillTextActive]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
         {/* Live Items Section Header */}
         <View style={styles.sectionHeaderRow}>
