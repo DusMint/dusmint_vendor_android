@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@dusmint/ui';
 import { VendorOrdersScreen } from './src/screens/orders/VendorOrdersScreen';
 import { VendorPackScreen } from './src/screens/orders/VendorPackScreen';
@@ -60,17 +61,11 @@ function VendorTabs() {
         options={{
           tabBarLabel: 'Orders',
           tabBarIcon: ({ color, focused }) => (
-            <View style={styles.iconContainer}>
-              <Image
-                source={require('./assets/img/tab_home.png')}
-                style={[
-                  styles.tabIcon,
-                  { tintColor: focused ? '#047A36' : '#94A3B8' },
-                ]}
-                resizeMode="contain"
-              />
-              {focused && <View style={styles.activeDot} />}
-            </View>
+            <Ionicons
+              name={focused ? 'receipt' : 'receipt-outline'}
+              size={23}
+              color={color}
+            />
           ),
         }}
       />
@@ -80,17 +75,11 @@ function VendorTabs() {
         options={{
           tabBarLabel: 'Menu & Stock',
           tabBarIcon: ({ color, focused }) => (
-            <View style={styles.iconContainer}>
-              <Image
-                source={require('./assets/img/tab_menu.png')}
-                style={[
-                  styles.tabIcon,
-                  { tintColor: focused ? '#047A36' : '#94A3B8' },
-                ]}
-                resizeMode="contain"
-              />
-              {focused && <View style={styles.activeDot} />}
-            </View>
+            <Ionicons
+              name={focused ? 'grid' : 'grid-outline'}
+              size={23}
+              color={color}
+            />
           ),
         }}
       />
@@ -100,17 +89,11 @@ function VendorTabs() {
         options={{
           tabBarLabel: 'Earnings',
           tabBarIcon: ({ color, focused }) => (
-            <View style={styles.iconContainer}>
-              <Image
-                source={require('./assets/img/more_payment.png')}
-                style={[
-                  styles.tabIcon,
-                  { tintColor: focused ? '#047A36' : '#94A3B8' },
-                ]}
-                resizeMode="contain"
-              />
-              {focused && <View style={styles.activeDot} />}
-            </View>
+            <Ionicons
+              name={focused ? 'wallet' : 'wallet-outline'}
+              size={23}
+              color={color}
+            />
           ),
         }}
       />
@@ -120,17 +103,11 @@ function VendorTabs() {
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <View style={styles.iconContainer}>
-              <Image
-                source={require('./assets/img/tab_profile.png')}
-                style={[
-                  styles.tabIcon,
-                  { tintColor: focused ? '#047A36' : '#94A3B8' },
-                ]}
-                resizeMode="contain"
-              />
-              {focused && <View style={styles.activeDot} />}
-            </View>
+            <Ionicons
+              name={focused ? 'person' : 'person-outline'}
+              size={23}
+              color={color}
+            />
           ),
         }}
       />
@@ -196,20 +173,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabIcon: {
-    width: 22,
-    height: 22,
-  },
-  activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#047A36',
-    marginTop: 2,
-  },
-});
+

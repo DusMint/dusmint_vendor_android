@@ -249,12 +249,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       >
         {/* Screen Header - Identical Alignment & Typography to Earnings & Menu */}
         <View style={styles.headerRow}>
-          <View style={styles.headerTitles}>
-            <Text style={styles.screenTitle}>Orders</Text>
-            <Text style={styles.shopSubTitle}>
-              {selectedVendor?.name || 'Gupta Traders'} • {selectedVendor?.cluster_name || 'Vijay Nagar'}
-            </Text>
-          </View>
+          <Text style={styles.screenTitle}>Orders</Text>
 
           {/* Clean 1-Tap Store Open/Closed Toggle */}
           <TouchableOpacity
@@ -276,19 +271,17 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
         {/* 1. Today's Pulse Metrics - The 3 Essential Numbers for the Merchant */}
         <View style={styles.pulseRow}>
-          {/* Card 1: To Pack (Urgent) */}
+          {/* Card 1: To Pack */}
           <TouchableOpacity
-            style={[styles.pulseCard, newOrders.length > 0 && styles.pulseCardUrgent]}
+            style={styles.pulseCard}
             onPress={() => handleSelectTab('new', 0)}
             activeOpacity={0.85}
           >
             <View style={styles.pulseCardTop}>
-              <View style={[styles.pulseIconCircle, newOrders.length > 0 && styles.pulseIconCircleUrgent]}>
-                <Ionicons name="cube" size={16} color={newOrders.length > 0 ? '#047A36' : '#64748B'} />
+              <View style={styles.pulseIconCircle}>
+                <Ionicons name="cube" size={16} color="#64748B" />
               </View>
-              <Text style={[styles.pulseVal, newOrders.length > 0 && styles.pulseValUrgent]}>
-                {newOrders.length}
-              </Text>
+              <Text style={styles.pulseVal}>{newOrders.length}</Text>
             </View>
             <Text style={styles.pulseLabel}>To Pack</Text>
           </TouchableOpacity>
@@ -318,7 +311,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           >
             <View style={styles.pulseCardTop}>
               <View style={styles.pulseIconCircle}>
-                <Ionicons name="checkmark-done" size={16} color="#047A36" />
+                <Ionicons name="checkmark-done" size={16} color="#64748B" />
               </View>
               <Text style={styles.pulseVal}>{doneOrders.length}</Text>
             </View>
@@ -408,11 +401,6 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
                 <View>
                   <View style={styles.orderCodeRow}>
                     <Text style={styles.orderCodeText}>{order.orderCode}</Text>
-                    {isPending && (
-                      <View style={styles.newAlertPill}>
-                        <Text style={styles.newAlertPillText}>NEW</Text>
-                      </View>
-                    )}
                   </View>
                   <View style={styles.slotRow}>
                     <Ionicons name="time-outline" size={12} color="#64748B" style={{ marginRight: 4 }} />
@@ -557,22 +545,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
-  headerTitles: {
-    flex: 1,
-    marginRight: 10,
-  },
   screenTitle: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 26,
     fontWeight: '800',
     color: '#111117',
     letterSpacing: -0.5,
-  },
-  shopSubTitle: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#64748B',
-    marginTop: 2,
   },
   statusTogglePill: {
     flexDirection: 'row',
@@ -634,10 +612,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  pulseCardUrgent: {
-    borderColor: '#BBF7D0',
-    backgroundColor: '#F0FDF4',
-  },
   pulseCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -652,17 +626,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  pulseIconCircleUrgent: {
-    backgroundColor: '#DCFCE7',
-  },
   pulseVal: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 20,
     fontWeight: '800',
     color: '#111117',
-  },
-  pulseValUrgent: {
-    color: '#047A36',
   },
   pulseLabel: {
     fontSize: 11.5,
@@ -799,21 +767,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#111117',
     letterSpacing: -0.3,
-  },
-  newAlertPill: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
-    marginLeft: 6,
-  },
-  newAlertPillText: {
-    fontSize: 9.5,
-    fontWeight: '800',
-    color: '#DC2626',
-    letterSpacing: 0.4,
   },
   slotRow: {
     flexDirection: 'row',
