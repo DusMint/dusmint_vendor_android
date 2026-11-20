@@ -290,9 +290,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '400',
+    fontSize: 15,
+    color: '#334155',
+    fontWeight: '500',
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -302,12 +302,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   phoneHighlight: {
+    fontSize: 16,
     color: '#0F172A',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   editText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     color: '#047A36',
   },
   otpBoxWrapper: {
@@ -336,22 +337,22 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   resendTimerText: {
-    fontSize: 13,
-    color: '#64748B',
+    fontSize: 14,
+    color: '#334155',
     fontWeight: '500',
   },
   timerBold: {
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#0F172A',
   },
   resendActionText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#047A36',
   },
   verifyButton: {
-    height: 52,
-    borderRadius: 14,
+    height: 54,
+    borderRadius: 16,
     backgroundColor: '#047A36',
     justifyContent: 'center',
     alignItems: 'center',
@@ -361,8 +362,8 @@ const styles = StyleSheet.create({
   },
   verifyButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16.5,
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
 });
