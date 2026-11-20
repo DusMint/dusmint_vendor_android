@@ -21,7 +21,6 @@ import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
-import { VendorAppFooter } from '../profile/widgets/VendorAppFooter';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 
 // Categories Filter - Limited strictly to Vegetables, Fruits, Poultry or Meat, Dairy
@@ -263,7 +262,7 @@ const QuickWeightAdjustModal: React.FC<QuickWeightModalProps> = ({
           </View>
 
           {/* Quick Additions Row (Inventory Refills & Rollovers) */}
-          <Text style={styles.modalSectionLabel}>Add to Stock (Refill & 1000g Rollover)</Text>
+          <Text style={styles.modalSectionLabel}>Add to Stock (Refill)</Text>
           <View style={styles.modalChipsGrid}>
             {[
               { label: '+10 g', deltaG: 10 },
@@ -271,17 +270,15 @@ const QuickWeightAdjustModal: React.FC<QuickWeightModalProps> = ({
               { label: '+100 g', deltaG: 100 },
               { label: '+200 g', deltaG: 200 },
               { label: '+500 g', deltaG: 500 },
-              { label: '+1000 g (+1 kg)', deltaG: 1000, highlight: true },
+              { label: '+1 kg', deltaG: 1000 },
             ].map((chip) => (
               <TouchableOpacity
                 key={chip.label}
-                style={[styles.modalAddChip, chip.highlight && styles.modalAddChipHighlight]}
+                style={styles.modalAddChip}
                 onPress={() => onApplyWeightChange(0, chip.deltaG)}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.modalAddChipText, chip.highlight && styles.modalAddChipHighlightText]}>
-                  {chip.label}
-                </Text>
+                <Text style={styles.modalAddChipText}>{chip.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -380,36 +377,80 @@ const StockInventoryCard: React.FC<{
 
       {/* Bottom Section: Dual Metric Controllers [- 1 +] and [- 000 +] with 1000g Rollover */}
       {isUnitItem ? (
-        // For unit-based items (Bananas dozen, Eggs pcs, Milk pouch): Single Count Controller
-        <View style={styles.unitControlRow}>
-          <Text style={styles.stepperColLabel}>QUANTITY ({item.unit.includes('dozen') ? 'DOZEN' : 'PIECES'})</Text>
-          <View style={styles.stepperContainer}>
-            <TouchableOpacity
-              style={[styles.stepperBtn, curKg <= 0 && styles.stepperBtnDisabled]}
-              onPress={() => onAdjustWeight(item.id, -1, 0)}
-              disabled={curKg <= 0}
-              activeOpacity={0.7}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Ionicons name="remove" size={16} color={curKg <= 0 ? '#94A3B8' : '#0F172A'} />
-            </TouchableOpacity>
+        // For unit-based items (Bananas dozen, Eggs pcs, Milk pouch): Clean Standard Width Controller
+        <View>
+          <View style={styles.dualMetricRow}>
+            <View style={styles.metricCol}>
+              <Text style={styles.stepperColLabel}>
+                QUANTITY ({item.unit.includes('dozen') ? 'DOZEN' : 'PIECES'})
+              </Text>
+              <View style={styles.stepperContainer}>
+                <TouchableOpacity
+                  style={[styles.stepperBtn, curKg <= 0 && styles.stepperBtnDisabled]}
+                  onPress={() => onAdjustWeight(item.id, -1, 0)}
+                  disabled={curKg <= 0}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="remove" size={16} color={curKg <= 0 ? '#94A3B8' : '#0F172A'} />
+                </TouchableOpacity>
 
-            <View style={styles.stepperValBox}>
-              <Text style={[styles.stepperNum, isOutOfStock && styles.stepperNumOut]}>
-                {curKg}
-              </Text>
-              <Text style={styles.stepperUnitLabel}>
-                {item.unit.includes('dozen') ? 'doz' : 'pcs'}
-              </Text>
+                <View style={styles.stepperValBox}>
+                  <Text style={[styles.stepperNum, isOutOfStock && styles.stepperNumOut]}>
+                    {curKg}
+                  </Text>
+                  <Text style={styles.stepperUnitLabel}>
+                    {item.unit.includes('dozen') ? 'doz' : 'pcs'}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.stepperBtn}
+                  onPress={() => onAdjustWeight(item.id, 1, 0)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="add" size={16} color="#047A36" />
+                </TouchableOpacity>
+              </View>
             </View>
 
+            {/* Empty matching column on the right for symmetry with weight cards */}
+            <View style={styles.metricCol} />
+          </View>
+
+          {/* Quick chips for unit items */}
+          <View style={styles.quickChipsRow}>
             <TouchableOpacity
-              style={styles.stepperBtn}
+              style={styles.quickChipBtn}
+              onPress={() => onAdjustWeight(item.id, -1, 0)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.quickChipText}>-1</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickChipBtn}
               onPress={() => onAdjustWeight(item.id, 1, 0)}
               activeOpacity={0.7}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Ionicons name="add" size={16} color="#047A36" />
+              <Text style={styles.quickChipText}>+1</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickChipBtn}
+              onPress={() => onAdjustWeight(item.id, item.unit.includes('dozen') ? 6 : 5, 0)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.quickChipText}>{item.unit.includes('dozen') ? '+6' : '+5'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickChipBtn}
+              onPress={() => onAdjustWeight(item.id, item.unit.includes('dozen') ? 12 : 10, 0)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.quickChipText}>{item.unit.includes('dozen') ? '+12' : '+10'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -493,7 +534,7 @@ const StockInventoryCard: React.FC<{
             </View>
           </View>
 
-          {/* Quick Order Granular Chips: 10g, 200g, 1000g rollover */}
+          {/* Quick Order Granular Chips: -10g, +10g, +200g, +1kg (all neutral, no green highlight) */}
           <View style={styles.quickChipsRow}>
             <TouchableOpacity
               style={styles.quickChipBtn}
@@ -520,11 +561,11 @@ const StockInventoryCard: React.FC<{
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.quickChipHighlightBtn}
-              onPress={() => onAdjustWeight(item.id, 0, 1000)}
+              style={styles.quickChipBtn}
+              onPress={() => onAdjustWeight(item.id, 1, 0)}
               activeOpacity={0.7}
             >
-              <Text style={styles.quickChipHighlightText}>+1000g (+1kg)</Text>
+              <Text style={styles.quickChipText}>+1kg</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -772,7 +813,7 @@ export const VendorStockScreen: React.FC = () => {
           activeOpacity={0.85}
         >
           <Ionicons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-          <Text style={styles.addProduceBtnText}>+ Add Vegetable, Fruit, Poultry or Meat, Dairy</Text>
+          <Text style={styles.addProduceBtnText}>Add Vegetable, Fruit, Poultry or Meat, Dairy</Text>
         </TouchableOpacity>
 
         {/* 3. Limited Category Filter Pills: Strictly Vegetables, Fruits, Poultry or Meat, Dairy */}
@@ -823,9 +864,6 @@ export const VendorStockScreen: React.FC = () => {
             />
           ))
         )}
-
-        {/* App Version Footer */}
-        <VendorAppFooter version="1.0.0" build="42" />
       </ScrollView>
 
       {/* Floating Animated Toast Banner */}
@@ -1055,11 +1093,12 @@ const styles = StyleSheet.create({
   },
   topCardRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   imgWrapper: {
     marginRight: 12,
+    marginTop: 1,
   },
   itemImg: {
     width: 52,
@@ -1105,14 +1144,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   totalStockBadge: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1.2,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'flex-start',
+    marginTop: 1,
   },
   totalStockBadgeOut: {
     backgroundColor: '#FEF2F2',
@@ -1120,9 +1161,9 @@ const styles = StyleSheet.create({
   },
   totalStockBadgeText: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 12.5,
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#047A36',
+    color: '#15803D',
     letterSpacing: -0.2,
   },
   totalStockBadgeTextOut: {

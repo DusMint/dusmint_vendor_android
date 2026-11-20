@@ -44,14 +44,12 @@ export const VendorEarningsScreen: React.FC = () => {
   const [range, setRange] = useState<'today' | 'week' | 'month'>('week');
   const [page, setPage] = useState(1);
 
-  // Smooth tab switching animations
+  // Smooth tab switching & value animations
   const tabAnim = useRef(new Animated.Value(1)).current; // 0: today, 1: week, 2: month
-  const contentFadeAnim = useRef(new Animated.Value(1)).current;
+  const valueFadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleSelectRange = (r: 'today' | 'week' | 'month', idx: number) => {
     if (range === r) return;
-    setRange(r);
-    setPage(1);
 
     // Smooth sliding pill indicator
     Animated.spring(tabAnim, {
@@ -61,13 +59,20 @@ export const VendorEarningsScreen: React.FC = () => {
       useNativeDriver: false,
     }).start();
 
-    // Smooth content fade transition
-    contentFadeAnim.setValue(0.4);
-    Animated.timing(contentFadeAnim, {
-      toValue: 1,
-      duration: 200,
+    // Smooth, clean value transition without flickering the card boxes
+    Animated.timing(valueFadeAnim, {
+      toValue: 0,
+      duration: 80,
       useNativeDriver: true,
-    }).start();
+    }).start(() => {
+      setRange(r);
+      setPage(1);
+      Animated.timing(valueFadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   // Active verified UPI account
