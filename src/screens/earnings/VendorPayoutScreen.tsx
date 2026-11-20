@@ -123,7 +123,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
       onSettlementRequested(transferAmount);
     }
 
-    setSuccessToast(`Instant payout of ₹${transferAmount.toFixed(2)} initiated to ${payoutUpi}!`);
+    setSuccessToast(`Instant payout of ${formatRupee(transferAmount)} initiated to ${payoutUpi}!`);
     setTimeout(() => {
       setSuccessToast(null);
     }, 3200);
@@ -169,30 +169,23 @@ export const VendorPayoutScreen: React.FC<Props> = ({
               </View>
             </View>
 
-            <Text style={styles.balanceAmountText}>₹{balance.toFixed(2)}</Text>
+            <Text style={styles.balanceAmountText}>{formatRupee(balance)}</Text>
             <Text style={styles.balanceSubText}>
-              Direct store earnings ready for transfer into {payoutUpi || 'sumit@hdfc'}
+              Ready for direct transfer to {payoutUpi || 'sumit@hdfc'}
             </Text>
 
             {/* Standard Daily Batch Settlement Notice */}
             <View style={styles.infoBanner}>
               <Ionicons name="time-outline" size={16} color="#0F172A" style={{ marginRight: 8, marginTop: 1 }} />
               <Text style={styles.infoBannerText}>
-                Standard daily settlement triggers automatically every evening at 09:30 PM (Daily Batch) directly to your linked UPI.
+                Daily settlement triggers automatically every evening at 09:30 PM to your linked UPI.
               </Text>
             </View>
           </View>
 
           {/* Card 2: Instant Payout Action */}
           <View style={styles.actionCard}>
-            <View style={styles.actionHeaderRow}>
-              <View>
-                <Text style={styles.actionTitle}>Need Instant Settlement?</Text>
-                <Text style={styles.actionSubtitle}>
-                  Request early payout anytime without waiting for the 09:30 PM batch
-                </Text>
-              </View>
-            </View>
+            <Text style={styles.actionTitle}>Need Instant Settlement?</Text>
 
             <TouchableOpacity
               style={[styles.instantPayoutBtn, balance <= 0 && styles.instantPayoutBtnDisabled]}
@@ -202,43 +195,51 @@ export const VendorPayoutScreen: React.FC<Props> = ({
             >
               <Ionicons name="flash" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
               <Text style={styles.instantPayoutBtnText}>
-                {balance > 0 ? `Request Instant Payout (₹${balance.toFixed(2)})` : 'All Earnings Settled'}
+                {balance > 0 ? `Request Instant Payout (${formatRupee(balance)})` : 'All Earnings Settled'}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Card 3: Settlement History Ledger */}
+          {/* Card 3: Settlement History Ledger - Clean and Direct for Tier 3/4 Vendors */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Settlement History</Text>
             <Text style={styles.sectionCountText}>Showing {settlementList.length} settlements</Text>
           </View>
 
           <View style={styles.unifiedCard}>
-            {settlementList.map((st, idx) => (
-              <View key={st.id}>
-                <View style={styles.settlementRow}>
-                  <View style={styles.txTopRow}>
-                    <Text style={styles.txDate}>{st.dateStr}</Text>
-                    <Text style={styles.txAmount}>+₹{st.amount.toFixed(2)}</Text>
-                  </View>
+            {settlementList.map((st, idx) => {
+              const isProcessing = st.status === 'Processing';
+              return (
+                <View key={st.id}>
+                  <View style={styles.settlementRow}>
+                    <View style={styles.txTopRow}>
+                      <Text style={styles.txDate}>{st.dateStr}</Text>
+                      <Text style={styles.txAmount}>+{formatRupee(st.amount)}</Text>
+                    </View>
 
-                  <View style={styles.txBottomRow}>
-                    <View style={styles.txUpiInfo}>
-                      <View style={[styles.statusDot, st.status === 'Processing' && styles.statusDotProcessing]} />
-                      <Text style={styles.txUpiText} numberOfLines={1}>
-                        Direct UPI Auto-Credit ({st.upiId})
-                      </Text>
-                    </View>
-                    <View style={[styles.txStatusPill, st.status === 'Processing' && styles.txStatusPillProcessing]}>
-                      <Text style={[styles.txStatusText, st.status === 'Processing' && styles.txStatusTextProcessing]}>
-                        {st.status} ({st.refId})
-                      </Text>
+                    <View style={styles.txBottomRow}>
+                      <View style={styles.txUpiInfo}>
+                        <Ionicons
+                          name={isProcessing ? 'time-outline' : 'checkmark-circle'}
+                          size={15}
+                          color={isProcessing ? '#D97706' : '#047A36'}
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text style={styles.txUpiText} numberOfLines={1}>
+                          Sent to {st.upiId}
+                        </Text>
+                      </View>
+                      <View style={[styles.txStatusPill, isProcessing && styles.txStatusPillProcessing]}>
+                        <Text style={[styles.txStatusText, isProcessing && styles.txStatusTextProcessing]}>
+                          {isProcessing ? 'Processing' : 'Paid'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
+                  {idx < settlementList.length - 1 && <View style={styles.rowDivider} />}
                 </View>
-                {idx < settlementList.length - 1 && <View style={styles.rowDivider} />}
-              </View>
-            ))}
+              );
+            })}
           </View>
         </ScrollView>
 
@@ -267,7 +268,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
               <View style={styles.modalSummaryBox}>
                 <View style={styles.modalSummaryRow}>
                   <Text style={styles.modalSummaryLabel}>Transfer Amount</Text>
-                  <Text style={styles.modalSummaryVal}>₹{balance.toFixed(2)}</Text>
+                  <Text style={styles.modalSummaryVal}>{formatRupee(balance)}</Text>
                 </View>
                 <View style={styles.modalSummaryRow}>
                   <Text style={styles.modalSummaryLabel}>Linked Account</Text>
@@ -275,7 +276,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
                 </View>
                 <View style={styles.modalSummaryRow}>
                   <Text style={styles.modalSummaryLabel}>Processing Fee</Text>
-                  <Text style={styles.modalSummaryFree}>₹0.00 (Free)</Text>
+                  <Text style={styles.modalSummaryFree}>Free (₹0 Fee)</Text>
                 </View>
               </View>
 
@@ -418,19 +419,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  actionHeaderRow: {
-    marginBottom: 12,
-  },
   actionTitle: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 15,
     fontWeight: '800',
     color: '#0F172A',
-  },
-  actionSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    marginBottom: 12,
   },
   instantPayoutBtn: {
     flexDirection: 'row',

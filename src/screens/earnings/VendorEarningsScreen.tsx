@@ -509,16 +509,11 @@ export const VendorEarningsScreen: React.FC = () => {
                           onPress={() => setSelectedOrderDetail(ord)}
                         >
                           <View style={styles.orderLeftCol}>
-                            <View style={styles.orderCodeDateRow}>
-                              <View style={styles.orderCodeBadge}>
-                                <Text style={styles.orderCodeText}>{ord.orderCode}</Text>
-                              </View>
-                              <Text style={styles.orderDate}>{ord.dateStr}</Text>
-                            </View>
+                            <Text style={styles.orderDate}>{ord.dateStr}</Text>
 
-                            <View style={styles.viewOrderBtn}>
-                              <Text style={styles.viewOrderText}>View Order Details</Text>
-                              <Ionicons name="chevron-forward" size={12} color="#047A36" style={{ marginLeft: 2 }} />
+                            <View style={styles.quickLinkBtn}>
+                              <Text style={styles.quickLinkText}>View Order Details</Text>
+                              <Ionicons name="arrow-forward" size={12} color="#047A36" style={{ marginLeft: 3 }} />
                             </View>
                           </View>
 
@@ -636,24 +631,25 @@ export const VendorEarningsScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Direct Minimal Items Table Header */}
-            <View style={styles.tableHeaderRow}>
-              <Text style={[styles.tableColHeader, { flex: 2 }]}>ITEM</Text>
-              <Text style={[styles.tableColHeader, { flex: 1.5, textAlign: 'center' }]}>RATE / QTY</Text>
-              <Text style={[styles.tableColHeader, { flex: 1, textAlign: 'right' }]}>TOTAL</Text>
-            </View>
-
-            {/* Direct Table Rows */}
+            {/* Direct Minimal Items List (2 rows per item for clean readability) */}
             <ScrollView style={styles.tableItemsScroll} showsVerticalScrollIndicator={false}>
               {selectedOrderDetail?.items.map((it, idx) => (
-                <View key={idx} style={styles.tableRow}>
-                  <Text style={styles.tableItemName} numberOfLines={1}>
-                    {it.name}
-                  </Text>
-                  <Text style={styles.tableItemRate}>
+                <View
+                  key={idx}
+                  style={[
+                    styles.dialogItemRow,
+                    idx < ((selectedOrderDetail?.items.length ?? 0) - 1) && styles.dialogItemBorder,
+                  ]}
+                >
+                  <View style={styles.dialogItemTopRow}>
+                    <Text style={styles.dialogItemName} numberOfLines={2}>
+                      {it.name}
+                    </Text>
+                    <Text style={styles.dialogItemTotal}>{formatRupee(it.itemTotal)}</Text>
+                  </View>
+                  <Text style={styles.dialogItemSub}>
                     {it.qtyText} @ {it.rateText}
                   </Text>
-                  <Text style={styles.tableItemTotal}>{formatRupee(it.itemTotal)}</Text>
                 </View>
               ))}
             </ScrollView>
