@@ -20,10 +20,9 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
   const animValue = useRef(new Animated.Value(isOpen ? 1 : 0)).current;
 
   useEffect(() => {
-    Animated.spring(animValue, {
+    Animated.timing(animValue, {
       toValue: isOpen ? 1 : 0,
-      tension: 65,
-      friction: 8,
+      duration: 220,
       useNativeDriver: false,
     }).start();
   }, [isOpen, animValue]);
@@ -31,7 +30,7 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
   const handlePress = () => {
     if (isLoading) return;
     try {
-      Vibration.vibrate(25);
+      Vibration.vibrate(20);
     } catch {}
     onToggle(!isOpen);
   };
@@ -39,25 +38,33 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
   // Interpolated track background color
   const trackBgColor = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E2E8F0', '#047A36'],
+    outputRange: ['#CBD5E1', '#047A36'],
   });
 
   // Interpolated thumb horizontal position
   const thumbTranslateX = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [2.5, 23.5],
+    outputRange: [2, 24],
   });
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={[styles.card, isOpen ? styles.cardOpen : styles.cardClosed]}
+      activeOpacity={0.85}
+      onPress={handlePress}
+      disabled={isLoading}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: isOpen }}
+      accessibilityLabel="Toggle store open status"
+    >
       <View style={styles.contentRow}>
         <View style={styles.leftCol}>
-          {/* Icon Circle matching the exact style of the menu items below */}
-          <View style={styles.iconCircle}>
+          {/* Icon Circle matching DusMint green/red theme */}
+          <View style={[styles.iconCircle, isOpen ? styles.iconCircleOpen : styles.iconCircleClosed]}>
             <Ionicons
-              name="storefront-outline"
+              name={isOpen ? 'storefront' : 'storefront-outline'}
               size={20}
-              color="#0F172A"
+              color={isOpen ? '#047A36' : '#DC2626'}
             />
           </View>
 
@@ -69,23 +76,18 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
               <View
                 style={[
                   styles.statusDot,
-                  { backgroundColor: isOpen ? '#16A34A' : '#94A3B8' },
+                  { backgroundColor: isOpen ? '#047A36' : '#DC2626' },
                 ]}
               />
             </View>
+            <Text style={[styles.subtext, { color: isOpen ? '#047A36' : '#64748B' }]}>
+              {isOpen ? 'Online • Customers can place live orders' : 'Paused • Orders paused until you re-open'}
+            </Text>
           </View>
         </View>
 
         {/* Modern Custom Sliding Toggle */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handlePress}
-          disabled={isLoading}
-          style={styles.toggleWrapper}
-          accessibilityRole="switch"
-          accessibilityState={{ checked: isOpen }}
-          accessibilityLabel="Toggle store open status"
-        >
+        <View style={styles.toggleWrapper} pointerEvents="none">
           <Animated.View style={[styles.toggleTrack, { backgroundColor: trackBgColor }]}>
             <Animated.View
               style={[
@@ -94,9 +96,9 @@ export const VendorStatusCard: React.FC<Props> = ({ isOpen, onToggle, isLoading 
               ]}
             />
           </Animated.View>
-        </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 14,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E8ECF2',
     borderRadius: 20,
     paddingVertical: 14,
@@ -115,6 +117,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
+  },
+  cardOpen: {
+    borderColor: '#A7F3D0',
+  },
+  cardClosed: {
+    borderColor: '#FECACA',
   },
   contentRow: {
     flexDirection: 'row',
@@ -128,15 +136,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
+  },
+  iconCircleOpen: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+  },
+  iconCircleClosed: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
   },
   textCol: {
     flex: 1,
@@ -146,30 +160,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 14.5,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.2,
   },
+  subtext: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     marginLeft: 6,
   },
   toggleWrapper: {
     padding: 2,
   },
   toggleTrack: {
-    width: 50,
-    height: 28,
-    borderRadius: 14,
+    width: 52,
+    height: 30,
+    borderRadius: 15,
     justifyContent: 'center',
   },
   toggleThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#FFFFFF',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },

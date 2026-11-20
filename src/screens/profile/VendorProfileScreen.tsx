@@ -33,10 +33,11 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   const selectedLanguage = (useVendorAuthStore((s) => s.selectedLanguage) as 'en' | 'hi') || 'en';
   const setLanguage = useVendorAuthStore((s) => s.setLanguage);
   const logout = useVendorAuthStore((s) => s.logout);
+  const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
+  const setStoreOpen = useVendorAuthStore((s) => s.setStoreOpen);
 
   const [vendors, setVendors] = useState<VendorProfileInfo[]>([]);
   const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(persistedVendor);
-  const [isOpen, setIsOpen] = useState(persistedVendor?.is_open ?? true);
   const [refreshing, setRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
@@ -132,13 +133,13 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
           useVendorAuthStore.getState().setStorePhotoUri(merged.shop_photo_urls[0]);
         }
         if (merged.is_open !== undefined) {
-          setIsOpen(merged.is_open);
+          setStoreOpen(merged.is_open);
         }
       } else if (persistedVendor) {
         // Keep persisted vendor if server list doesn't match
         setActiveVendor(persistedVendor);
         if (persistedVendor.is_open !== undefined) {
-          setIsOpen(persistedVendor.is_open);
+          setStoreOpen(persistedVendor.is_open);
         }
       }
     } catch (err) {
@@ -146,7 +147,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [user?.phone, user?.id, persistedVendor, setActiveVendorInStore]);
+  }, [user?.phone, user?.id, persistedVendor, setActiveVendorInStore, setStoreOpen]);
 
   useEffect(() => {
     loadVendorProfile();
@@ -159,15 +160,10 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   // Toggle Live Store Status
   const handleToggleStatus = async (newVal: boolean) => {
-    setIsOpen(newVal);
-    const cur = activeVendor || persistedVendor || useVendorAuthStore.getState().activeVendor;
-    if (cur) {
-      const updated: VendorProfileInfo = { ...cur, is_open: newVal };
-      setActiveVendor(updated);
-      setActiveVendorInStore(updated);
-    }
+    setStoreOpen(newVal);
     showToast(newVal ? 'Store is Online & Accepting Orders' : 'Store is Closed');
 
+    const cur = activeVendor || persistedVendor || useVendorAuthStore.getState().activeVendor;
     if (!cur?.id) return;
 
     try {
@@ -311,7 +307,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* 2. Live Store Online / Offline Toggle Card */}
         <VendorStatusCard
-          isOpen={isOpen}
+          isOpen={isStoreOpen}
           onToggle={handleToggleStatus}
           isLoading={isTogglingStatus}
         />
