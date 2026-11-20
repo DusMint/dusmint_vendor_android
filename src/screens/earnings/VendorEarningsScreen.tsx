@@ -29,6 +29,48 @@ interface SettlementTransaction {
   upiId: string;
 }
 
+// Custom hook for comforting, smooth rolling count transitions (Zero blink, 60fps)
+function useAnimatedNumber(target: number, durationMs: number = 320): number {
+  const [currentVal, setCurrentVal] = useState(target);
+  const startValRef = useRef(target);
+
+  useEffect(() => {
+    const fromVal = startValRef.current;
+    const toVal = target;
+
+    if (fromVal === toVal) {
+      setCurrentVal(toVal);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let frameId: number;
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const eased = easeOutCubic(progress);
+      const val = fromVal + (toVal - fromVal) * eased;
+      setCurrentVal(val);
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate);
+      } else {
+        startValRef.current = toVal;
+        setCurrentVal(toVal);
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [target, durationMs]);
+
+  return currentVal;
+}
+
 export const VendorEarningsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const user = useVendorAuthStore((s) => s.user);
@@ -44,14 +86,15 @@ export const VendorEarningsScreen: React.FC = () => {
   const [range, setRange] = useState<'today' | 'week' | 'month'>('week');
   const [page, setPage] = useState(1);
 
-  // Smooth tab switching & value animations
+  // Smooth tab switching & content animations
   const tabAnim = useRef(new Animated.Value(1)).current; // 0: today, 1: week, 2: month
-  const valueFadeAnim = useRef(new Animated.Value(1)).current;
+  const labelFadeAnim = useRef(new Animated.Value(1)).current;
+  const settlementsFadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleSelectRange = (r: 'today' | 'week' | 'month', idx: number) => {
     if (range === r) return;
 
-    // Smooth sliding pill indicator
+    // 1. Smooth sliding pill indicator
     Animated.spring(tabAnim, {
       toValue: idx,
       tension: 65,
@@ -59,20 +102,25 @@ export const VendorEarningsScreen: React.FC = () => {
       useNativeDriver: false,
     }).start();
 
-    // Smooth, clean value transition without flickering the card boxes
-    Animated.timing(valueFadeAnim, {
-      toValue: 0,
-      duration: 80,
+    // 2. Set new data immediately - numbers smoothly count up/down to new targets
+    setRange(r);
+    setPage(1);
+
+    // 3. Gentle label breath (never drops below 0.65, zero blink)
+    labelFadeAnim.setValue(0);
+    Animated.timing(labelFadeAnim, {
+      toValue: 1,
+      duration: 200,
       useNativeDriver: true,
-    }).start(() => {
-      setRange(r);
-      setPage(1);
-      Animated.timing(valueFadeAnim, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-    });
+    }).start();
+
+    // 4. Smooth, continuous dissolve on recent settlement rows
+    settlementsFadeAnim.setValue(0);
+    Animated.timing(settlementsFadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
   };
 
   // Active verified UPI account
@@ -263,6 +311,11 @@ export const VendorEarningsScreen: React.FC = () => {
     }
   }, [range, earningsData, filteredTransactions]);
 
+  // Comforting smooth rolling numbers (Zero blink)
+  const animatedAmount = useAnimatedNumber(rangeMetrics.amount, 320);
+  const animatedOrders = useAnimatedNumber(rangeMetrics.orderCount, 320);
+  const animatedAvg = useAnimatedNumber(Number(rangeMetrics.avgOrderValue) || 0, 320);
+
   // Pagination for transaction ledger (5 items per page)
   const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE));
   const paginatedTransactions = filteredTransactions.slice(
@@ -334,22 +387,33 @@ export const VendorEarningsScreen: React.FC = () => {
             <Text style={styles.loadingText}>Loading earnings ledger...</Text>
           </View>
         ) : (
-          <Animated.View style={{ opacity: contentFadeAnim }}>
-            {/* 1. Hero Earnings Card */}
+          <View>
+            {/* 1. Hero Earnings Card - Box stays solid, numbers roll smoothly without blink */}
             <View style={styles.heroCard}>
               <View style={styles.heroTopRow}>
                 {/* 0% Platform Commission Tag */}
                 <View style={styles.commissionTag}>
                   <Text style={styles.commissionTagText}>0% Platform Commission</Text>
                 </View>
-                <Text style={styles.rangeLabelText}>{rangeMetrics.label}</Text>
+                <Animated.Text
+                  style={[
+                    styles.rangeLabelText,
+                    {
+                      opacity: labelFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.65, 1] }),
+                    },
+                  ]}
+                >
+                  {rangeMetrics.label}
+                </Animated.Text>
               </View>
 
-              <Text style={styles.heroAmountText}>₹{rangeMetrics.amount.toFixed(2)}</Text>
+              <Text style={styles.heroAmountText}>
+                ₹{animatedAmount.toFixed(2)}
+              </Text>
               <Text style={styles.heroSubText}>Direct Store Payouts Settled (T+0)</Text>
             </View>
 
-            {/* 2. Two-Card Performance Metric Row */}
+            {/* 2. Two-Card Performance Metric Row - Boxes stay solid, numbers roll smoothly */}
             <View style={styles.metricRow}>
               {/* Card 1: Orders Delivered */}
               <View style={styles.metricCard}>
@@ -357,7 +421,9 @@ export const VendorEarningsScreen: React.FC = () => {
                   <Ionicons name="bag-check-outline" size={20} color="#047A36" />
                 </View>
                 <Text style={styles.metricLabel}>Orders Delivered</Text>
-                <Text style={styles.metricValue}>{rangeMetrics.orderCount}</Text>
+                <Text style={styles.metricValue}>
+                  {Math.round(animatedOrders)}
+                </Text>
               </View>
 
               {/* Card 2: Average Order Value */}
@@ -366,11 +432,13 @@ export const VendorEarningsScreen: React.FC = () => {
                   <Ionicons name="trending-up-outline" size={20} color="#047A36" />
                 </View>
                 <Text style={styles.metricLabel}>Avg Order Value</Text>
-                <Text style={styles.metricValue}>₹{rangeMetrics.avgOrderValue}</Text>
+                <Text style={styles.metricValue}>
+                  ₹{Math.round(animatedAvg)}
+                </Text>
               </View>
             </View>
 
-            {/* 3. Recent Settlements Ledger (Strict 5 items per page) */}
+            {/* 3. Recent Settlements Ledger - Unified Single Card */}
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Recent Settlements</Text>
               {filteredTransactions.length > 0 && (
@@ -390,75 +458,84 @@ export const VendorEarningsScreen: React.FC = () => {
                 </Text>
               </View>
             ) : (
-              <View>
-                {paginatedTransactions.map((tx) => (
-                  <View key={tx.id} style={styles.transactionCard}>
-                    <View style={styles.txTopRow}>
-                      <Text style={styles.txDate}>{tx.dateStr}</Text>
-                      <Text style={styles.txAmount}>+₹{tx.amount.toFixed(2)}</Text>
-                    </View>
+              <View style={styles.unifiedCard}>
+                <Animated.View
+                  style={{
+                    opacity: settlementsFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }),
+                  }}
+                >
+                  {paginatedTransactions.map((tx, idx) => (
+                    <View key={tx.id}>
+                      <View style={styles.settlementRow}>
+                        <View style={styles.txTopRow}>
+                          <Text style={styles.txDate}>{tx.dateStr}</Text>
+                          <Text style={styles.txAmount}>+₹{tx.amount.toFixed(2)}</Text>
+                        </View>
 
-                    <View style={styles.txBottomRow}>
-                      <View style={styles.txUpiInfo}>
-                        <View style={styles.greenDot} />
-                        <Text style={styles.txUpiText} numberOfLines={1}>
-                          Direct UPI Auto-Credit ({tx.upiId})
-                        </Text>
-                      </View>
-                      <View style={styles.txStatusPill}>
-                        <Text style={styles.txStatusText}>
-                          {tx.status} ({tx.refId})
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                ))}
-
-                {/* 5-Item Pagination Controls */}
-                {totalPages > 1 && (
-                  <View style={styles.paginationRow}>
-                    <TouchableOpacity
-                      onPress={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      activeOpacity={0.7}
-                      style={[styles.pageBtn, page === 1 && styles.pageBtnDisabled]}
-                    >
-                      <Ionicons name="chevron-back" size={14} color={page === 1 ? '#9CA3AF' : '#111117'} style={{ marginRight: 2 }} />
-                      <Text style={[styles.pageBtnText, page === 1 && styles.pageBtnTextDisabled]}>Previous</Text>
-                    </TouchableOpacity>
-
-                    <View style={styles.pagePillsRow}>
-                      {Array.from({ length: totalPages }).map((_, i) => {
-                        const pageNum = i + 1;
-                        const isCurrent = pageNum === page;
-                        return (
-                          <TouchableOpacity
-                            key={pageNum}
-                            onPress={() => setPage(pageNum)}
-                            style={[styles.pageNumberPill, isCurrent && styles.pageNumberPillActive]}
-                          >
-                            <Text style={[styles.pageNumberText, isCurrent && styles.pageNumberTextActive]}>
-                              {pageNum}
+                        <View style={styles.txBottomRow}>
+                          <View style={styles.txUpiInfo}>
+                            <View style={styles.greenDot} />
+                            <Text style={styles.txUpiText} numberOfLines={1}>
+                              Direct UPI Auto-Credit ({tx.upiId})
                             </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                          </View>
+                          <View style={styles.txStatusPill}>
+                            <Text style={styles.txStatusText}>
+                              {tx.status} ({tx.refId})
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                      {idx < paginatedTransactions.length - 1 && <View style={styles.rowDivider} />}
                     </View>
-
-                    <TouchableOpacity
-                      onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      activeOpacity={0.7}
-                      style={[styles.pageBtn, page === totalPages && styles.pageBtnDisabled]}
-                    >
-                      <Text style={[styles.pageBtnText, page === totalPages && styles.pageBtnTextDisabled]}>Next</Text>
-                      <Ionicons name="chevron-forward" size={14} color={page === totalPages ? '#9CA3AF' : '#111117'} style={{ marginLeft: 2 }} />
-                    </TouchableOpacity>
-                  </View>
-                )}
+                  ))}
+                </Animated.View>
               </View>
             )}
-          </Animated.View>
+
+            {/* 5-Item Pagination Controls below the unified card */}
+            {totalPages > 1 && (
+              <View style={styles.paginationRow}>
+                <TouchableOpacity
+                  onPress={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  activeOpacity={0.7}
+                  style={[styles.pageBtn, page === 1 && styles.pageBtnDisabled]}
+                >
+                  <Ionicons name="chevron-back" size={14} color={page === 1 ? '#9CA3AF' : '#111117'} style={{ marginRight: 2 }} />
+                  <Text style={[styles.pageBtnText, page === 1 && styles.pageBtnTextDisabled]}>Previous</Text>
+                </TouchableOpacity>
+
+                <View style={styles.pagePillsRow}>
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const pageNum = i + 1;
+                    const isCurrent = pageNum === page;
+                    return (
+                      <TouchableOpacity
+                        key={pageNum}
+                        onPress={() => setPage(pageNum)}
+                        style={[styles.pageNumberPill, isCurrent && styles.pageNumberPillActive]}
+                      >
+                        <Text style={[styles.pageNumberText, isCurrent && styles.pageNumberTextActive]}>
+                          {pageNum}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  activeOpacity={0.7}
+                  style={[styles.pageBtn, page === totalPages && styles.pageBtnDisabled]}
+                >
+                  <Text style={[styles.pageBtnText, page === totalPages && styles.pageBtnTextDisabled]}>Next</Text>
+                  <Ionicons name="chevron-forward" size={14} color={page === totalPages ? '#9CA3AF' : '#111117'} style={{ marginLeft: 2 }} />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -669,18 +746,26 @@ const styles = StyleSheet.create({
     marginTop: 4,
     maxWidth: 240,
   },
-  transactionCard: {
+  unifiedCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#E8ECF2',
     borderRadius: 18,
-    padding: 16,
-    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 2,
+    marginBottom: 12,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
+  },
+  settlementRow: {
+    paddingVertical: 14,
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
   },
   txTopRow: {
     flexDirection: 'row',
