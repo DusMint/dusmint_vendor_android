@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#E2E8F0',
   },
   txTopRow: {
     flexDirection: 'row',

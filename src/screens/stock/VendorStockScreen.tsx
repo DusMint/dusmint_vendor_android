@@ -781,28 +781,18 @@ export const VendorStockScreen: React.FC = () => {
         {/* Screen Header - Aligned to exact vertical position & typography of Earnings & Profile */}
         <Text style={styles.screenTitle}>Stock</Text>
 
-        {/* 1. Boxes of Active Inventory & Out of Stock */}
+        {/* 1. Boxes of Active Inventory & Out of Stock (Clean single-line label & number) */}
         <View style={styles.metricsRow}>
           {/* Active Inventory Box */}
           <View style={styles.metricBoxActive}>
-            <View style={styles.metricBoxTop}>
-              <View style={styles.metricIconCircleActive}>
-                <Ionicons name="checkmark-circle-outline" size={18} color="#0F172A" />
-              </View>
-              <Text style={styles.metricValActive}>{inStockCount}</Text>
-            </View>
             <Text style={styles.metricLabelActive}>Active in Stock</Text>
+            <Text style={styles.metricValActive}>{inStockCount}</Text>
           </View>
 
           {/* Out of Inventory Box */}
           <View style={styles.metricBoxOut}>
-            <View style={styles.metricBoxTop}>
-              <View style={styles.metricIconCircleOut}>
-                <Ionicons name="alert-circle-outline" size={18} color="#DC2626" />
-              </View>
-              <Text style={styles.metricValOut}>{outOfStockCount}</Text>
-            </View>
             <Text style={styles.metricLabelOut}>Out of Stock</Text>
+            <Text style={styles.metricValOut}>{outOfStockCount}</Text>
           </View>
         </View>
 

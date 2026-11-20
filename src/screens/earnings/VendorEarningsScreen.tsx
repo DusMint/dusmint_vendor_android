@@ -859,6 +859,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
     color: '#0F172A',
+    marginLeft: 14,
   },
   payoutActionSub: {
     fontSize: 13,
@@ -938,49 +939,27 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#E2E8F0',
   },
   orderLeftCol: {
     flex: 1,
     marginRight: 12,
   },
-  orderCodeDateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  orderCodeBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  orderCodeText: {
+  orderDate: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
     color: '#0F172A',
+    marginBottom: 4,
   },
-  orderDate: {
-    fontSize: 13.5,
-    fontWeight: '600',
-    color: '#334155',
-    marginLeft: 8,
-  },
-  viewOrderBtn: {
+  quickLinkBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
     marginTop: 2,
   },
-  viewOrderText: {
-    fontSize: 12.5,
+  quickLinkText: {
+    fontSize: 13,
     fontWeight: '700',
     color: '#047A36',
   },
@@ -1067,47 +1046,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    marginBottom: 8,
-  },
-  tableColHeader: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-  },
   tableItemsScroll: {
-    maxHeight: 180,
+    maxHeight: 240,
   },
-  tableRow: {
+  dialogItemRow: {
+    paddingVertical: 10,
+  },
+  dialogItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  dialogItemTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  tableItemName: {
-    flex: 2,
-    fontSize: 14,
+  dialogItemName: {
+    flex: 1,
+    fontSize: 15,
     fontWeight: '700',
     color: '#0F172A',
+    marginRight: 12,
   },
-  tableItemRate: {
-    flex: 1.5,
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#475569',
-    textAlign: 'center',
-  },
-  tableItemTotal: {
-    flex: 1,
+  dialogItemTotal: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
     color: '#0F172A',
-    textAlign: 'right',
+  },
+  dialogItemSub: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#64748B',
+    marginTop: 3,
   },
   dialogDivider: {
     height: 1,
