@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   StatusBar,
   Animated,
+  Image,
   Vibration,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,13 +18,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 import { VendorAppFooter } from '../profile/widgets/VendorAppFooter';
+import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 
-// Category Definitions
-const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Staples', 'Dairy'] as const;
+// Categories Filter
+const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Meat', 'Staples'] as const;
 type CategoryType = (typeof CATEGORIES)[number];
 
-// Default Rich Catalogue for Gupta Traders
-const DEFAULT_STOCK_ITEMS: VendorStockItem[] = [
+// Default Rich Store Inventory for Gupta Traders with live Kilos & Reserved quantities
+const INITIAL_STORE_STOCK: VendorStockItem[] = [
   {
     id: 'stock-1',
     nameEn: 'Fresh Desi Tomato',
@@ -33,6 +34,9 @@ const DEFAULT_STOCK_ITEMS: VendorStockItem[] = [
     pricePaise: 3500,
     mrpPaise: 4500,
     isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200&q=80',
+    stockKg: 18,
+    reservedKg: 1.4, // 1 kg 400 g reserved for active customer orders
   },
   {
     id: 'stock-2',
@@ -42,6 +46,9 @@ const DEFAULT_STOCK_ITEMS: VendorStockItem[] = [
     pricePaise: 2500,
     mrpPaise: 3200,
     isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200&q=80',
+    stockKg: 25,
+    reservedKg: 2.0, // 2 kg reserved
   },
   {
     id: 'stock-3',
@@ -51,187 +58,193 @@ const DEFAULT_STOCK_ITEMS: VendorStockItem[] = [
     pricePaise: 3800,
     mrpPaise: 4800,
     isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=200&q=80',
+    stockKg: 12,
+    reservedKg: 0.8, // 800 g reserved
   },
   {
     id: 'stock-4',
-    nameEn: 'Fresh Green Coriander',
-    category: 'Vegetables',
-    unit: '100 g',
-    pricePaise: 1200,
-    mrpPaise: 1800,
-    isInStock: true,
-  },
-  {
-    id: 'stock-5',
-    nameEn: 'Shimla Green Apple',
+    nameEn: 'Shimla Royal Apple',
     category: 'Fruits',
     unit: '1 kg',
     pricePaise: 14000,
     mrpPaise: 18000,
     isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200&q=80',
+    stockKg: 10,
+    reservedKg: 1.0, // 1 kg reserved
   },
   {
-    id: 'stock-6',
-    nameEn: 'Robusta Banana',
+    id: 'stock-5',
+    nameEn: 'Robusta Golden Banana',
     category: 'Fruits',
     unit: '1 dozen',
     pricePaise: 4500,
     mrpPaise: 6000,
     isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&q=80',
+    stockKg: 14,
+    reservedKg: 0, // 0 reserved
+  },
+  {
+    id: 'stock-6',
+    nameEn: 'Full Cream Milk Pouch',
+    category: 'Dairy',
+    unit: '500 ml',
+    pricePaise: 3400,
+    mrpPaise: 3400,
+    isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200&q=80',
+    stockKg: 30,
+    reservedKg: 3.0, // 3 pouches reserved
   },
   {
     id: 'stock-7',
+    nameEn: 'Fresh Malai Paneer',
+    category: 'Dairy',
+    unit: '200 g',
+    pricePaise: 8500,
+    mrpPaise: 9500,
+    isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=200&q=80',
+    stockKg: 8,
+    reservedKg: 0.4, // 400 g reserved
+  },
+  {
+    id: 'stock-8',
+    nameEn: 'Aashirvaad Chakki Atta',
+    category: 'Staples',
+    unit: '5 kg',
+    pricePaise: 24500,
+    mrpPaise: 27500,
+    isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80',
+    stockKg: 15,
+    reservedKg: 0,
+  },
+  {
+    id: 'stock-9',
     nameEn: 'Nagpur Sweet Orange',
     category: 'Fruits',
     unit: '1 kg',
     pricePaise: 6500,
     mrpPaise: 8500,
     isInStock: false,
-  },
-  {
-    id: 'stock-8',
-    nameEn: 'Aashirvaad Shudh Chakki Atta',
-    category: 'Staples',
-    unit: '5 kg',
-    pricePaise: 24500,
-    mrpPaise: 27500,
-    isInStock: true,
-  },
-  {
-    id: 'stock-9',
-    nameEn: 'Daawat Rozana Basmati Rice',
-    category: 'Staples',
-    unit: '1 kg',
-    pricePaise: 8500,
-    mrpPaise: 11000,
-    isInStock: true,
-  },
-  {
-    id: 'stock-10',
-    nameEn: 'Tata Salt Iodized',
-    category: 'Staples',
-    unit: '1 kg',
-    pricePaise: 2800,
-    mrpPaise: 3000,
-    isInStock: true,
-  },
-  {
-    id: 'stock-11',
-    nameEn: 'Amul Taaza Toned Milk',
-    category: 'Dairy',
-    unit: '500 ml',
-    pricePaise: 2700,
-    mrpPaise: 2800,
-    isInStock: true,
-  },
-  {
-    id: 'stock-12',
-    nameEn: 'Amul Pasteurised Butter',
-    category: 'Dairy',
-    unit: '100 g',
-    pricePaise: 5600,
-    mrpPaise: 6000,
-    isInStock: true,
+    photoUrl: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=200&q=80',
+    stockKg: 0,
+    reservedKg: 0,
   },
 ];
 
-// Modern Sliding Toggle Row for each Stock Item
-const StockItemCard: React.FC<{
+// Helper to format reserved weights cleanly (e.g. 1.4 -> "1 kg 400 g", 0.8 -> "800 g")
+function formatReservedWeight(valKg?: number, unitStr: string = 'kg'): string {
+  if (!valKg || valKg <= 0) return '0';
+  if (unitStr.toLowerCase().includes('dozen') || unitStr.toLowerCase().includes('pc') || unitStr.toLowerCase().includes('ml')) {
+    return `${valKg} ${unitStr}`;
+  }
+  const kg = Math.floor(valKg);
+  const grams = Math.round((valKg - kg) * 1000);
+  if (kg > 0 && grams > 0) return `${kg} kg ${grams} g`;
+  if (kg > 0) return `${kg} kg`;
+  return `${grams} g`;
+}
+
+// Single Live Inventory Stock Item Row
+const StockInventoryCard: React.FC<{
   item: VendorStockItem;
-  onToggle: (id: string, current: boolean) => void;
-}> = React.memo(({ item, onToggle }) => {
-  const animValue = useRef(new Animated.Value(item.isInStock ? 1 : 0)).current;
-
-  useEffect(() => {
-    Animated.spring(animValue, {
-      toValue: item.isInStock ? 1 : 0,
-      tension: 65,
-      friction: 8,
-      useNativeDriver: false,
-    }).start();
-  }, [item.isInStock, animValue]);
-
-  const handlePress = () => {
-    try {
-      Vibration.vibrate(25);
-    } catch {}
-    onToggle(item.id, item.isInStock);
-  };
-
-  const trackBgColor = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#E2E8F0', '#047A36'],
-  });
-
-  const thumbTranslateX = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [2.5, 23.5],
-  });
-
+  onAdjustStock: (id: string, delta: number) => void;
+}> = React.memo(({ item, onAdjustStock }) => {
   const priceRupees = (item.pricePaise / 100).toFixed(0);
-  const mrpRupees = item.mrpPaise ? (item.mrpPaise / 100).toFixed(0) : null;
-
-  // Icon based on category
-  const getCategoryIcon = (cat: string) => {
-    switch (cat.toLowerCase()) {
-      case 'vegetables':
-        return 'leaf-outline';
-      case 'fruits':
-        return 'nutrition-outline';
-      case 'staples':
-        return 'cube-outline';
-      case 'dairy':
-        return 'water-outline';
-      default:
-        return 'basket-outline';
-    }
-  };
+  const currentStock = item.stockKg ?? (item.isInStock ? 10 : 0);
+  const isOutOfStock = currentStock <= 0 || !item.isInStock;
+  const reservedText = formatReservedWeight(item.reservedKg, item.unit);
+  const hasReserved = Boolean(item.reservedKg && item.reservedKg > 0);
 
   return (
-    <View style={[styles.card, !item.isInStock && styles.outOfStockCard]}>
-      <View style={styles.cardLeft}>
-        {/* Category Outline Icon matching VendorOptionsCard style */}
-        <View style={styles.iconCircle}>
-          <Ionicons name={getCategoryIcon(item.category) as any} size={20} color="#0F172A" />
+    <View style={[styles.card, isOutOfStock && styles.cardOutOfStock]}>
+      {/* Top Main Row: 1. Picture, 2. Name & Unit, 3. Price, 4. Stepper [- 1 +] */}
+      <View style={styles.topCardRow}>
+        {/* 1. Picture on the Left */}
+        <View style={styles.imgWrapper}>
+          {item.photoUrl ? (
+            <Image source={{ uri: item.photoUrl }} style={styles.itemImg} resizeMode="cover" />
+          ) : (
+            <View style={styles.imgPlaceholder}>
+              <Ionicons name="basket-outline" size={22} color="#047A36" />
+            </View>
+          )}
         </View>
 
-        <View style={styles.infoCol}>
+        {/* 2. Product Name Beside It & 3. Price */}
+        <View style={styles.nameAndPriceCol}>
           <Text style={styles.itemName} numberOfLines={1}>
             {item.nameEn}
           </Text>
-          <Text style={styles.itemMeta}>
+          <Text style={styles.itemCategoryUnit}>
             {item.unit} • {item.category}
           </Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceText}>₹{priceRupees}</Text>
-            {mrpRupees && <Text style={styles.mrpText}>MRP ₹{mrpRupees}</Text>}
+          <Text style={styles.priceText}>
+            ₹{priceRupees}{' '}
+            <Text style={styles.priceUnitText}>/ {item.unit}</Text>
+          </Text>
+        </View>
+
+        {/* 4. On the Right Side: Number Representing Total Kilos in format [- 1 +] */}
+        <View style={styles.stepperContainer}>
+          <TouchableOpacity
+            style={[styles.stepperBtn, currentStock <= 0 && styles.stepperBtnDisabled]}
+            onPress={() => onAdjustStock(item.id, -1)}
+            disabled={currentStock <= 0}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="remove" size={16} color={currentStock <= 0 ? '#94A3B8' : '#0F172A'} />
+          </TouchableOpacity>
+
+          <View style={styles.stepperValBox}>
+            <Text style={[styles.stepperNum, isOutOfStock && styles.stepperNumOut]}>
+              {currentStock}
+            </Text>
+            <Text style={styles.stepperUnitLabel}>
+              {item.unit.includes('dozen') ? 'doz' : item.unit.includes('pc') ? 'pcs' : 'kg'}
+            </Text>
           </View>
+
+          <TouchableOpacity
+            style={styles.stepperBtn}
+            onPress={() => onAdjustStock(item.id, 1)}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="add" size={16} color="#047A36" />
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.cardRight}>
-        <Text style={[styles.stockStatusText, item.isInStock ? styles.statusInStock : styles.statusOut]}>
-          {item.isInStock ? 'IN STOCK' : 'OUT'}
-        </Text>
+      {/* Divider */}
+      <View style={styles.cardDivider} />
 
-        {/* Custom Modern Sliding Toggle */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={handlePress}
-          style={styles.toggleWrapper}
-          accessibilityRole="switch"
-          accessibilityState={{ checked: item.isInStock }}
-          accessibilityLabel={`Toggle ${item.nameEn} stock status`}
-        >
-          <Animated.View style={[styles.toggleTrack, { backgroundColor: trackBgColor }]}>
-            <Animated.View
-              style={[
-                styles.toggleThumb,
-                { transform: [{ translateX: thumbTranslateX }] },
-              ]}
-            />
-          </Animated.View>
-        </TouchableOpacity>
+      {/* Single Line Below Telling How Much is Reserved */}
+      <View style={styles.reservedRow}>
+        <View style={styles.reservedLeft}>
+          <Ionicons
+            name={hasReserved ? 'lock-closed' : 'checkmark-circle'}
+            size={13}
+            color={hasReserved ? '#D97706' : '#059669'}
+            style={{ marginRight: 5 }}
+          />
+          <Text style={[styles.reservedText, hasReserved ? styles.reservedTextActive : styles.reservedTextClear]}>
+            {hasReserved
+              ? `${reservedText} reserved for active customer orders`
+              : `All ${currentStock} available • 0 reserved`}
+          </Text>
+        </View>
+
+        <View style={[styles.stockPill, isOutOfStock ? styles.stockPillOut : styles.stockPillIn]}>
+          <Text style={[styles.stockPillText, isOutOfStock ? styles.stockPillTextOut : styles.stockPillTextIn]}>
+            {isOutOfStock ? 'OUT OF STOCK' : 'LIVE'}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -239,11 +252,13 @@ const StockItemCard: React.FC<{
 
 export const VendorStockScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const [items, setItems] = useState<VendorStockItem[]>(DEFAULT_STOCK_ITEMS);
+  const [items, setItems] = useState<VendorStockItem[]>(INITIAL_STORE_STOCK);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('All');
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Master Catalogue Modal State
+  const [isMasterModalOpen, setIsMasterModalOpen] = useState(false);
 
   // Floating Toast Notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -281,20 +296,30 @@ export const VendorStockScreen: React.FC = () => {
       ]).start(() => {
         setToastMessage(null);
       });
-    }, 2200);
+    }, 2400);
   }, [toastAnim, toastOpacity]);
 
-  // Load Vendor Catalogue Items
+  // Load Vendor Stock
   const loadStock = useCallback(async () => {
     try {
       const data = await dusmintApi.getVendorStock();
       if (data && data.length > 0) {
-        setItems(data);
+        // Merge server data with our rich local stockKg and photoUrl fields
+        const merged = data.map((serverItem) => {
+          const match = INITIAL_STORE_STOCK.find((d) => d.nameEn.toLowerCase() === serverItem.nameEn.toLowerCase());
+          return {
+            ...serverItem,
+            stockKg: serverItem.stockKg ?? match?.stockKg ?? 15,
+            reservedKg: serverItem.reservedKg ?? match?.reservedKg ?? 0,
+            photoUrl: serverItem.photoUrl || match?.photoUrl,
+          };
+        });
+        setItems(merged);
       } else {
-        setItems(DEFAULT_STOCK_ITEMS);
+        setItems(INITIAL_STORE_STOCK);
       }
     } catch {
-      setItems(DEFAULT_STOCK_ITEMS);
+      setItems(INITIAL_STORE_STOCK);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -310,42 +335,53 @@ export const VendorStockScreen: React.FC = () => {
     loadStock();
   };
 
-  // Toggle In-Stock / Out of Stock
-  const handleToggleStock = async (itemId: string, currentVal: boolean) => {
-    const newVal = !currentVal;
-    const targetItem = items.find((i) => i.id === itemId);
-    const itemName = targetItem ? targetItem.nameEn : 'Item';
-
-    // Optimistic UI update
-    setItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, isInStock: newVal } : item))
-    );
-    showToast(`${itemName} marked ${newVal ? 'In Stock' : 'Out of Stock'}`);
-
+  // Stepper increment / decrement (- 1 +)
+  const handleAdjustStock = (itemId: string, delta: number) => {
     try {
-      await dusmintApi.updateVendorStock(itemId, { inStock: newVal });
-    } catch (err) {
-      console.warn('Stock update API warning:', err);
+      Vibration.vibrate(20);
+    } catch {}
+
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === itemId) {
+          const cur = item.stockKg ?? (item.isInStock ? 10 : 0);
+          const nextStock = Math.max(0, cur + delta);
+          const nextInStock = nextStock > 0;
+          return {
+            ...item,
+            stockKg: nextStock,
+            isInStock: nextInStock,
+          };
+        }
+        return item;
+      })
+    );
+
+    const target = items.find((i) => i.id === itemId);
+    if (target) {
+      const cur = target.stockKg ?? 10;
+      const nextStock = Math.max(0, cur + delta);
+      showToast(`${target.nameEn}: ${nextStock} ${target.unit.includes('dozen') ? 'dozen' : 'kg'} in stock`);
+      dusmintApi.updateVendorStock(itemId, { stockKg: nextStock, inStock: nextStock > 0 }).catch(() => {});
     }
   };
 
-  // Filtered catalogue based on category and search query
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const matchesCategory =
-        selectedCategory === 'All' ||
-        item.category.toLowerCase() === selectedCategory.toLowerCase();
-      const matchesSearch =
-        searchQuery.trim().length === 0 ||
-        item.nameEn.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase().trim());
-      return matchesCategory && matchesSearch;
-    });
-  }, [items, selectedCategory, searchQuery]);
+  // Add new item from Master Catalogue Database
+  const handleAddItemFromCatalogue = (newItem: VendorStockItem) => {
+    setItems((prev) => [newItem, ...prev]);
+    showToast(`${newItem.nameEn} added (${newItem.stockKg} kg @ ₹${(newItem.pricePaise / 100).toFixed(0)})`);
+  };
 
-  // Summary Metrics
-  const inStockCount = useMemo(() => items.filter((i) => i.isInStock).length, [items]);
-  const outOfStockCount = useMemo(() => items.filter((i) => !i.isInStock).length, [items]);
+  // Category filter
+  const filteredItems = useMemo(() => {
+    if (selectedCategory === 'All') return items;
+    return items.filter((i) => i.category.toLowerCase() === selectedCategory.toLowerCase());
+  }, [items, selectedCategory]);
+
+  // Small Metrics
+  const inStockCount = useMemo(() => items.filter((i) => (i.stockKg ?? 1) > 0 && i.isInStock).length, [items]);
+  const outOfStockCount = useMemo(() => items.filter((i) => (i.stockKg ?? 0) <= 0 || !i.isInStock).length, [items]);
+  const existingNames = useMemo(() => items.map((i) => i.nameEn), [items]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -367,56 +403,42 @@ export const VendorStockScreen: React.FC = () => {
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
       >
         {/* Screen Header - Exact font & vertical position as Earnings and Profile */}
         <View style={styles.headerRow}>
           <Text style={styles.screenTitle}>Menu & Stock</Text>
-          <View style={styles.badgeTotal}>
-            <Text style={styles.badgeTotalText}>{items.length} Total Items</Text>
-          </View>
-        </View>
 
-        {/* 2 Metric Cards Row (Best of Earnings & Profile design) */}
-        <View style={styles.metricRow}>
-          <View style={styles.metricCard}>
-            <View style={styles.metricIconBox}>
-              <Ionicons name="checkmark-circle-outline" size={20} color="#047A36" />
+          {/* 1. Small Compact Active & Out of Stock Pills */}
+          <View style={styles.miniStatsRow}>
+            <View style={styles.miniPillIn}>
+              <View style={styles.dotGreen} />
+              <Text style={styles.miniPillTextIn}>{inStockCount} Active</Text>
             </View>
-            <Text style={styles.metricLabel}>ACTIVE IN STOCK</Text>
-            <Text style={styles.metricValue}>{inStockCount}</Text>
-          </View>
-
-          <View style={styles.metricCard}>
-            <View style={[styles.metricIconBox, { backgroundColor: '#F3F4F6' }]}>
-              <Ionicons name="pause-circle-outline" size={20} color="#64748B" />
+            <View style={styles.miniPillOut}>
+              <View style={styles.dotGrey} />
+              <Text style={styles.miniPillTextOut}>{outOfStockCount} Out</Text>
             </View>
-            <Text style={styles.metricLabel}>OUT OF STOCK</Text>
-            <Text style={styles.metricValue}>{outOfStockCount}</Text>
           </View>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color="#94A3B8" style={{ marginRight: 8 }} />
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search menu or stock items..."
-            placeholderTextColor="#94A3B8"
-            style={styles.searchInput}
-            clearButtonMode="while-editing"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </TouchableOpacity>
-          )}
-        </View>
+        {/* 2. Prominent "+ Add Vegetable / Fruit / Dairy / Meat" Button (Replaces Search Bar) */}
+        <TouchableOpacity
+          style={styles.addProduceBtn}
+          onPress={() => setIsMasterModalOpen(true)}
+          activeOpacity={0.85}
+        >
+          <View style={styles.addProduceIconBox}>
+            <Ionicons name="add" size={20} color="#FFFFFF" />
+          </View>
+          <View style={styles.addProduceTextBox}>
+            <Text style={styles.addProduceTitle}>+ Add Vegetable, Fruit, Dairy or Meat</Text>
+            <Text style={styles.addProduceSub}>Browse 40+ master catalogue items & set your shop rates</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#047A36" />
+        </TouchableOpacity>
 
-        {/* Category Filter Pills (Horizontal Scroll) */}
+        {/* 3. Category Filter Pills */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -428,7 +450,6 @@ export const VendorStockScreen: React.FC = () => {
               <TouchableOpacity
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
-                activeOpacity={0.75}
                 style={[styles.categoryPill, isSelected && styles.categoryPillActive]}
               >
                 <Text style={[styles.categoryPillText, isSelected && styles.categoryPillTextActive]}>
@@ -439,28 +460,26 @@ export const VendorStockScreen: React.FC = () => {
           })}
         </ScrollView>
 
-        {/* Items List Heading */}
-        <View style={styles.listHeaderRow}>
-          <Text style={styles.sectionTitle}>Catalogue Items</Text>
+        {/* Live Items Section Header */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Inventory Stock</Text>
           <Text style={styles.sectionCountText}>
-            Showing {filteredItems.length} of {items.length}
+            Showing {filteredItems.length} items
           </Text>
         </View>
 
-        {loading ? (
+        {loading && items.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#047A36" />
-            <Text style={styles.loadingText}>Fetching catalogue items...</Text>
-          </View>
-        ) : filteredItems.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Ionicons name="basket-outline" size={32} color="#94A3B8" style={{ marginBottom: 8 }} />
-            <Text style={styles.emptyTitle}>No matching items found</Text>
-            <Text style={styles.emptySub}>Try searching for another keyword or change category filter.</Text>
+            <Text style={styles.loadingText}>Loading inventory...</Text>
           </View>
         ) : (
           filteredItems.map((item) => (
-            <StockItemCard key={item.id} item={item} onToggle={handleToggleStock} />
+            <StockInventoryCard
+              key={item.id}
+              item={item}
+              onAdjustStock={handleAdjustStock}
+            />
           ))
         )}
 
@@ -483,6 +502,14 @@ export const VendorStockScreen: React.FC = () => {
           <Text style={styles.toastText}>{toastMessage}</Text>
         </Animated.View>
       )}
+
+      {/* Master Catalogue Database Modal */}
+      <AddMasterCatalogueModal
+        visible={isMasterModalOpen}
+        existingItemNames={existingNames}
+        onClose={() => setIsMasterModalOpen(false)}
+        onAddItem={handleAddItemFromCatalogue}
+      />
     </SafeAreaView>
   );
 };
@@ -500,7 +527,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 16,
+    marginTop: 4,
+    marginBottom: 16,
   },
   screenTitle: {
     fontFamily: 'Metropolis-Bold',
@@ -509,94 +537,104 @@ const styles = StyleSheet.create({
     color: '#111117',
     letterSpacing: -0.5,
   },
-  badgeTotal: {
+  miniStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  miniPillIn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#ECFDF5',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#A7F3D0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  badgeTotalText: {
+  dotGreen: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#047A36',
+    marginRight: 4,
+  },
+  miniPillTextIn: {
     fontSize: 11,
     fontWeight: '700',
     color: '#047A36',
   },
-  metricRow: {
+  miniPillOut: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  metricCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E8ECF2',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#047A36',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  metricIconBox: {
-    width: 38,
-    height: 38,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
   },
-  metricLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#9CA3AF',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 4,
-    textAlign: 'center',
+  dotGrey: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#94A3B8',
+    marginRight: 4,
   },
-  metricValue: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#111117',
+  miniPillTextOut: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
   },
-  searchBar: {
+  addProduceBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E8ECF2',
-    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    borderRadius: 18,
+    paddingVertical: 12,
     paddingHorizontal: 14,
-    height: 46,
     marginBottom: 14,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  searchInput: {
+  addProduceIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#047A36',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  addProduceTextBox: {
     flex: 1,
-    fontSize: 13,
+  },
+  addProduceTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13.5,
+    fontWeight: '800',
     color: '#0F172A',
-    fontWeight: '500',
+    letterSpacing: -0.2,
+  },
+  addProduceSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
   },
   categoryScroll: {
-    paddingBottom: 16,
+    paddingBottom: 14,
     gap: 8,
   },
   categoryPill: {
     backgroundColor: '#F3F4F6',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 12,
   },
   categoryPillActive: {
     backgroundColor: '#047A36',
@@ -610,129 +648,188 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
   },
-  listHeaderRow: {
+  sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '800',
     color: '#111117',
     letterSpacing: -0.2,
   },
   sectionCountText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '500',
     color: '#9CA3AF',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E8ECF2',
     padding: 14,
     marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
-    shadowRadius: 5,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  outOfStockCard: {
+  cardOutOfStock: {
     opacity: 0.72,
     backgroundColor: '#FAFAFA',
   },
-  cardLeft: {
+  topCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    marginRight: 10,
+    justifyContent: 'space-between',
   },
-  iconCircle: {
-    width: 38,
-    height: 38,
+  imgWrapper: {
+    marginRight: 12,
+  },
+  itemImg: {
+    width: 52,
+    height: 52,
     borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F1F5F9',
+  },
+  imgPlaceholder: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
   },
-  infoCol: {
+  nameAndPriceCol: {
     flex: 1,
+    marginRight: 10,
   },
   itemName: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 14.5,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.2,
   },
-  itemMeta: {
+  itemCategoryUnit: {
     fontSize: 11.5,
     color: '#64748B',
     marginTop: 2,
     fontWeight: '500',
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 6,
   },
   priceText: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 15,
     fontWeight: '800',
     color: '#047A36',
+    marginTop: 3,
   },
-  mrpText: {
+  priceUnitText: {
     fontSize: 11,
-    color: '#94A3B8',
-    textDecorationLine: 'line-through',
+    color: '#64748B',
+    fontWeight: '500',
   },
-  cardRight: {
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingHorizontal: 4,
+    paddingVertical: 3,
+  },
+  stepperBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  stockStatusText: {
-    fontSize: 9.5,
+  stepperBtnDisabled: {
+    backgroundColor: '#F1F5F9',
+    opacity: 0.5,
+  },
+  stepperValBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    minWidth: 44,
+  },
+  stepperNum: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  stepperNumOut: {
+    color: '#EF4444',
+  },
+  stepperUnitLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#64748B',
+    textTransform: 'uppercase',
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 10,
+  },
+  reservedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reservedLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  reservedText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    flex: 1,
+  },
+  reservedTextActive: {
+    color: '#B45309',
+  },
+  reservedTextClear: {
+    color: '#059669',
+  },
+  stockPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  stockPillIn: {
+    backgroundColor: '#ECFDF5',
+  },
+  stockPillOut: {
+    backgroundColor: '#FEE2E2',
+  },
+  stockPillText: {
+    fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.5,
-    marginBottom: 4,
   },
-  statusInStock: {
-    color: '#047A36',
+  stockPillTextIn: {
+    color: '#047857',
   },
-  statusOut: {
-    color: '#94A3B8',
-  },
-  toggleWrapper: {
-    padding: 2,
-  },
-  toggleTrack: {
-    width: 50,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-  },
-  toggleThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+  stockPillTextOut: {
+    color: '#DC2626',
   },
   loadingContainer: {
     paddingVertical: 40,
@@ -742,29 +839,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 12,
     color: '#64748B',
-  },
-  emptyCard: {
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderStyle: 'dashed',
-    borderRadius: 20,
-    padding: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  emptyTitle: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#374151',
-  },
-  emptySub: {
-    fontSize: 11.5,
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginTop: 4,
-    maxWidth: 240,
   },
   toastContainer: {
     position: 'absolute',
