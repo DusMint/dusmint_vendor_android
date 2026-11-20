@@ -207,6 +207,8 @@ export interface VendorStockItem {
   mrpPaise?: number;
   isInStock: boolean;
   photoUrl?: string;
+  stockKg?: number;
+  reservedKg?: number;
 }
 
 export interface VendorEarningsData {
