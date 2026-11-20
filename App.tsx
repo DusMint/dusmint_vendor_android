@@ -37,7 +37,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
-  const bottomOffset = insets.bottom > 0 ? insets.bottom + 6 : 14;
+  const bottomInset = insets.bottom > 0 ? insets.bottom : 8;
   const [barWidth, setBarWidth] = useState(0);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const pendingOrdersCount = useVendorAuthStore((s) => s.pendingOrdersCount ?? 2);
@@ -47,10 +47,10 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
 
   // Scale animation for each of the 4 tabs
   const scaleAnims = useRef([
-    new Animated.Value(state.index === 0 ? 1.16 : 1.0),
-    new Animated.Value(state.index === 1 ? 1.16 : 1.0),
-    new Animated.Value(state.index === 2 ? 1.16 : 1.0),
-    new Animated.Value(state.index === 3 ? 1.16 : 1.0),
+    new Animated.Value(state.index === 0 ? 1.14 : 1.0),
+    new Animated.Value(state.index === 1 ? 1.14 : 1.0),
+    new Animated.Value(state.index === 2 ? 1.14 : 1.0),
+    new Animated.Value(state.index === 3 ? 1.14 : 1.0),
   ]).current;
 
   // Pulsing animation for the Voice Assistant visualizer ring
@@ -68,7 +68,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
     // 2. Smooth scale enlargement for active tab, smooth scale down for others
     scaleAnims.forEach((anim, i) => {
       Animated.spring(anim, {
-        toValue: i === state.index ? 1.16 : 1.0,
+        toValue: i === state.index ? 1.14 : 1.0,
         useNativeDriver: true,
         tension: 90,
         friction: 8,
@@ -97,9 +97,9 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
     }
   }, [isVoiceModalOpen, pulseAnim]);
 
-  // 5 slots: Slot 0 (Orders), Slot 1 (Inventory), Slot 2 (Mic), Slot 3 (Earnings), Slot 4 (Profile)
+  // 5 slots: Slot 0 (Orders), Slot 1 (Stock), Slot 2 (Mic), Slot 3 (Earnings), Slot 4 (Profile)
   const numSlots = 5;
-  const slotWidth = barWidth > 0 ? (barWidth - 12) / numSlots : 0;
+  const slotWidth = barWidth > 0 ? barWidth / numSlots : 0;
 
   const renderTabButton = (route: any, index: number) => {
     const { options } = descriptors[route.key];
@@ -159,7 +159,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
             <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
               <Ionicons
                 name={iconName}
-                size={20}
+                size={24}
                 color={isFocused ? '#047A36' : '#94A3B8'}
               />
             </Animated.View>
@@ -187,65 +187,68 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
 
   return (
     <>
-      <View style={[styles.floatingWrapper, { bottom: bottomOffset }]}>
-        <View
-          onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
-          style={styles.floatingBar}
-        >
-          {/* Smooth Sliding Capsule Pill Track (Skips center slot 2 where Mic sits) */}
-          {slotWidth > 0 && (
-            <View style={StyleSheet.absoluteFill} pointerEvents="none">
-              <Animated.View
-                style={[
-                  styles.sliderTrack,
-                  {
-                    left: 6,
-                    width: slotWidth,
-                    transform: [
-                      {
-                        translateX: slideAnim.interpolate({
-                          inputRange: [0, 1, 2, 3],
-                          outputRange: [0, slotWidth, slotWidth * 3, slotWidth * 4],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <View style={styles.grayPill} />
-              </Animated.View>
-            </View>
-          )}
-
-          {/* 5-Slot Tab Row: [Orders] [Inventory] [Popped-Out Mic] [Earnings] [Profile] */}
-          <View style={styles.tabButtonsRow}>
-            {/* Slot 0: Orders */}
-            {state.routes[0] && renderTabButton(state.routes[0], 0)}
-
-            {/* Slot 1: Inventory */}
-            {state.routes[1] && renderTabButton(state.routes[1], 1)}
-
-            {/* Slot 2: Popped-Out Center AI Mic Button */}
-            <View style={styles.micSlotContainer}>
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => {
-                  Vibration.vibrate(35);
-                  setIsVoiceModalOpen(true);
-                }}
-                style={styles.micPoppedButton}
-              >
-                <Ionicons name="mic" size={24} color="#047A36" />
-              </TouchableOpacity>
-              <Text style={styles.micSubLabel}>Speak</Text>
-            </View>
-
-            {/* Slot 3: Earnings */}
-            {state.routes[2] && renderTabButton(state.routes[2], 2)}
-
-            {/* Slot 4: Profile */}
-            {state.routes[3] && renderTabButton(state.routes[3], 3)}
+      <View
+        onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+        style={[
+          styles.tabBarContainer,
+          {
+            height: 68 + bottomInset,
+            paddingBottom: bottomInset,
+          },
+        ]}
+      >
+        {/* Smooth Sliding Capsule Pill Track (Skips center slot 2 where Mic sits) */}
+        {slotWidth > 0 && (
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <Animated.View
+              style={[
+                styles.sliderTrack,
+                {
+                  width: slotWidth,
+                  transform: [
+                    {
+                      translateX: slideAnim.interpolate({
+                        inputRange: [0, 1, 2, 3],
+                        outputRange: [0, slotWidth, slotWidth * 3, slotWidth * 4],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <View style={styles.grayPill} />
+            </Animated.View>
           </View>
+        )}
+
+        {/* 5-Slot Tab Row: [Orders] [Stock] [Popped-Out Mic] [Earnings] [Profile] */}
+        <View style={styles.tabButtonsRow}>
+          {/* Slot 0: Orders */}
+          {state.routes[0] && renderTabButton(state.routes[0], 0)}
+
+          {/* Slot 1: Stock */}
+          {state.routes[1] && renderTabButton(state.routes[1], 1)}
+
+          {/* Slot 2: Popped-Out Center AI Mic Button */}
+          <View style={styles.micSlotContainer}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => {
+                Vibration.vibrate(35);
+                setIsVoiceModalOpen(true);
+              }}
+              style={styles.micPoppedButton}
+            >
+              <Ionicons name="mic" size={26} color="#047A36" />
+            </TouchableOpacity>
+            <Text style={styles.micSubLabel}>Speak</Text>
+          </View>
+
+          {/* Slot 3: Earnings */}
+          {state.routes[2] && renderTabButton(state.routes[2], 2)}
+
+          {/* Slot 4: Profile */}
+          {state.routes[3] && renderTabButton(state.routes[3], 3)}
         </View>
       </View>
 
@@ -420,39 +423,28 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  floatingWrapper: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    zIndex: 999,
-  },
-  floatingBar: {
-    height: 62,
+  tabBarContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 31,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
     position: 'relative',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
   },
   sliderTrack: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
+    top: 6,
+    height: 54,
     alignItems: 'center',
     justifyContent: 'center',
   },
   grayPill: {
-    width: 58,
-    height: 44,
-    borderRadius: 22,
+    width: 66,
+    height: 52,
+    borderRadius: 20,
     backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
@@ -461,10 +453,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flex: 1,
     alignItems: 'center',
+    paddingTop: 4,
   },
   tabButton: {
     flex: 1,
-    height: 46,
+    height: 58,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -472,9 +465,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tabLabel: {
+  iconWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orderBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -10,
+    backgroundColor: '#D9482B',
+    minWidth: 17,
+    height: 17,
+    borderRadius: 8.5,
+    paddingHorizontal: 3.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  orderBadgeText: {
+    fontFamily: 'Metropolis-Bold',
     fontSize: 9.5,
-    marginTop: 2,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    lineHeight: 12,
+  },
+  tabLabel: {
+    fontFamily: 'Metropolis-Medium',
+    fontSize: 11,
+    marginTop: 3,
     letterSpacing: -0.2,
   },
   tabLabelActive: {
@@ -489,33 +510,33 @@ const styles = StyleSheet.create({
   // Popped-Out Center Mic Button
   micSlotContainer: {
     flex: 1,
-    height: 62,
+    height: 58,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
   micPoppedButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -22,
+    marginTop: -26,
     borderWidth: 2.5,
     borderColor: '#047A36',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   micSubLabel: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
     color: '#047A36',
-    marginTop: 2,
+    marginTop: 3,
     letterSpacing: -0.2,
   },
 
