@@ -40,6 +40,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
   const bottomOffset = insets.bottom > 0 ? insets.bottom + 6 : 14;
   const [barWidth, setBarWidth] = useState(0);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const pendingOrdersCount = useVendorAuthStore((s) => s.pendingOrdersCount ?? 2);
 
   // Animated sliding indicator value tracking route index (0, 1, 2, 3)
   const slideAnim = useRef(new Animated.Value(state.index)).current;
@@ -154,13 +155,22 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
         activeOpacity={0.8}
       >
         <View style={styles.tabContent}>
-          <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
-            <Ionicons
-              name={iconName}
-              size={20}
-              color={isFocused ? '#047A36' : '#94A3B8'}
-            />
-          </Animated.View>
+          <View style={styles.iconWrapper}>
+            <Animated.View style={{ transform: [{ scale: scaleAnims[index] }] }}>
+              <Ionicons
+                name={iconName}
+                size={20}
+                color={isFocused ? '#047A36' : '#94A3B8'}
+              />
+            </Animated.View>
+            {route.name === 'VendorOrders' && pendingOrdersCount > 0 && (
+              <View style={styles.orderBadge}>
+                <Text style={styles.orderBadgeText}>
+                  {pendingOrdersCount > 99 ? '99+' : pendingOrdersCount}
+                </Text>
+              </View>
+            )}
+          </View>
           <Text
             style={[
               styles.tabLabel,
@@ -227,7 +237,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
               >
                 <Ionicons name="mic" size={24} color="#047A36" />
               </TouchableOpacity>
-              <Text style={styles.micSubLabel}>Ask AI</Text>
+              <Text style={styles.micSubLabel}>Speak</Text>
             </View>
 
             {/* Slot 3: Earnings */}
@@ -258,7 +268,7 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
 
             {/* Header */}
             <View style={styles.voiceHeader}>
-              <Text style={styles.voiceTitle}>Ask AI Assistant</Text>
+              <Text style={styles.voiceTitle}>Speak to Store Assistant</Text>
               <Text style={styles.voiceSubtitle}>
                 Speak your store commands in Hindi or English
               </Text>
@@ -335,7 +345,7 @@ function VendorTabs() {
       <Tab.Screen
         name="VendorStock"
         component={VendorStockScreen}
-        options={{ tabBarLabel: 'Inventory' }}
+        options={{ tabBarLabel: 'Stock' }}
       />
       <Tab.Screen
         name="VendorEarnings"
