@@ -18,7 +18,7 @@ import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { VendorStockItem } from '../../../api-client/types';
 
-export type MasterCategory = 'Vegetables' | 'Fruits' | 'Poultry / Meat' | 'Dairy';
+export type MasterCategory = 'Vegetables' | 'Fruits' | 'Poultry or Meat' | 'Dairy';
 
 export interface MasterCatalogueItem {
   id: string;
@@ -248,11 +248,11 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
     photoUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=200&q=80',
   },
 
-  // --- Poultry & Meat ---
+  // --- Poultry or Meat ---
   {
     id: 'master-meat-1',
     nameEn: 'Fresh Chicken Curry Cut',
-    category: 'Poultry / Meat',
+    category: 'Poultry or Meat',
     unit: '500 g',
     defaultPricePaise: 13000,
     mrpPaise: 15000,
@@ -262,7 +262,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-2',
     nameEn: 'Tender Chicken Breast Boneless',
-    category: 'Poultry / Meat',
+    category: 'Poultry or Meat',
     unit: '500 g',
     defaultPricePaise: 18000,
     mrpPaise: 21000,
@@ -272,7 +272,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-3',
     nameEn: 'Fresh Mutton Curry Cut',
-    category: 'Poultry / Meat',
+    category: 'Poultry or Meat',
     unit: '500 g',
     defaultPricePaise: 39000,
     mrpPaise: 44000,
@@ -282,7 +282,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-4',
     nameEn: 'Farm Fresh White Eggs',
-    category: 'Poultry / Meat',
+    category: 'Poultry or Meat',
     unit: '6 pcs',
     defaultPricePaise: 4800,
     mrpPaise: 5400,
@@ -292,7 +292,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-5',
     nameEn: 'Rohu Fresh Fish Cut',
-    category: 'Poultry / Meat',
+    category: 'Poultry or Meat',
     unit: '500 g',
     defaultPricePaise: 16000,
     mrpPaise: 19000,
@@ -301,7 +301,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   },
 ];
 
-const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry / Meat', 'Dairy'] as const;
+const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry or Meat', 'Dairy'] as const;
 
 interface Props {
   visible: boolean;
@@ -322,7 +322,18 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   // Config Dialogue state when + Add is pressed on an item
   const [configuringItem, setConfiguringItem] = useState<MasterCatalogueItem | null>(null);
   const [sellingPriceStr, setSellingPriceStr] = useState('');
-  const [initialInventoryKg, setInitialInventoryKg] = useState('20');
+  const [initialKg, setInitialKg] = useState(20);
+  const [initialGrams, setInitialGrams] = useState(0);
+
+  // Helper to adjust initial stock with 1000g rollover
+  const adjustInitialStock = (deltaKg: number, deltaG: number) => {
+    try {
+      Vibration.vibrate(15);
+    } catch {}
+    const totalG = Math.max(0, initialKg * 1000 + initialGrams + deltaKg * 1000 + deltaG);
+    setInitialKg(Math.floor(totalG / 1000));
+    setInitialGrams(totalG % 1000);
+  };
 
   // Filtered Master Database Items - Auto-sorted alphabetically from A to Z
   const filteredCatalogue = useMemo(() => {
@@ -352,7 +363,8 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
     } catch {}
     setConfiguringItem(item);
     setSellingPriceStr((item.defaultPricePaise / 100).toString());
-    setInitialInventoryKg('20');
+    setInitialKg(20);
+    setInitialGrams(0);
   };
 
   // Confirm and Add to Store
@@ -360,7 +372,9 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
     if (!configuringItem) return;
 
     const pricePaise = Math.round((parseFloat(sellingPriceStr) || configuringItem.defaultPricePaise / 100) * 100);
-    const stockKg = Math.max(1, parseInt(initialInventoryKg, 10) || 20);
+    const isUnit = configuringItem.unit.toLowerCase().includes('dozen') || configuringItem.unit.toLowerCase().includes('pc');
+    const finalKg = isUnit ? Math.max(1, initialKg) : initialKg;
+    const finalGrams = isUnit ? 0 : initialGrams;
 
     const newStockItem: VendorStockItem = {
       id: `stock-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -369,10 +383,10 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
       unit: configuringItem.unit,
       pricePaise,
       mrpPaise: configuringItem.mrpPaise,
-      isInStock: true,
+      isInStock: finalKg > 0 || finalGrams > 0,
       photoUrl: configuringItem.photoUrl,
-      stockKg,
-      reservedKg: 0,
+      stockKg: finalKg,
+      stockGrams: finalGrams,
     };
 
     onAddItem(newStockItem);
@@ -559,38 +573,124 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                 </View>
               </View>
 
-              {/* Input 2: Set Initial Inventory Kilos / Units */}
+              {/* Input 2: Set Initial Inventory (Kg and Grams) */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Initial Available Inventory (e.g. Total Kilos)</Text>
-                <View style={styles.inventoryStepperRow}>
-                  <TouchableOpacity
-                    style={styles.stepBtn}
-                    onPress={() => {
-                      const cur = parseInt(initialInventoryKg, 10) || 5;
-                      setInitialInventoryKg(Math.max(1, cur - 5).toString());
-                    }}
-                  >
-                    <Text style={styles.stepBtnText}>- 5</Text>
-                  </TouchableOpacity>
-
-                  <TextInput
-                    value={initialInventoryKg}
-                    onChangeText={setInitialInventoryKg}
-                    keyboardType="numeric"
-                    style={styles.inventoryInput}
-                  />
-                  <Text style={styles.kgSuffix}>kilos / pcs</Text>
-
-                  <TouchableOpacity
-                    style={styles.stepBtn}
-                    onPress={() => {
-                      const cur = parseInt(initialInventoryKg, 10) || 0;
-                      setInitialInventoryKg((cur + 5).toString());
-                    }}
-                  >
-                    <Text style={styles.stepBtnText}>+ 5</Text>
-                  </TouchableOpacity>
+                <View style={styles.inputLabelRow}>
+                  <Text style={styles.inputLabel}>Initial Inventory Stock</Text>
+                  <Text style={styles.liveWeightBadge}>
+                    {configuringItem && (configuringItem.unit.includes('dozen') || configuringItem.unit.includes('pc'))
+                      ? `${initialKg} ${configuringItem.unit.includes('dozen') ? 'doz' : 'pcs'}`
+                      : `${initialKg} kg ${initialGrams.toString().padStart(3, '0')} g`}
+                  </Text>
                 </View>
+
+                {configuringItem && (configuringItem.unit.includes('dozen') || configuringItem.unit.includes('pc')) ? (
+                  <View style={styles.inventoryStepperRow}>
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setInitialKg(Math.max(1, initialKg - 1))}
+                    >
+                      <Text style={styles.stepBtnText}>- 1</Text>
+                    </TouchableOpacity>
+
+                    <TextInput
+                      value={initialKg.toString()}
+                      onChangeText={(t) => setInitialKg(Math.max(0, parseInt(t, 10) || 0))}
+                      keyboardType="numeric"
+                      style={styles.inventoryInput}
+                    />
+                    <Text style={styles.kgSuffix}>{configuringItem.unit.includes('dozen') ? 'doz' : 'pcs'}</Text>
+
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setInitialKg(initialKg + 1)}
+                    >
+                      <Text style={styles.stepBtnText}>+ 1</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View>
+                    <View style={styles.dualModalStepperRow}>
+                      {/* Kilograms Controller: [- 1 +] */}
+                      <View style={styles.modalStepperCol}>
+                        <Text style={styles.stepperSubLabel}>KILOS (KG)</Text>
+                        <View style={styles.innerStepperRow}>
+                          <TouchableOpacity
+                            style={styles.stepBtn}
+                            onPress={() => adjustInitialStock(-1, 0)}
+                          >
+                            <Ionicons name="remove" size={16} color="#047A36" />
+                          </TouchableOpacity>
+
+                          <TextInput
+                            value={initialKg.toString()}
+                            onChangeText={(t) => setInitialKg(Math.max(0, parseInt(t, 10) || 0))}
+                            keyboardType="numeric"
+                            style={styles.inventoryInput}
+                          />
+
+                          <TouchableOpacity
+                            style={styles.stepBtn}
+                            onPress={() => adjustInitialStock(1, 0)}
+                          >
+                            <Ionicons name="add" size={16} color="#047A36" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+
+                      {/* Grams Controller: [- 000 +] */}
+                      <View style={styles.modalStepperCol}>
+                        <Text style={styles.stepperSubLabel}>GRAMS (G)</Text>
+                        <View style={styles.innerStepperRow}>
+                          <TouchableOpacity
+                            style={styles.stepBtn}
+                            onPress={() => adjustInitialStock(0, -100)}
+                          >
+                            <Ionicons name="remove" size={16} color="#047A36" />
+                          </TouchableOpacity>
+
+                          <TextInput
+                            value={initialGrams.toString().padStart(3, '0')}
+                            onChangeText={(t) => {
+                              const val = Math.max(0, parseInt(t, 10) || 0);
+                              if (val >= 1000) {
+                                setInitialKg(initialKg + Math.floor(val / 1000));
+                                setInitialGrams(val % 1000);
+                              } else {
+                                setInitialGrams(val);
+                              }
+                            }}
+                            keyboardType="numeric"
+                            style={styles.inventoryInput}
+                          />
+
+                          <TouchableOpacity
+                            style={styles.stepBtn}
+                            onPress={() => adjustInitialStock(0, 100)}
+                          >
+                            <Ionicons name="add" size={16} color="#047A36" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Quick Preset Chips for Grams: +10g, +100g, +200g, +1000g */}
+                    <View style={styles.quickPresetRow}>
+                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 10)}>
+                        <Text style={styles.presetChipText}>+10 g</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 100)}>
+                        <Text style={styles.presetChipText}>+100 g</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 200)}>
+                        <Text style={styles.presetChipText}>+200 g</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.presetChip} onPress={() => adjustInitialStock(0, 1000)}>
+                        <Text style={styles.presetChipText}>+1000 g (+1kg)</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
               </View>
 
               {/* Confirm Button */}
@@ -849,11 +949,22 @@ const styles = StyleSheet.create({
   inputGroup: {
     marginBottom: 14,
   },
+  inputLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   inputLabel: {
     fontSize: 11.5,
     fontWeight: '700',
     color: '#334155',
-    marginBottom: 6,
+  },
+  liveWeightBadge: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#047A36',
   },
   textInputBox: {
     flexDirection: 'row',
@@ -882,6 +993,43 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  dualModalStepperRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  modalStepperCol: {
+    flex: 1,
+  },
+  stepperSubLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    marginBottom: 4,
+  },
+  innerStepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  quickPresetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 10,
+  },
+  presetChip: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  presetChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#047A36',
   },
   stepBtn: {
     backgroundColor: '#ECFDF5',
