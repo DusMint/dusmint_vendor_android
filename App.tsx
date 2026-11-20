@@ -445,9 +445,9 @@ const styles = StyleSheet.create({
     width: 66,
     height: 52,
     borderRadius: 20,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#F1F5F9',
     borderWidth: 1.2,
-    borderColor: '#A7F3D0',
+    borderColor: '#E2E8F0',
   },
   tabButtonsRow: {
     flexDirection: 'row',

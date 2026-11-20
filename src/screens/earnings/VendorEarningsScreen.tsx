@@ -9,6 +9,7 @@ import {
   RefreshControl,
   StatusBar,
   Animated,
+  Modal,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -19,6 +20,12 @@ import { VendorEarningsData, VendorProfileInfo } from '../../api-client/types';
 import { VendorPayoutScreen } from './VendorPayoutScreen';
 
 const ITEMS_PER_PAGE = 5;
+
+// Indian Currency Formatter with commas and NO decimals
+export const formatRupee = (val: number): string => {
+  const rounded = Math.round(val);
+  return '₹' + rounded.toLocaleString('en-IN');
+};
 
 // Custom hook for comforting, smooth rolling count transitions (Zero blink, 60fps)
 function useAnimatedNumber(target: number, durationMs: number = 320): number {
@@ -63,14 +70,21 @@ function useAnimatedNumber(target: number, durationMs: number = 320): number {
 }
 
 // Completed Order Record for Order History Section
-interface CompletedOrderRecord {
+export interface OrderItemDetail {
+  name: string;
+  qtyText: string;
+  rateText: string;
+  itemTotal: number;
+}
+
+export interface CompletedOrderRecord {
   id: string;
   orderCode: string;
   dateStr: string;
   timestamp: number;
-  itemsSummary: string;
   payoutAmount: number;
-  status: string;
+  status: 'Delivered' | 'Cancelled';
+  items: OrderItemDetail[];
 }
 
 const ALL_COMPLETED_ORDERS: CompletedOrderRecord[] = [
@@ -79,72 +93,103 @@ const ALL_COMPLETED_ORDERS: CompletedOrderRecord[] = [
     orderCode: '#DM-8821',
     dateStr: 'Today, 01:15 PM',
     timestamp: Date.now() - 2 * 60 * 60 * 1000,
-    itemsSummary: '3 items • 2 kg Tomato, 1 kg Onion, 500g Chicken',
-    payoutAmount: 420.0,
+    payoutAmount: 420,
     status: 'Delivered',
+    items: [
+      { name: 'Fresh Desi Tomato', qtyText: '2 kg', rateText: '₹25/kg', itemTotal: 50 },
+      { name: 'Indore Jyoti Potato', qtyText: '2 kg', rateText: '₹30/kg', itemTotal: 60 },
+      { name: 'Nashik Red Onion', qtyText: '1 kg', rateText: '₹35/kg', itemTotal: 35 },
+      { name: 'Fresh Chicken Curry Cut', qtyText: '1 kg', rateText: '₹275/kg', itemTotal: 275 },
+    ],
   },
   {
     id: 'ord-2',
     orderCode: '#DM-8814',
     dateStr: 'Today, 11:30 AM',
     timestamp: Date.now() - 4 * 60 * 60 * 1000,
-    itemsSummary: '2 items • 1 kg Apple, 500g Paneer',
-    payoutAmount: 310.0,
+    payoutAmount: 310,
     status: 'Delivered',
+    items: [
+      { name: 'Shimla Royal Apple', qtyText: '1 kg', rateText: '₹160/kg', itemTotal: 160 },
+      { name: 'Fresh Malai Paneer', qtyText: '500 g', rateText: '₹300/kg', itemTotal: 150 },
+    ],
   },
   {
     id: 'ord-3',
     orderCode: '#DM-8790',
     dateStr: 'Yesterday, 07:15 PM',
     timestamp: Date.now() - 1 * 24 * 60 * 60 * 1000,
-    itemsSummary: '4 items • 1 kg Potato, 1 kg Onion, 6 pcs Eggs',
-    payoutAmount: 540.0,
+    payoutAmount: 540,
     status: 'Delivered',
+    items: [
+      { name: 'Indore Jyoti Potato', qtyText: '2 kg', rateText: '₹30/kg', itemTotal: 60 },
+      { name: 'Nashik Red Onion', qtyText: '2 kg', rateText: '₹35/kg', itemTotal: 70 },
+      { name: 'Farm Fresh White Eggs', qtyText: '12 pcs', rateText: '₹7/pc', itemTotal: 84 },
+      { name: 'Fresh Desi Ghee', qtyText: '500 ml', rateText: '₹652/L', itemTotal: 326 },
+    ],
   },
   {
     id: 'ord-4',
     orderCode: '#DM-8762',
     dateStr: 'Yesterday, 05:40 PM',
     timestamp: Date.now() - 1.2 * 24 * 60 * 60 * 1000,
-    itemsSummary: '2 items • 2 kg Potato, 500ml Milk',
-    payoutAmount: 185.0,
+    payoutAmount: 185,
     status: 'Delivered',
+    items: [
+      { name: 'Indore Jyoti Potato', qtyText: '2 kg', rateText: '₹30/kg', itemTotal: 60 },
+      { name: 'Full Cream Milk', qtyText: '1 L', rateText: '₹65/L', itemTotal: 65 },
+      { name: 'Fresh Green Chillies', qtyText: '250 g', rateText: '₹240/kg', itemTotal: 60 },
+    ],
   },
   {
     id: 'ord-5',
-    orderCode: '#DM-8740',
-    dateStr: '28 Oct, 08:30 PM',
-    timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
-    itemsSummary: '5 items • 1 doz Banana, 1 kg Tomato, 500g Chicken',
-    payoutAmount: 680.0,
-    status: 'Delivered',
+    orderCode: '#DM-8745',
+    dateStr: 'Yesterday, 03:20 PM',
+    timestamp: Date.now() - 1.4 * 24 * 60 * 60 * 1000,
+    payoutAmount: 0,
+    status: 'Cancelled',
+    items: [
+      { name: 'Fresh Desi Tomato', qtyText: '1 kg', rateText: '₹25/kg', itemTotal: 25 },
+      { name: 'Full Cream Milk', qtyText: '1 L', rateText: '₹65/L', itemTotal: 65 },
+    ],
   },
   {
     id: 'ord-6',
-    orderCode: '#DM-8715',
-    dateStr: '27 Oct, 06:10 PM',
-    timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000,
-    itemsSummary: '3 items • 1 kg Apple, 500g Paneer, 100g Butter',
-    payoutAmount: 490.0,
+    orderCode: '#DM-8740',
+    dateStr: '28 Oct, 08:30 PM',
+    timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
+    payoutAmount: 680,
     status: 'Delivered',
+    items: [
+      { name: 'Robusta Banana', qtyText: '1 doz', rateText: '₹60/doz', itemTotal: 60 },
+      { name: 'Fresh Desi Tomato', qtyText: '2 kg', rateText: '₹25/kg', itemTotal: 50 },
+      { name: 'Fresh Chicken Curry Cut', qtyText: '2 kg', rateText: '₹285/kg', itemTotal: 570 },
+    ],
   },
   {
     id: 'ord-7',
-    orderCode: '#DM-8692',
-    dateStr: '26 Oct, 09:00 PM',
-    timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000,
-    itemsSummary: '2 items • 2 kg Onion, 1 kg Potato',
-    payoutAmount: 240.0,
+    orderCode: '#DM-8715',
+    dateStr: '27 Oct, 06:10 PM',
+    timestamp: Date.now() - 3 * 24 * 60 * 60 * 1000,
+    payoutAmount: 490,
     status: 'Delivered',
+    items: [
+      { name: 'Shimla Royal Apple', qtyText: '2 kg', rateText: '₹160/kg', itemTotal: 320 },
+      { name: 'Fresh Malai Paneer', qtyText: '500 g', rateText: '₹300/kg', itemTotal: 150 },
+      { name: 'Amul Butter', qtyText: '100 g', rateText: '₹20/pc', itemTotal: 20 },
+    ],
   },
   {
     id: 'ord-8',
-    orderCode: '#DM-8640',
-    dateStr: '25 Oct, 08:15 PM',
-    timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000,
-    itemsSummary: '4 items • 1 kg Tomato, 1 kg Apple, 6 pcs Eggs',
-    payoutAmount: 510.0,
+    orderCode: '#DM-8692',
+    dateStr: '26 Oct, 09:00 PM',
+    timestamp: Date.now() - 4 * 24 * 60 * 60 * 1000,
+    payoutAmount: 240,
     status: 'Delivered',
+    items: [
+      { name: 'Nashik Red Onion', qtyText: '3 kg', rateText: '₹35/kg', itemTotal: 105 },
+      { name: 'Indore Jyoti Potato', qtyText: '4.5 kg', rateText: '₹30/kg', itemTotal: 135 },
+    ],
   },
 ];
 
