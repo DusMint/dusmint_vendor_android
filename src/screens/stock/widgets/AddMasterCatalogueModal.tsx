@@ -247,11 +247,11 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
     photoUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=200&q=80',
   },
 
-  // --- Meat & Seafood ---
+  // --- Poultry & Meat ---
   {
     id: 'master-meat-1',
     nameEn: 'Fresh Chicken Curry Cut',
-    category: 'Meat',
+    category: 'Poultry / Meat',
     unit: '500 g',
     defaultPricePaise: 13000,
     mrpPaise: 15000,
@@ -261,7 +261,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-2',
     nameEn: 'Tender Chicken Breast Boneless',
-    category: 'Meat',
+    category: 'Poultry / Meat',
     unit: '500 g',
     defaultPricePaise: 18000,
     mrpPaise: 21000,
@@ -271,7 +271,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-3',
     nameEn: 'Fresh Mutton Curry Cut',
-    category: 'Meat',
+    category: 'Poultry / Meat',
     unit: '500 g',
     defaultPricePaise: 39000,
     mrpPaise: 44000,
@@ -281,7 +281,7 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-4',
     nameEn: 'Farm Fresh White Eggs',
-    category: 'Meat',
+    category: 'Poultry / Meat',
     unit: '6 pcs',
     defaultPricePaise: 4800,
     mrpPaise: 5400,
@@ -291,39 +291,17 @@ const MASTER_PRODUCE_DATABASE: MasterCatalogueItem[] = [
   {
     id: 'master-meat-5',
     nameEn: 'Rohu Fresh Fish Cut',
-    category: 'Meat',
+    category: 'Poultry / Meat',
     unit: '500 g',
     defaultPricePaise: 16000,
     mrpPaise: 19000,
     mandiRateText: '₹150 – ₹180 / 500g',
     photoUrl: 'https://images.unsplash.com/photo-1534043464124-3be32fe00099?w=200&q=80',
   },
-
-  // --- Staples ---
-  {
-    id: 'master-staple-1',
-    nameEn: 'Aashirvaad Shudh Chakki Atta',
-    category: 'Staples',
-    unit: '5 kg',
-    defaultPricePaise: 24500,
-    mrpPaise: 27500,
-    mandiRateText: '₹240 – ₹260 / 5kg',
-    photoUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=80',
-  },
-  {
-    id: 'master-staple-2',
-    nameEn: 'Daawat Rozana Basmati Rice',
-    category: 'Staples',
-    unit: '1 kg',
-    defaultPricePaise: 8500,
-    mrpPaise: 11000,
-    mandiRateText: '₹80 – ₹95 / kg',
-    photoUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&q=80',
-  },
 ];
 
 const ALPHABET = ['All', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
-const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Dairy', 'Meat', 'Staples'];
+const MASTER_CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Poultry / Meat', 'Dairy'] as const;
 
 interface Props {
   visible: boolean;
@@ -408,24 +386,34 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 16 : insets.top + 8 }]}>
-        {/* Header */}
+        {/* Soft Green Gradient Accent Header Background */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Svg width="100%" height={260}>
+            <Defs>
+              <SvgGradient id="masterGrad" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0%" stopColor="#E8F5EC" />
+                <Stop offset="100%" stopColor="#FFFFFF" />
+              </SvgGradient>
+            </Defs>
+            <Rect width="100%" height={260} fill="url(#masterGrad)" />
+          </Svg>
+        </View>
+
+        {/* Header - Simple and Bold, no extra descriptions */}
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.headerTitle}>Master Produce Catalogue</Text>
-            <Text style={styles.headerSub}>Tap + Add to add items to your store inventory</Text>
-          </View>
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Ionicons name="close" size={22} color="#0F172A" />
+          <Text style={styles.headerTitle}>Master Produce Catalogue</Text>
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
+            <Ionicons name="close" size={20} color="#0F172A" />
           </TouchableOpacity>
         </View>
 
         {/* Search Input Bar */}
         <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={18} color="#94A3B8" style={{ marginRight: 8 }} />
+          <Ionicons name="search-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search across 40+ vegetables, fruits, dairy, meat..."
+            placeholder="Search vegetable, fruit, poultry, dairy..."
             placeholderTextColor="#94A3B8"
             style={styles.searchInput}
             clearButtonMode="while-editing"
@@ -619,14 +607,6 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
                 </View>
               </View>
 
-              {/* Info Note */}
-              <View style={styles.dialogNotice}>
-                <Ionicons name="flash" size={14} color="#047A36" style={{ marginRight: 6 }} />
-                <Text style={styles.dialogNoticeText}>
-                  This item will immediately become visible to customers on DusMint.
-                </Text>
-              </View>
-
               {/* Confirm Button */}
               <TouchableOpacity
                 style={styles.confirmBtn}
@@ -657,35 +637,42 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
-    letterSpacing: -0.3,
-  },
-  headerSub: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    color: '#111117',
+    letterSpacing: -0.4,
   },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
     borderRadius: 14,
     marginHorizontal: 20,
     paddingHorizontal: 12,
     height: 44,
     marginBottom: 10,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   searchInput: {
     flex: 1,
@@ -698,18 +685,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 12,
   },
   categoryPillActive: {
     backgroundColor: '#047A36',
+    borderColor: '#047A36',
   },
   categoryPillText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#475569',
   },
   categoryPillTextActive: {
     color: '#FFFFFF',
@@ -724,7 +714,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -828,9 +818,11 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 24,
     padding: 20,
-    shadowColor: '#000000',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.16,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -857,12 +849,12 @@ const styles = StyleSheet.create({
   dialogItemPreview: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F0FDF4',
     borderRadius: 14,
     padding: 10,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#BBF7D0',
   },
   dialogImg: {
     width: 44,
@@ -892,9 +884,9 @@ const styles = StyleSheet.create({
   textInputBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
@@ -918,22 +910,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   stepBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 10,
   },
   stepBtnText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '800',
+    color: '#047A36',
   },
   inventoryInput: {
     width: 60,
     height: 42,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
     borderRadius: 10,
     textAlign: 'center',
     fontFamily: 'Metropolis-Bold',
@@ -947,26 +941,13 @@ const styles = StyleSheet.create({
     color: '#64748B',
     flex: 1,
   },
-  dialogNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    padding: 10,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  dialogNoticeText: {
-    fontSize: 11,
-    color: '#047857',
-    fontWeight: '500',
-    flex: 1,
-  },
   confirmBtn: {
     backgroundColor: '#047A36',
     borderRadius: 14,
     paddingVertical: 13,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 4,
   },
   confirmBtnText: {
     fontFamily: 'Metropolis-Bold',
