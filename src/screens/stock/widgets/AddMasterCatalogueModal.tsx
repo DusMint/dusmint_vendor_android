@@ -14,6 +14,7 @@ import {
   StatusBar,
   ActivityIndicator,
   FlatList,
+  InteractionManager,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -331,10 +332,18 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (visible) {
+      let active = true;
+      const task = InteractionManager.runAfterInteractions(() => {
+        if (active) setIsContentReady(true);
+      });
       const timer = setTimeout(() => {
-        setIsContentReady(true);
-      }, 75);
-      return () => clearTimeout(timer);
+        if (active) setIsContentReady(true);
+      }, 220);
+      return () => {
+        active = false;
+        task.cancel();
+        clearTimeout(timer);
+      };
     } else {
       setIsContentReady(false);
       setSearchQuery('');

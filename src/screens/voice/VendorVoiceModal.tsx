@@ -34,10 +34,20 @@ interface Props {
   onClose: () => void;
 }
 
+interface PendingConfirmation {
+  title: string;
+  promptHi: string;
+  promptEn: string;
+  options?: Array<{ label: string; onSelect: () => void }>;
+  onConfirm?: () => void;
+  onCancel: () => void;
+}
+
 export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [lastExecutedCommand, setLastExecutedCommand] = useState<ParsedVendorCommand | null>(null);
+  const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation | null>(null);
   const [undoState, setUndoState] = useState<(() => void) | null>(null);
   const [undoTimerSeconds, setUndoTimerSeconds] = useState(5);
   const [customPrompt, setCustomPrompt] = useState('');
@@ -76,8 +86,8 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     }
   }, [visible, isListening, pulseAnim]);
 
-  // Execute the parsed command on active Zustand stores
-  const executeCommand = useCallback(
+  // Execute the state change on active stores (used directly for low-impact, or after confirmation for high-impact)
+  const applyCommandExecution = useCallback(
     (parsed: ParsedVendorCommand) => {
       try {
         Vibration.vibrate(35);
@@ -193,6 +203,106 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
       }, 1000);
     },
     [isStoreOpen, pendingOrdersCount, setStoreOpen, setPendingOrdersCount, undoProgressAnim]
+  );
+
+  // Command handler separating high-impact confirmation from low-impact undo-only
+  const executeCommand = useCallback(
+    (parsed: ParsedVendorCommand) => {
+      // 1. High-Impact Actions Require Explicit Confirmation (Haan / Nahi)
+      if (parsed.isHighImpact) {
+        if (parsed.action === 'STORE_TOGGLE' && parsed.targetStoreOpen === false) {
+          setPendingConfirmation({
+            title: 'दुकान बंद करें?',
+            promptHi: 'क्या आप दुकान बंद करना चाहते हैं? नए ऑनलाइन ऑर्डर आना बंद हो जाएंगे।',
+            promptEn: 'Are you sure you want to close the shop? Incoming orders will stop.',
+            onConfirm: () => {
+              setPendingConfirmation(null);
+              applyCommandExecution(parsed);
+              speakConfirmationAloud('दुकान बंद कर दी गई है।');
+            },
+            onCancel: () => {
+              setPendingConfirmation(null);
+              speakConfirmationAloud('रद्द किया गया।');
+            },
+          });
+          speakConfirmationAloud('क्या आप दुकान बंद करना चाहते हैं?');
+          return;
+        }
+
+        if (parsed.action === 'SET_OUT_OF_STOCK') {
+          const itemName = parsed.matchedItemNameEn || 'इस आइटम';
+          setPendingConfirmation({
+            title: `${itemName} आउट ऑफ स्टॉक?`,
+            promptHi: `क्या आप ${itemName} को Out of Stock करना चाहते हैं? ग्राहक इसे ऑर्डर नहीं कर पाएंगे।`,
+            promptEn: `Do you want to mark ${itemName} as Out of Stock?`,
+            onConfirm: () => {
+              setPendingConfirmation(null);
+              applyCommandExecution(parsed);
+              speakConfirmationAloud(`${itemName} आउट ऑफ स्टॉक कर दिया गया है।`);
+            },
+            onCancel: () => {
+              setPendingConfirmation(null);
+              speakConfirmationAloud('रद्द किया गया।');
+            },
+          });
+          speakConfirmationAloud(`क्या आप ${itemName} को आउट ऑफ स्टॉक करना चाहते हैं?`);
+          return;
+        }
+
+        if (parsed.action === 'ORDER_ACCEPT') {
+          const PENDING_ORDERS = [
+            { code: '#DM-8821', customer: 'Rohit Sharma', total: 465 },
+            { code: '#DM-8825', customer: 'Pooja Verma', total: 280 },
+          ];
+
+          if (parsed.orderCodeRequested) {
+            const found = PENDING_ORDERS.find((o) => o.code === parsed.orderCodeRequested) || PENDING_ORDERS[0];
+            setPendingConfirmation({
+              title: `ऑर्डर ${found.code} स्वीकार करें?`,
+              promptHi: `ग्राहक: ${found.customer} • कुल राशि: ₹${found.total}`,
+              promptEn: `Customer: ${found.customer} • Total: ₹${found.total}`,
+              onConfirm: () => {
+                setPendingConfirmation(null);
+                applyCommandExecution(parsed);
+                speakConfirmationAloud(`ऑर्डर ${found.code} स्वीकार कर लिया गया है।`);
+              },
+              onCancel: () => {
+                setPendingConfirmation(null);
+                speakConfirmationAloud('रद्द किया गया।');
+              },
+            });
+            speakConfirmationAloud(`ऑर्डर ${found.code}, स्वीकार करें?`);
+            return;
+          }
+
+          // Multiple orders pending: ask which one
+          setPendingConfirmation({
+            title: 'कौन सा ऑर्डर स्वीकार करें?',
+            promptHi: '2 पेंडिंग ऑर्डर हैं। कृपया चुनें:',
+            promptEn: '2 pending orders available. Please choose:',
+            options: PENDING_ORDERS.map((ord) => ({
+              label: `${ord.code} (${ord.customer} • ₹${ord.total})`,
+              onSelect: () => {
+                setPendingConfirmation(null);
+                applyCommandExecution(parsed);
+                speakConfirmationAloud(`ऑर्डर ${ord.code} स्वीकार कर लिया गया है।`);
+              },
+            })),
+            onCancel: () => {
+              setPendingConfirmation(null);
+              speakConfirmationAloud('रद्द किया गया।');
+            },
+          });
+          speakConfirmationAloud('दो पेंडिंग ऑर्डर हैं। कौन सा स्वीकार करें?');
+          return;
+        }
+      }
+
+      // 2. Low-Impact Actions (Add Stock, Price Update, etc.): Auto-execute with 5s Undo buffer
+      applyCommandExecution(parsed);
+      speakConfirmationAloud(parsed.userFeedbackHi);
+    },
+    [applyCommandExecution]
   );
 
   // Undo execution handler
@@ -399,44 +509,61 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
             </Text>
           </View>
 
-          {/* Custom Command Prompt Input Bar */}
-          <View style={styles.promptInputContainer}>
-            <Ionicons name="chatbox-ellipses-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
-            <TextInput
-              ref={promptInputRef}
-              style={styles.promptInput}
-              placeholder="Type or voice-type (e.g. 10 kg Aalu add karo)..."
-              placeholderTextColor="#94A3B8"
-              value={customPrompt}
-              onChangeText={setCustomPrompt}
-              onSubmitEditing={handleSendCustomPrompt}
-              returnKeyType="send"
-            />
-            <TouchableOpacity
-              style={[
-                styles.sendPromptBtn,
-                customPrompt.trim().length === 0 && styles.sendPromptBtnDisabled,
-              ]}
-              onPress={handleSendCustomPrompt}
-              disabled={customPrompt.trim().length === 0}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
+          {/* Explicit High-Impact Confirmation Card (Haan / Nahi) */}
+          {pendingConfirmation && (
+            <View style={styles.confirmPromptCard}>
+              <View style={styles.confirmHeaderRow}>
+                <Ionicons name="help-circle" size={24} color="#D97706" style={{ marginRight: 8 }} />
+                <Text style={styles.confirmPromptTitle}>{pendingConfirmation.title}</Text>
+              </View>
+              <Text style={styles.confirmPromptMsgHi}>{pendingConfirmation.promptHi}</Text>
+              <Text style={styles.confirmPromptMsgEn}>{pendingConfirmation.promptEn}</Text>
 
-          {/* Dev / Hardware Notice if running in Expo Go without native module compiled */}
-          {!isSpeechSupported && (
-            <View style={styles.devNoticeBanner}>
-              <Ionicons name="information-circle" size={15} color="#D97706" style={{ marginRight: 6 }} />
-              <Text style={styles.devNoticeText}>
-                Live Mic hardware requires compiled APK (`npx expo run:android`). Use prompt input above or tap chips below to test instantly!
-              </Text>
+              {/* Multiple order options if available */}
+              {pendingConfirmation.options ? (
+                <View style={styles.optionsList}>
+                  {pendingConfirmation.options.map((opt, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={styles.optionBtn}
+                      onPress={opt.onSelect}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="receipt-outline" size={16} color="#047A36" style={{ marginRight: 6 }} />
+                      <Text style={styles.optionBtnText}>{opt.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    style={styles.cancelBtnWide}
+                    onPress={pendingConfirmation.onCancel}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cancelBtnText}>✕ रद्द करें (Cancel)</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.confirmActionRow}>
+                  <TouchableOpacity
+                    style={styles.cancelConfirmBtn}
+                    onPress={pendingConfirmation.onCancel}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cancelConfirmBtnText}>✕ नहीं (No)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.acceptConfirmBtn}
+                    onPress={pendingConfirmation.onConfirm}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.acceptConfirmBtnText}>✓ हाँ, स्वीकार करें (Yes)</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           )}
 
           {/* Real-time Execution & 5-Second Undo Toast Card */}
-          {lastExecutedCommand && (
+          {lastExecutedCommand && !pendingConfirmation && (
             <View style={styles.executionCard}>
               <View style={styles.execHeaderRow}>
                 <View style={styles.execIconCircle}>
@@ -475,30 +602,71 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
             </View>
           )}
 
-          {/* Quick Vernacular Sample Prompt Chips */}
-          <Text style={styles.sampleSectionTitle}>TAP OR SPEAK IN REGIONAL DIALECT</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScroll}>
-            {[
-              '20 kilo Tamatar add karo',
-              'Aadha kilo Paneer add karo',
-              'Pyaaz khatam ho gaya',
-              'Aalu ka rate 30 rupay',
-              'Dukan band kar do',
-              'Dukan khol do',
-              'Aaj kitna kamaya',
-              'Naya order accept karo',
-            ].map((chip, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={styles.sampleChip}
-                onPress={() => handleTestCommand(chip)}
-                activeOpacity={0.75}
-              >
-                <Ionicons name="chatbubble-ellipses-outline" size={13} color="#047A36" style={{ marginRight: 4 }} />
-                <Text style={styles.sampleChipText}>{chip}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {/* Developer Testing Bar (Only rendered when __DEV__ is true; hidden in production) */}
+          {__DEV__ && (
+            <>
+              {/* Custom Command Prompt Input Bar */}
+              <View style={styles.promptInputContainer}>
+                <Ionicons name="chatbox-ellipses-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
+                <TextInput
+                  ref={promptInputRef}
+                  style={styles.promptInput}
+                  placeholder="Type or voice-type (e.g. 10 kg Aalu add karo)..."
+                  placeholderTextColor="#94A3B8"
+                  value={customPrompt}
+                  onChangeText={setCustomPrompt}
+                  onSubmitEditing={handleSendCustomPrompt}
+                  returnKeyType="send"
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.sendPromptBtn,
+                    customPrompt.trim().length === 0 && styles.sendPromptBtnDisabled,
+                  ]}
+                  onPress={handleSendCustomPrompt}
+                  disabled={customPrompt.trim().length === 0}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Dev / Hardware Notice if running in Expo Go without native module compiled */}
+              {!isSpeechSupported && (
+                <View style={styles.devNoticeBanner}>
+                  <Ionicons name="information-circle" size={15} color="#D97706" style={{ marginRight: 6 }} />
+                  <Text style={styles.devNoticeText}>
+                    Live Mic hardware requires compiled APK (`npx expo run:android`). Use prompt input above or tap chips below to test!
+                  </Text>
+                </View>
+              )}
+
+              {/* Quick Vernacular Sample Prompt Chips */}
+              <Text style={styles.sampleSectionTitle}>DEVELOPER TEST PROMPTS</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScroll}>
+                {[
+                  '20 kilo Tamatar add karo',
+                  'Aadha kilo Paneer add karo',
+                  'Pyaaz khatam ho gaya',
+                  'Aalu ka rate 30 rupay',
+                  'Dukan band kar do',
+                  'Dukan khol do',
+                  'Aaj kitna kamaya',
+                  'Naya order accept karo',
+                ].map((chip, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={styles.sampleChip}
+                    onPress={() => handleTestCommand(chip)}
+                    activeOpacity={0.75}
+                  >
+                    <Ionicons name="chatbubble-ellipses-outline" size={13} color="#047A36" style={{ marginRight: 4 }} />
+                    <Text style={styles.sampleChipText}>{chip}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
+          )}
 
           {/* Close Button */}
           <TouchableOpacity style={styles.closeVoiceBtn} onPress={onClose} activeOpacity={0.85}>
@@ -720,6 +888,104 @@ const styles = StyleSheet.create({
     color: '#92400E',
     fontWeight: '600',
     flex: 1,
+  },
+  confirmPromptCard: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+  },
+  confirmHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  confirmPromptTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  confirmPromptMsgHi: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  confirmPromptMsgEn: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 12,
+  },
+  confirmActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  cancelConfirmBtn: {
+    flex: 1,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelConfirmBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  acceptConfirmBtn: {
+    flex: 1.3,
+    backgroundColor: '#047A36',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  acceptConfirmBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  optionsList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  optionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  optionBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  cancelBtnWide: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  cancelBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
   },
   executionCard: {
     backgroundColor: '#F0FDF4',
