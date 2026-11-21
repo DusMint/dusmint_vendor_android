@@ -28,6 +28,7 @@ import { LanguageSelectScreen } from './src/screens/language/LanguageSelectScree
 import { VendorLoginScreen } from './src/screens/auth/VendorLoginScreen';
 import { VendorOtpScreen } from './src/screens/auth/VendorOtpScreen';
 import { VendorOnboardingScreen } from './src/screens/onboarding/VendorOnboardingScreen';
+import { VendorVoiceModal } from './src/screens/voice/VendorVoiceModal';
 import { useVendorAuthStore } from './src/state/useVendorAuthStore';
 
 // Suppress dev-mode LogBox banners to prevent bottom navigation occlusion
