@@ -326,6 +326,23 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   const [sellingPriceStr, setSellingPriceStr] = useState('');
   const [initialKg, setInitialKg] = useState(20);
 
+  // Smooth asynchronous loading: modal opens first immediately with zero lag or frame drops
+  const [isContentReady, setIsContentReady] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      const timer = setTimeout(() => {
+        setIsContentReady(true);
+      }, 75);
+      return () => clearTimeout(timer);
+    } else {
+      setIsContentReady(false);
+      setSearchQuery('');
+      setSelectedCategory('All');
+      setConfiguringItem(null);
+    }
+  }, [visible]);
+
   // Filtered Master Database Items - Auto-sorted alphabetically from A to Z
   const filteredCatalogue = useMemo(() => {
     const list = MASTER_PRODUCE_DATABASE.filter((item) => {
@@ -348,14 +365,14 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
   }, [selectedCategory, searchQuery]);
 
   // Open config dialog when + Add button is tapped
-  const handleOpenConfigDialog = (item: MasterCatalogueItem) => {
+  const handleOpenConfigDialog = useCallback((item: MasterCatalogueItem) => {
     try {
       Vibration.vibrate(20);
     } catch {}
     setConfiguringItem(item);
     setSellingPriceStr((item.defaultPricePaise / 100).toString());
     setInitialKg(20);
-  };
+  }, []);
 
   // Confirm and Add to Store
   const handleConfirmAdd = () => {
@@ -380,6 +397,50 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
     onAddItem(newStockItem);
     setConfiguringItem(null);
   };
+
+  const renderCatalogueItem = useCallback(
+    ({ item }: { item: MasterCatalogueItem }) => {
+      const isAlreadyAdded = existingItemNames.some(
+        (n) => n.toLowerCase().trim() === item.nameEn.toLowerCase().trim()
+      );
+
+      return (
+        <View style={styles.itemRow}>
+          {/* 1. Picture on Left */}
+          <Image
+            source={{ uri: item.photoUrl }}
+            style={styles.itemImg}
+            resizeMode="cover"
+          />
+
+          {/* 2. Item Name & Category Beside It */}
+          <View style={styles.itemInfo}>
+            <Text style={styles.itemNameText}>{item.nameEn}</Text>
+            <Text style={styles.itemCategoryText}>{item.category}</Text>
+          </View>
+
+          {/* 3. Add Button on Right */}
+          <TouchableOpacity
+            style={[styles.addBtn, isAlreadyAdded && styles.addBtnDone]}
+            onPress={() => (isAlreadyAdded ? null : handleOpenConfigDialog(item))}
+            disabled={isAlreadyAdded}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={isAlreadyAdded ? 'checkmark-circle' : 'add'}
+              size={16}
+              color={isAlreadyAdded ? '#047A36' : '#FFFFFF'}
+              style={{ marginRight: 3 }}
+            />
+            <Text style={[styles.addBtnText, isAlreadyAdded && styles.addBtnTextDone]}>
+              {isAlreadyAdded ? 'Added' : 'Add'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    },
+    [existingItemNames, handleOpenConfigDialog]
+  );
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -420,7 +481,7 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search vegetable, fruit, poultry, dairy..."
+            placeholder="Search vegetable, fruit, meat, dairy..."
             placeholderTextColor="#94A3B8"
             style={styles.searchInput}
             clearButtonMode="while-editing"
@@ -457,57 +518,31 @@ export const AddMasterCatalogueModal: React.FC<Props> = ({
           </ScrollView>
         </View>
 
-        {/* Items Master List (Auto-sorted A-Z) */}
-        <ScrollView
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.resultsCount}>
-            Found {filteredCatalogue.length} matching items
-          </Text>
-
-          {filteredCatalogue.map((item) => {
-            const isAlreadyAdded = existingItemNames.some(
-              (n) => n.toLowerCase().trim() === item.nameEn.toLowerCase().trim()
-            );
-
-            return (
-              <View key={item.id} style={styles.itemRow}>
-                {/* 1. Picture on Left */}
-                <Image
-                  source={{ uri: item.photoUrl }}
-                  style={styles.itemImg}
-                  resizeMode="cover"
-                />
-
-                {/* 2. Item Name & Category Beside It */}
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemNameText}>{item.nameEn}</Text>
-                  <Text style={styles.itemCategoryText}>{item.category}</Text>
-                </View>
-
-                {/* 3. Add Button on Right */}
-                <TouchableOpacity
-                  style={[styles.addBtn, isAlreadyAdded && styles.addBtnDone]}
-                  onPress={() => (isAlreadyAdded ? null : handleOpenConfigDialog(item))}
-                  disabled={isAlreadyAdded}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons
-                    name={isAlreadyAdded ? 'checkmark-circle' : 'add'}
-                    size={16}
-                    color={isAlreadyAdded ? '#047A36' : '#FFFFFF'}
-                    style={{ marginRight: 3 }}
-                  />
-                  <Text style={[styles.addBtnText, isAlreadyAdded && styles.addBtnTextDone]}>
-                    {isAlreadyAdded ? 'Added' : 'Add'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-          <View style={{ height: 60 }} />
-        </ScrollView>
+        {/* Loading Indicator or Catalogue List */}
+        {!isContentReady ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#047A36" />
+            <Text style={styles.loadingText}>Loading catalogue items...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredCatalogue}
+            keyExtractor={(item) => item.id}
+            renderItem={renderCatalogueItem}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            initialNumToRender={8}
+            maxToRenderPerBatch={8}
+            windowSize={5}
+            removeClippedSubviews={Platform.OS === 'android'}
+            ListHeaderComponent={
+              <Text style={styles.resultsCount}>
+                Found {filteredCatalogue.length} matching items
+              </Text>
+            }
+            ListFooterComponent={<View style={{ height: 60 }} />}
+          />
+        )}
 
         {/* --- Custom Dialogue Box Modal to Set Price & Inventory --- */}
         <Modal
@@ -732,6 +767,19 @@ const styles = StyleSheet.create({
   categoryPillTextActive: {
     color: '#FFFFFF',
     fontWeight: '800',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 100,
+  },
+  loadingText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 14,
   },
   listContent: {
     paddingHorizontal: 20,
