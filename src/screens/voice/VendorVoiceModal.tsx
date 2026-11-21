@@ -9,6 +9,8 @@ import {
   Vibration,
   ScrollView,
   Platform,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AudioWaveformVisualizer } from './widgets/AudioWaveformVisualizer';
@@ -37,6 +39,9 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   const [lastExecutedCommand, setLastExecutedCommand] = useState<ParsedVendorCommand | null>(null);
   const [undoState, setUndoState] = useState<(() => void) | null>(null);
   const [undoTimerSeconds, setUndoTimerSeconds] = useState(5);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const isSpeechSupported = isSpeechRecognitionSupported();
+  const promptInputRef = useRef<TextInput>(null);
 
   const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage || 'hi');
   const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
@@ -236,37 +241,52 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     setIsListening(false);
   });
 
+  const handleSendCustomPrompt = () => {
+    const q = customPrompt.trim();
+    if (!q) return;
+    setTranscript(q);
+    setIsListening(false);
+    stopSpeechRecognition();
+    const parsed = parseVendorVoiceCommand(q);
+    executeCommand(parsed);
+    setCustomPrompt('');
+  };
+
   // Toggle voice recognition
   const toggleListening = async () => {
+    try {
+      Vibration.vibrate(40);
+    } catch {}
+
     if (isListening) {
       stopSpeechRecognition();
       setIsListening(false);
       return;
     }
 
-    if (!isSpeechRecognitionSupported()) {
-      // Simulate live native listening if module not compiled in current Expo dev client
-      setIsListening(true);
-      setTranscript('');
-      return;
-    }
+    setIsListening(true);
+    setTranscript('');
 
-    try {
-      const granted = await requestSpeechPermissions();
-      if (!granted) {
-        setIsListening(false);
-        return;
+    if (isSpeechRecognitionSupported()) {
+      try {
+        const granted = await requestSpeechPermissions();
+        if (!granted) {
+          setIsListening(false);
+          return;
+        }
+
+        const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
+        startSpeechRecognition({
+          lang: langCode,
+          interimResults: true,
+          extraLanguages: ['en-IN', 'hi-IN'],
+        });
+      } catch {
+        // Fallback to visual active listening
       }
-
-      const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
-      startSpeechRecognition({
-        lang: langCode,
-        interimResults: true,
-        extraLanguages: ['en-IN', 'hi-IN'],
-      });
-      setIsListening(true);
-    } catch {
-      setIsListening(false);
+    } else {
+      // In Expo Go dev client: activate live listening animation immediately
+      promptInputRef.current?.focus();
     }
   };
 
@@ -377,6 +397,42 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
               {transcript.trim().length > 0 ? `"${transcript}"` : 'Listening for spoken produce or action...'}
             </Text>
           </View>
+
+          {/* Custom Command Prompt Input Bar */}
+          <View style={styles.promptInputContainer}>
+            <Ionicons name="chatbox-ellipses-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
+            <TextInput
+              ref={promptInputRef}
+              style={styles.promptInput}
+              placeholder="Type or voice-type (e.g. 10 kg Aalu add karo)..."
+              placeholderTextColor="#94A3B8"
+              value={customPrompt}
+              onChangeText={setCustomPrompt}
+              onSubmitEditing={handleSendCustomPrompt}
+              returnKeyType="send"
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendPromptBtn,
+                customPrompt.trim().length === 0 && styles.sendPromptBtnDisabled,
+              ]}
+              onPress={handleSendCustomPrompt}
+              disabled={customPrompt.trim().length === 0}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Dev / Hardware Notice if running in Expo Go without native module compiled */}
+          {!isSpeechSupported && (
+            <View style={styles.devNoticeBanner}>
+              <Ionicons name="information-circle" size={15} color="#D97706" style={{ marginRight: 6 }} />
+              <Text style={styles.devNoticeText}>
+                Live Mic hardware requires compiled APK (`npx expo run:android`). Use prompt input above or tap chips below to test instantly!
+              </Text>
+            </View>
+          )}
 
           {/* Real-time Execution & 5-Second Undo Toast Card */}
           {lastExecutedCommand && (
@@ -613,6 +669,56 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#0F172A',
     lineHeight: 21,
+  },
+  promptInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 46,
+    marginBottom: 8,
+    shadowColor: '#047A36',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  promptInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  sendPromptBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#047A36',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendPromptBtnDisabled: {
+    backgroundColor: '#CBD5E1',
+  },
+  devNoticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 10,
+  },
+  devNoticeText: {
+    fontSize: 11,
+    color: '#92400E',
+    fontWeight: '600',
+    flex: 1,
   },
   executionCard: {
     backgroundColor: '#F0FDF4',

@@ -5,8 +5,8 @@ import { requireOptionalNativeModule } from 'expo';
 export const NativeSpeechModule = requireOptionalNativeModule('ExpoSpeechRecognition') as any;
 
 /**
- * High-priority Contextual Phrase Hints for Indian Groceries / Mandis
- * Biases Google Mic's acoustic model towards correct regional produce & units
+ * Contextual Phrase Hints for Indian Groceries & Mandis
+ * Provides vocabulary hints for regional produce and units
  */
 export const VENDOR_PHRASE_BIASING: string[] = [
   // Produce (Hindi, Hinglish, Marathi, Gujarati)
@@ -71,7 +71,7 @@ export function startSpeechRecognition(options?: {
       continuous: options?.continuous ?? false,
       extraLanguages: options?.extraLanguages || ['en-IN', 'hi-IN'],
       contextualStrings: options?.contextualStrings || VENDOR_PHRASE_BIASING,
-      androidAudioSource: 'voice_recognition', // Uses dual-mic noise suppression on Android
+      androidAudioSource: 'voice_recognition',
     });
     return true;
   } catch (e) {
@@ -136,3 +136,33 @@ export function useSafeSpeechEvent(
     }
   }, [eventName, callback]);
 }
+
+/**
+ * Secure Backend Speech Transcription Fallback
+ * Sends audio to our backend endpoint when on-device recognition has low confidence;
+ * never stores 3rd-party AI/speech API keys in the client app.
+ */
+export async function transcribeAudioViaBackend(audioUri: string): Promise<string | null> {
+  try {
+    const formData = new FormData();
+    formData.append('audio', {
+      uri: audioUri,
+      type: 'audio/m4a',
+      name: 'voice_command.m4a',
+    } as any);
+
+    const res = await fetch('https://api.dusmint.com/api/vendor/voice/transcribe', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data?.transcript || null;
+    }
+  } catch (err) {
+    console.warn('Backend speech transcription fallback failed:', err);
+  }
+  return null;
+}
+
