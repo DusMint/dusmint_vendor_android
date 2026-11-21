@@ -6,13 +6,14 @@ export interface GoogleSpeechResult {
   transcript: string;
   candidates?: string[];
   status?: string;
+  errorCode?: number;
   error?: string;
 }
 
 const speechEmitter = Platform.OS === 'android' && GoogleSpeech ? new NativeEventEmitter(GoogleSpeech) : null;
 
 /**
- * Returns true if the native Google Speech Recognition Intent is supported and available on this device
+ * Returns true if the native Google Speech Recognition service is available on this device
  */
 export const isGoogleSpeechAvailable = async (): Promise<boolean> => {
   if (Platform.OS !== 'android' || !GoogleSpeech || typeof GoogleSpeech.isAvailable !== 'function') {
@@ -26,9 +27,9 @@ export const isGoogleSpeechAvailable = async (): Promise<boolean> => {
 };
 
 /**
- * Launches the official Google Voice Search / Assistant Dialog.
- * Google listens to the microphone with full Hindi / English acoustic models
- * and returns the transcribed text.
+ * Starts in-app Google Speech Recognition silently in the background
+ * without opening any external dark/black activity dialogs.
+ * The audio is recognized directly and delivered to the promise / event listener.
  */
 export const startGoogleSpeech = async (
   prompt: string = 'DusMint: बोलिए...',
@@ -41,11 +42,33 @@ export const startGoogleSpeech = async (
   return await GoogleSpeech.startGoogleSpeech(prompt, languageCode);
 };
 
+export const stopGoogleSpeech = async (): Promise<boolean> => {
+  if (Platform.OS !== 'android' || !GoogleSpeech || typeof GoogleSpeech.stopGoogleSpeech !== 'function') {
+    return false;
+  }
+  try {
+    return await GoogleSpeech.stopGoogleSpeech();
+  } catch {
+    return false;
+  }
+};
+
+export const cancelGoogleSpeech = async (): Promise<boolean> => {
+  if (Platform.OS !== 'android' || !GoogleSpeech || typeof GoogleSpeech.cancelGoogleSpeech !== 'function') {
+    return false;
+  }
+  try {
+    return await GoogleSpeech.cancelGoogleSpeech();
+  } catch {
+    return false;
+  }
+};
+
 /**
- * Add listener for speech results
+ * Add listener for speech events
  */
 export const addGoogleSpeechListener = (
-  eventName: 'onSpeechResult' | 'onSpeechCancelled' | 'onSpeechError',
+  eventName: 'onSpeechReady' | 'onSpeechBegin' | 'onSpeechPartial' | 'onSpeechEnd' | 'onSpeechResult' | 'onSpeechCancelled' | 'onSpeechError',
   listener: (data: any) => void
 ) => {
   if (!speechEmitter) return { remove: () => {} };

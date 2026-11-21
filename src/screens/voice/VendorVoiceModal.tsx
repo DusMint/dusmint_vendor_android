@@ -11,9 +11,13 @@ import {
   Platform,
   TextInput,
   KeyboardAvoidingView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AudioWaveformVisualizer } from './widgets/AudioWaveformVisualizer';
+import { GoogleVoiceWaveform } from './widgets/GoogleVoiceWaveform';
+import { GoogleMicIcon } from './widgets/GoogleMicIcon';
+import { isGoogleSpeechAvailable, startGoogleSpeech, addGoogleSpeechListener } from '../../utils/GoogleSpeech';
 import {
   parseVendorVoiceCommand,
   ParsedVendorCommand,
@@ -85,6 +89,18 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
       pulseAnim.setValue(1);
     }
   }, [visible, isListening, pulseAnim]);
+
+  // Listen to live partial speech recognition results streamed in real-time
+  useEffect(() => {
+    const sub = addGoogleSpeechListener('onSpeechPartial', (data) => {
+      if (data?.partial) {
+        setTranscript(data.partial);
+      }
+    });
+    return () => {
+      sub.remove();
+    };
+  }, []);
 
   // Execute the state change on active stores (used directly for low-impact, or after confirmation for high-impact)
   const applyCommandExecution = useCallback(
@@ -363,10 +379,10 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     setCustomPrompt('');
   };
 
-  // Toggle voice recognition
+  // Toggle voice recognition via Google Speech
   const toggleListening = async () => {
     try {
-      Vibration.vibrate(40);
+      Vibration.vibrate(35);
     } catch {}
 
     if (isListening) {
@@ -375,30 +391,57 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
       return;
     }
 
-    setIsListening(true);
     setTranscript('');
+    setIsListening(true);
 
+    const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
+
+    // 1. Try Native Android Google Speech Activity first (The real Google Assistant Voice dialog)
+    try {
+      const googleAvailable = await isGoogleSpeechAvailable();
+      if (googleAvailable) {
+        const result = await startGoogleSpeech(
+          'DusMint: बोलिए... (e.g. 20 kg aloo add karo)',
+          langCode
+        );
+        setIsListening(false);
+        if (result?.transcript && result.transcript.trim().length > 0) {
+          const spoken = result.transcript.trim();
+          setTranscript(spoken);
+          try {
+            const parsed = parseVendorVoiceCommand(spoken);
+            executeCommand(parsed);
+          } catch (cmdErr) {
+            console.warn('Voice command parse/execution error:', cmdErr);
+          }
+          return;
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('Native GoogleSpeech error or cancelled:', err);
+      setIsListening(false);
+    }
+
+    // 2. Try ExpoSpeechRecognition if present in custom build
     if (isSpeechRecognitionSupported()) {
       try {
         const granted = await requestSpeechPermissions();
-        if (!granted) {
-          setIsListening(false);
+        if (granted) {
+          startSpeechRecognition({
+            lang: langCode,
+            interimResults: true,
+            extraLanguages: ['en-IN', 'hi-IN'],
+          });
           return;
         }
-
-        const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
-        startSpeechRecognition({
-          lang: langCode,
-          interimResults: true,
-          extraLanguages: ['en-IN', 'hi-IN'],
-        });
-      } catch {
-        // Fallback to visual active listening
+      } catch (e) {
+        console.warn('Speech recognition error:', e);
       }
-    } else {
-      // In Expo Go dev client: activate live listening animation immediately
-      promptInputRef.current?.focus();
     }
+
+    // 3. Fallback: activate Gboard Google Voice typing focus
+    promptInputRef.current?.focus();
   };
 
   // Trigger test chip
@@ -429,39 +472,40 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <StatusBar barStyle="light-content" backgroundColor="rgba(0, 0, 0, 0.45)" />
       <View style={styles.modalBackdrop}>
+        {/* Semi-transparent Dimmed Backdrop: acts as a true drawer sheet where the stock page behind is visible */}
         <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={onClose} />
 
+        {/* Crisp White Bottom Drawer Sheet */}
         <View style={styles.voiceSheet}>
           {/* Top Sheet Drag Handle */}
           <View style={styles.sheetHandle} />
 
-          {/* Header Row: Title + Regional Language Badge + Close */}
+          {/* Minimal Clean Header: Title + Close Icon */}
           <View style={styles.voiceHeaderRow}>
-            <View style={{ flex: 1 }}>
-              <View style={styles.titleRow}>
-                <Ionicons name="mic" size={20} color="#047A36" style={{ marginRight: 6 }} />
-                <Text style={styles.voiceTitle}>Google Mic Assistant</Text>
+            <View style={styles.titleRow}>
+              <View style={styles.googleDotsMiniRow}>
+                <View style={[styles.googleDotMini, { backgroundColor: '#4285F4' }]} />
+                <View style={[styles.googleDotMini, { backgroundColor: '#EA4335' }]} />
+                <View style={[styles.googleDotMini, { backgroundColor: '#FBBC05' }]} />
+                <View style={[styles.googleDotMini, { backgroundColor: '#34A853' }]} />
               </View>
-              <Text style={styles.voiceSubtitle}>
-                Boliye: Stock, Rate, Order, Payout & Dukan Band/Chalu
-              </Text>
+              <Text style={styles.voiceTitle}>Google Mic</Text>
             </View>
 
-            {/* Language Badge */}
-            <View style={styles.langBadge}>
-              <Text style={styles.langBadgeText}>
-                {selectedLanguage === 'mr' ? 'मराठी + English' : selectedLanguage === 'gu' ? 'ગુજરાતી + Eng' : 'हिंदी + Hinglish'}
-              </Text>
-            </View>
-
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={onClose}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Ionicons name="close" size={20} color="#64748B" />
             </TouchableOpacity>
           </View>
 
-          {/* Center Visualizer & Active Listening State */}
+          {/* Centerpiece: Clean Google Mic with 4-Color Waveform */}
           <View style={styles.visualizerSection}>
             <View style={styles.micCircleWrapper}>
               <Animated.View
@@ -479,47 +523,69 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
                 ]}
               />
               <TouchableOpacity
-                style={[styles.micBigButton, isListening && styles.micBigButtonActive]}
+                style={[styles.googleMicBigButton, isListening && styles.googleMicBigButtonActive]}
                 onPress={toggleListening}
                 activeOpacity={0.85}
               >
-                <Ionicons name="mic" size={36} color="#FFFFFF" />
+                <GoogleMicIcon size={44} />
               </TouchableOpacity>
             </View>
 
-            {/* 7-Bar Audio Waveform Visualizer */}
-            <View style={{ height: 42, justifyContent: 'center', marginTop: 10 }}>
-              <AudioWaveformVisualizer isListening={isListening} barColor="#047A36" />
-            </View>
+            {/* Authentic Google 4-Color Animated Bouncing Dots */}
+            <GoogleVoiceWaveform isListening={isListening} size="large" />
 
-            {/* Status Pill */}
-            <View style={[styles.statusBadge, isListening ? styles.statusBadgeActive : styles.statusBadgeIdle]}>
-              <View style={[styles.statusDot, isListening && styles.statusDotActive]} />
-              <Text style={styles.statusText}>
-                {isListening ? 'Google Mic सुन रहा है... (Speak now)' : 'Tap Mic to Speak'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Live Recognized Speech Transcript Box */}
-          <View style={styles.transcriptBox}>
-            <Text style={styles.transcriptLabel}>RECOGNIZED VOICE</Text>
-            <Text style={styles.transcriptText} numberOfLines={2}>
-              {transcript.trim().length > 0 ? `"${transcript}"` : 'Listening for spoken produce or action...'}
+            {/* Direct Status Text */}
+            <Text style={styles.statusDirectText}>
+              {isListening ? 'बोलिए... (Listening)' : 'बोलने के लिए माइक दबाएं'}
             </Text>
           </View>
 
-          {/* Explicit High-Impact Confirmation Card (Haan / Nahi) */}
-          {pendingConfirmation && (
-            <View style={styles.confirmPromptCard}>
+          {/* Direct Spoken & Action Feedback */}
+          {lastExecutedCommand && !pendingConfirmation ? (
+            <View style={styles.executionCardDirect}>
+              <View style={styles.execHeaderRow}>
+                <View style={styles.execIconCircle}>
+                  <Ionicons name="checkmark-circle" size={20} color="#047A36" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.execTitleDirect}>{lastExecutedCommand.userFeedbackHi}</Text>
+                  {transcript.trim().length > 0 && (
+                    <Text style={styles.execSpokenQuote}>"{transcript}"</Text>
+                  )}
+                </View>
+
+                {undoState && (
+                  <TouchableOpacity style={styles.undoBtn} onPress={handleUndo} activeOpacity={0.8}>
+                    <Ionicons name="arrow-undo" size={14} color="#DC2626" style={{ marginRight: 4 }} />
+                    <Text style={styles.undoBtnText}>Undo ({undoTimerSeconds}s)</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {undoState && (
+                <View style={styles.progressBarBg}>
+                  <Animated.View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: undoProgressAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', '100%'],
+                        }),
+                      },
+                    ]}
+                  />
+                </View>
+              )}
+            </View>
+          ) : pendingConfirmation ? (
+            <View style={styles.confirmPromptCardDirect}>
               <View style={styles.confirmHeaderRow}>
-                <Ionicons name="help-circle" size={24} color="#D97706" style={{ marginRight: 8 }} />
+                <Ionicons name="help-circle" size={22} color="#D97706" style={{ marginRight: 8 }} />
                 <Text style={styles.confirmPromptTitle}>{pendingConfirmation.title}</Text>
               </View>
               <Text style={styles.confirmPromptMsgHi}>{pendingConfirmation.promptHi}</Text>
-              <Text style={styles.confirmPromptMsgEn}>{pendingConfirmation.promptEn}</Text>
 
-              {/* Multiple order options if available */}
               {pendingConfirmation.options ? (
                 <View style={styles.optionsList}>
                   {pendingConfirmation.options.map((opt, i) => (
@@ -555,123 +621,41 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
                     onPress={pendingConfirmation.onConfirm}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.acceptConfirmBtnText}>✓ हाँ, स्वीकार करें (Yes)</Text>
+                    <Text style={styles.acceptConfirmBtnText}>✓ हाँ (Yes)</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </View>
-          )}
-
-          {/* Real-time Execution & 5-Second Undo Toast Card */}
-          {lastExecutedCommand && !pendingConfirmation && (
-            <View style={styles.executionCard}>
-              <View style={styles.execHeaderRow}>
-                <View style={styles.execIconCircle}>
-                  <Ionicons name="checkmark-circle" size={20} color="#047A36" />
-                </View>
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.execTitle}>Action Confirmed</Text>
-                  <Text style={styles.execDesc}>{lastExecutedCommand.userFeedbackHi}</Text>
-                  <Text style={styles.execDescEn}>{lastExecutedCommand.userFeedbackEn}</Text>
-                </View>
-
-                {undoState && (
-                  <TouchableOpacity style={styles.undoBtn} onPress={handleUndo} activeOpacity={0.8}>
-                    <Ionicons name="arrow-undo" size={15} color="#DC2626" style={{ marginRight: 4 }} />
-                    <Text style={styles.undoBtnText}>Undo ({undoTimerSeconds}s)</Text>
-                  </TouchableOpacity>
-                )}
+          ) : (
+            transcript.trim().length > 0 && (
+              <View style={styles.transcriptBoxDirect}>
+                <Text style={styles.transcriptTextDirect}>"{transcript}"</Text>
               </View>
-
-              {/* Progress Countdown Bar */}
-              {undoState && (
-                <View style={styles.progressBarBg}>
-                  <Animated.View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: undoProgressAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0%', '100%'],
-                        }),
-                      },
-                    ]}
-                  />
-                </View>
-              )}
-            </View>
+            )
           )}
 
-          {/* Developer Testing Bar (Only rendered when __DEV__ is true; hidden in production) */}
-          {__DEV__ && (
-            <>
-              {/* Custom Command Prompt Input Bar */}
-              <View style={styles.promptInputContainer}>
-                <Ionicons name="chatbox-ellipses-outline" size={18} color="#047A36" style={{ marginRight: 8 }} />
-                <TextInput
-                  ref={promptInputRef}
-                  style={styles.promptInput}
-                  placeholder="Type or voice-type (e.g. 10 kg Aalu add karo)..."
-                  placeholderTextColor="#94A3B8"
-                  value={customPrompt}
-                  onChangeText={setCustomPrompt}
-                  onSubmitEditing={handleSendCustomPrompt}
-                  returnKeyType="send"
-                />
+          {/* Quick Direct Voice Chips */}
+          <View style={styles.chipsSection}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScrollDirect}>
+              {[
+                { label: '+ 20 kg आलू', text: '20 kilo Aloo add karo' },
+                { label: '✕ दुकान बंद', text: 'Dukan band karo' },
+                { label: '✓ ऑर्डर लें', text: 'Naya order accept karo' },
+                { label: '! टमाटर समाप्त', text: 'Desi Tamatar out of stock' },
+                { label: '+ 10 kg प्याज', text: '10 kilo Pyaaz add karo' },
+                { label: '₹ आज की कमाई', text: 'Aaj kitna kamaya' },
+              ].map((chip, idx) => (
                 <TouchableOpacity
-                  style={[
-                    styles.sendPromptBtn,
-                    customPrompt.trim().length === 0 && styles.sendPromptBtnDisabled,
-                  ]}
-                  onPress={handleSendCustomPrompt}
-                  disabled={customPrompt.trim().length === 0}
-                  activeOpacity={0.8}
+                  key={idx}
+                  style={styles.sampleChipDirect}
+                  onPress={() => handleTestCommand(chip.text)}
+                  activeOpacity={0.75}
                 >
-                  <Ionicons name="arrow-up" size={16} color="#FFFFFF" />
+                  <Text style={styles.sampleChipTextDirect}>{chip.label}</Text>
                 </TouchableOpacity>
-              </View>
-
-              {/* Dev / Hardware Notice if running in Expo Go without native module compiled */}
-              {!isSpeechSupported && (
-                <View style={styles.devNoticeBanner}>
-                  <Ionicons name="information-circle" size={15} color="#D97706" style={{ marginRight: 6 }} />
-                  <Text style={styles.devNoticeText}>
-                    Live Mic hardware requires compiled APK (`npx expo run:android`). Use prompt input above or tap chips below to test!
-                  </Text>
-                </View>
-              )}
-
-              {/* Quick Vernacular Sample Prompt Chips */}
-              <Text style={styles.sampleSectionTitle}>DEVELOPER TEST PROMPTS</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScroll}>
-                {[
-                  '20 kilo Tamatar add karo',
-                  'Aadha kilo Paneer add karo',
-                  'Pyaaz khatam ho gaya',
-                  'Aalu ka rate 30 rupay',
-                  'Dukan band kar do',
-                  'Dukan khol do',
-                  'Aaj kitna kamaya',
-                  'Naya order accept karo',
-                ].map((chip, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.sampleChip}
-                    onPress={() => handleTestCommand(chip)}
-                    activeOpacity={0.75}
-                  >
-                    <Ionicons name="chatbubble-ellipses-outline" size={13} color="#047A36" style={{ marginRight: 4 }} />
-                    <Text style={styles.sampleChipText}>{chip}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </>
-          )}
-
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeVoiceBtn} onPress={onClose} activeOpacity={0.85}>
-            <Text style={styles.closeVoiceBtnText}>Close Assistant</Text>
-          </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
       </View>
     </Modal>
@@ -681,35 +665,35 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)', // Semi-transparent dimmed backdrop so the stock inventory page behind is visible as a drawer
     justifyContent: 'flex-end',
   },
   voiceSheet: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    paddingTop: 12,
+    paddingTop: 10,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 22,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 10,
-    maxHeight: '90%',
+    shadowRadius: 16,
+    elevation: 12,
   },
   sheetHandle: {
-    width: 44,
-    height: 4.5,
-    borderRadius: 3,
-    backgroundColor: '#CBD5E1',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E2E8F0',
     alignSelf: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   voiceHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   titleRow: {
     flexDirection: 'row',
@@ -720,27 +704,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     color: '#0F172A',
-  },
-  voiceSubtitle: {
-    fontSize: 12.5,
-    color: '#64748B',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  langBadge: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 8,
-  },
-  langBadgeText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#047A36',
   },
   closeBtn: {
     width: 32,
@@ -753,251 +716,76 @@ const styles = StyleSheet.create({
   visualizerSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginVertical: 4,
   },
   micCircleWrapper: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    width: 84,
-    height: 84,
+    width: 86,
+    height: 86,
   },
   pulseRing: {
     position: 'absolute',
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: '#A7F3D0',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(66, 133, 244, 0.22)',
   },
-  micBigButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: '#047A36',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#047A36',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  micBigButtonActive: {
-    backgroundColor: '#059669',
-  },
-  statusBadge: {
+  googleDotsMiniRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: 6,
+    gap: 4,
+    marginRight: 6,
   },
-  statusBadgeActive: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  statusBadgeIdle: {
-    backgroundColor: '#F1F5F9',
-  },
-  statusDot: {
+  googleDotMini: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#94A3B8',
-    marginRight: 7,
   },
-  statusDotActive: {
-    backgroundColor: '#047A36',
+  googleDotMicro: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
-  statusText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  transcriptBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-  },
-  transcriptLabel: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  transcriptText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#0F172A',
-    lineHeight: 21,
-  },
-  promptInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  googleMicBigButton: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#A7F3D0',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    height: 46,
+    borderWidth: 2,
+    borderColor: '#4285F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#4285F4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  googleMicBigButtonActive: {
+    borderColor: '#EA4335',
+    shadowColor: '#EA4335',
+  },
+  statusDirectText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: -2,
     marginBottom: 8,
-    shadowColor: '#047A36',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
   },
-  promptInput: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  sendPromptBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#047A36',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendPromptBtnDisabled: {
-    backgroundColor: '#CBD5E1',
-  },
-  devNoticeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginBottom: 10,
-  },
-  devNoticeText: {
-    fontSize: 11,
-    color: '#92400E',
-    fontWeight: '600',
-    flex: 1,
-  },
-  confirmPromptCard: {
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
-  },
-  confirmHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  confirmPromptTitle: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#92400E',
-  },
-  confirmPromptMsgHi: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 2,
-  },
-  confirmPromptMsgEn: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 12,
-  },
-  confirmActionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 4,
-  },
-  cancelConfirmBtn: {
-    flex: 1,
-    backgroundColor: '#FEE2E2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelConfirmBtnText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#DC2626',
-  },
-  acceptConfirmBtn: {
-    flex: 1.3,
-    backgroundColor: '#047A36',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  acceptConfirmBtnText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  optionsList: {
-    gap: 8,
-    marginTop: 4,
-  },
-  optionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  optionBtnText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#166534',
-  },
-  cancelBtnWide: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  cancelBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  executionCard: {
+  executionCardDirect: {
     backgroundColor: '#F0FDF4',
     borderWidth: 1.5,
     borderColor: '#86EFAC',
     borderRadius: 14,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   execHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   execIconCircle: {
     width: 28,
@@ -1006,25 +794,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
   },
-  execTitle: {
+  execTitleDirect: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
-    color: '#047A36',
-  },
-  execDesc: {
-    fontSize: 13.5,
-    fontWeight: '700',
     color: '#0F172A',
-    marginTop: 1,
   },
-  execDescEn: {
-    fontSize: 11.5,
-    color: '#475569',
+  execSpokenQuote: {
+    fontSize: 12,
+    color: '#64748B',
     fontWeight: '600',
-    marginTop: 1,
+    marginTop: 2,
+    fontStyle: 'italic',
   },
   undoBtn: {
     flexDirection: 'row',
@@ -1033,7 +815,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FECACA',
     paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingVertical: 4,
     borderRadius: 8,
   },
   undoBtnText: {
@@ -1053,44 +835,133 @@ const styles = StyleSheet.create({
     height: 3,
     backgroundColor: '#16A34A',
   },
-  sampleSectionTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
+  confirmPromptCardDirect: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    padding: 12,
     marginBottom: 8,
   },
-  sampleScroll: {
-    gap: 8,
-    paddingBottom: 6,
-  },
-  sampleChip: {
+  confirmHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 4,
+  },
+  confirmPromptTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  confirmPromptMsgHi: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  confirmActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 2,
+  },
+  cancelConfirmBtn: {
+    flex: 1,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 10,
+    paddingVertical: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelConfirmBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  acceptConfirmBtn: {
+    flex: 1.3,
+    backgroundColor: '#047A36',
+    borderRadius: 10,
+    paddingVertical: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  acceptConfirmBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  optionsList: {
+    gap: 6,
+    marginTop: 2,
+  },
+  optionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+  },
+  optionBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  cancelBtnWide: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  cancelBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  transcriptBoxDirect: {
     backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  transcriptTextDirect: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14.5,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  chipsSection: {
+    marginTop: 2,
+    paddingBottom: 2,
+  },
+  sampleScrollDirect: {
+    gap: 8,
+    paddingVertical: 2,
+  },
+  sampleChipDirect: {
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: 18,
   },
-  sampleChipText: {
-    fontSize: 12.5,
+  sampleChipTextDirect: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12,
     fontWeight: '700',
     color: '#334155',
-  },
-  closeVoiceBtn: {
-    backgroundColor: '#047A36',
-    borderRadius: 14,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-  },
-  closeVoiceBtnText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#FFFFFF',
   },
 });
