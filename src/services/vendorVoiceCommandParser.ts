@@ -35,6 +35,10 @@ export interface ParsedVendorCommand {
   deltaGrams: number;
   newPriceRupees?: number;
   targetStoreOpen?: boolean;
+  orderCodeRequested?: string;
+  isHighImpact: boolean;
+  confirmationPromptHi?: string;
+  confirmationPromptEn?: string;
   userFeedbackHi: string;
   userFeedbackEn: string;
 }
@@ -151,6 +155,9 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
       targetStoreOpen: false,
       deltaKg: 0,
       deltaGrams: 0,
+      isHighImpact: true,
+      confirmationPromptHi: 'दुकान बंद करें? नए ऑनलाइन ऑर्डर आना बंद हो जाएंगे।',
+      confirmationPromptEn: 'Close shop? Incoming online orders will stop.',
       userFeedbackHi: 'दुकान बंद कर दी गई है (नए ऑर्डर आना बंद हो गए हैं)।',
       userFeedbackEn: 'Store has been marked Closed (Incoming orders stopped).',
     };
@@ -170,6 +177,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
       targetStoreOpen: true,
       deltaKg: 0,
       deltaGrams: 0,
+      isHighImpact: false,
       userFeedbackHi: 'दुकान खोल दी गई है (नए ऑर्डर चालू हैं)।',
       userFeedbackEn: 'Store is now Open and accepting incoming orders!',
     };
@@ -191,6 +199,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
       action: 'EARNINGS_CHECK',
       deltaKg: 0,
       deltaGrams: 0,
+      isHighImpact: false,
       userFeedbackHi: 'आज आपकी कुल कमाई ₹28,780 है। 34 ऑर्डर पूरे हुए हैं।',
       userFeedbackEn: "Today's total earnings are ₹28,780 across 34 completed orders.",
     };
@@ -198,13 +207,24 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
 
   // 3. ORDER ACCEPT & PACK
   if (t.includes('order accept') || t.includes('accept order') || t.includes('naya order le lo') || t.includes('order lo')) {
+    const orderNumMatch = t.match(/(\d{4})/);
+    const orderCodeRequested = orderNumMatch ? `#DM-${orderNumMatch[1]}` : undefined;
+
     return {
       rawTranscript: raw,
       action: 'ORDER_ACCEPT',
       deltaKg: 0,
       deltaGrams: 0,
-      userFeedbackHi: 'नया ऑर्डर स्वीकार कर लिया गया है।',
-      userFeedbackEn: 'New incoming order accepted!',
+      orderCodeRequested,
+      isHighImpact: true,
+      confirmationPromptHi: orderCodeRequested
+        ? `ऑर्डर ${orderCodeRequested} स्वीकार करें?`
+        : 'पेंडिंग ऑर्डर स्वीकार करें?',
+      confirmationPromptEn: orderCodeRequested
+        ? `Accept order ${orderCodeRequested}?`
+        : 'Accept pending order?',
+      userFeedbackHi: 'ऑर्डर स्वीकार कर लिया गया है।',
+      userFeedbackEn: 'Order accepted!',
     };
   }
 
@@ -214,6 +234,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
       action: 'ORDER_PACKED',
       deltaKg: 0,
       deltaGrams: 0,
+      isHighImpact: false,
       userFeedbackHi: 'ऑर्डर पैक चिह्नित कर दिया गया है। डिलीवरी पार्टनर को सूचित किया गया।',
       userFeedbackEn: 'Order marked as Packed & Ready for delivery pickup.',
     };
@@ -239,6 +260,9 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
         matchedItemNameEn: matched.item.nameEn,
         deltaKg: 0,
         deltaGrams: 0,
+        isHighImpact: true,
+        confirmationPromptHi: `${matched.item.nameEn} को Out of Stock करें? ग्राहक इसे ऑर्डर नहीं कर पाएंगे।`,
+        confirmationPromptEn: `Mark ${matched.item.nameEn} as Out of Stock? Customers will not be able to order it.`,
         userFeedbackHi: `${matched.item.nameEn} को Out of Stock (स्टॉक समाप्त) कर दिया गया है।`,
         userFeedbackEn: `${matched.item.nameEn} marked Out of Stock.`,
       };
@@ -255,6 +279,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
         matchedItemNameEn: matched.item.nameEn,
         deltaKg: 10,
         deltaGrams: 0,
+        isHighImpact: false,
         userFeedbackHi: `${matched.item.nameEn} को दोबारा In Stock (स्टॉक में) कर दिया गया है।`,
         userFeedbackEn: `${matched.item.nameEn} is back In Stock.`,
       };
@@ -275,6 +300,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
         deltaKg: 0,
         deltaGrams: 0,
         newPriceRupees: newPrice,
+        isHighImpact: false,
         userFeedbackHi: `${matched.item.nameEn} का नया रेट ₹${newPrice} सेट कर दिया गया है।`,
         userFeedbackEn: `${matched.item.nameEn} price updated to ₹${newPrice}.`,
       };
@@ -293,7 +319,8 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
   ) {
     if (matched) {
       const { kg, grams } = parseColloquialQuantity(t);
-      const qtyLabel = grams > 0 ? (kg > 0 ? `${kg} kg ${grams} g` : `${grams} g`) : `${kg} kg`;
+      const curKg = matched.item.stockKg ?? 0;
+      const finalKg = curKg + kg;
 
       return {
         rawTranscript: raw,
@@ -303,8 +330,9 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
         matchedItemNameEn: matched.item.nameEn,
         deltaKg: kg,
         deltaGrams: grams,
-        userFeedbackHi: `${matched.item.nameEn} में +${qtyLabel} स्टॉक जोड़ दिया गया है।`,
-        userFeedbackEn: `Added +${qtyLabel} to ${matched.item.nameEn} stock.`,
+        isHighImpact: false,
+        userFeedbackHi: `${matched.item.nameEn} अब ${finalKg} किलो (Stock: ${finalKg} kg).`,
+        userFeedbackEn: `${matched.item.nameEn} is now ${finalKg} kg (Stock: ${finalKg} kg).`,
       };
     }
   }
@@ -315,6 +343,7 @@ export function parseVendorVoiceCommand(transcript: string): ParsedVendorCommand
     action: 'UNKNOWN',
     deltaKg: 0,
     deltaGrams: 0,
+    isHighImpact: false,
     userFeedbackHi: `आवाज समझ नहीं आई ("${raw}"). कृपया साफ बोलें जैसे: "टमाटर 20 किलो ऐड करो" या "दुकान बंद करो"।`,
     userFeedbackEn: `Command not recognized ("${raw}"). Try saying: "Add 20 kg Tomato" or "Mark store closed".`,
   };

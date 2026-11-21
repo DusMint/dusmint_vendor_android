@@ -27,6 +27,7 @@ import {
 } from '../../services/safeSpeechService';
 import { useVendorStockStore } from '../../state/useVendorStockStore';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
+import { speakConfirmationAloud, stopSpeaking } from '../../services/textToSpeechService';
 
 interface Props {
   visible: boolean;
