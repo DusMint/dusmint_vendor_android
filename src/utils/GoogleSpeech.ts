@@ -32,7 +32,7 @@ export const isGoogleSpeechAvailable = async (): Promise<boolean> => {
  * The audio is recognized directly and delivered to the promise / event listener.
  */
 export const startGoogleSpeech = async (
-  prompt: string = 'DusMint: बोलिए...',
+  prompt: string = 'Try speaking: "20 kilo aloo add karo"...',
   languageCode: string = 'hi-IN'
 ): Promise<GoogleSpeechResult> => {
   if (Platform.OS !== 'android' || !GoogleSpeech || typeof GoogleSpeech.startGoogleSpeech !== 'function') {

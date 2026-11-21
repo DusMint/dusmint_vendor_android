@@ -9,15 +9,17 @@ import {
   Vibration,
   ScrollView,
   Platform,
-  TextInput,
-  KeyboardAvoidingView,
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { AudioWaveformVisualizer } from './widgets/AudioWaveformVisualizer';
 import { GoogleVoiceWaveform } from './widgets/GoogleVoiceWaveform';
 import { GoogleMicIcon } from './widgets/GoogleMicIcon';
-import { isGoogleSpeechAvailable, startGoogleSpeech, addGoogleSpeechListener } from '../../utils/GoogleSpeech';
+import {
+  isGoogleSpeechAvailable,
+  startGoogleSpeech,
+  stopGoogleSpeech,
+  addGoogleSpeechListener,
+} from '../../utils/GoogleSpeech';
 import {
   parseVendorVoiceCommand,
   ParsedVendorCommand,
@@ -31,7 +33,7 @@ import {
 } from '../../services/safeSpeechService';
 import { useVendorStockStore } from '../../state/useVendorStockStore';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
-import { speakConfirmationAloud, stopSpeaking } from '../../services/textToSpeechService';
+import { speakConfirmationAloud } from '../../services/textToSpeechService';
 
 interface Props {
   visible: boolean;
@@ -47,6 +49,15 @@ interface PendingConfirmation {
   onCancel: () => void;
 }
 
+const PROMPT_SUGGESTIONS = [
+  { en: '20 kilo aloo add karo', hi: '20 किलो आलू ऐड करो' },
+  { en: 'Indore Jyoti Potato 10 kilo badhao', hi: '10 किलो आलू बढ़ाओ' },
+  { en: 'Dukan band karo', hi: 'दुकान बंद करो' },
+  { en: 'Desi Tamatar out of stock', hi: 'टमाटर आउट ऑफ स्टॉक' },
+  { en: 'Naya order accept karo', hi: 'नया ऑर्डर स्वीकार करें' },
+  { en: '10 kilo pyaaz add karo', hi: '10 किलो प्याज ऐड करो' },
+];
+
 export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -54,9 +65,7 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation | null>(null);
   const [undoState, setUndoState] = useState<(() => void) | null>(null);
   const [undoTimerSeconds, setUndoTimerSeconds] = useState(5);
-  const [customPrompt, setCustomPrompt] = useState('');
-  const isSpeechSupported = isSpeechRecognitionSupported();
-  const promptInputRef = useRef<TextInput>(null);
+  const [suggestionIdx, setSuggestionIdx] = useState(0);
 
   const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage || 'hi');
   const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
@@ -68,6 +77,17 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const undoProgressAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Rotate dynamic suggestion prompts every 2.8 seconds
+  useEffect(() => {
+    if (!visible) return;
+    const interval = setInterval(() => {
+      setSuggestionIdx((prev) => (prev + 1) % PROMPT_SUGGESTIONS.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [visible]);
+
+  const activeSuggestion = PROMPT_SUGGESTIONS[suggestionIdx];
 
   useEffect(() => {
     if (visible && isListening) {
@@ -368,17 +388,6 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     setIsListening(false);
   });
 
-  const handleSendCustomPrompt = () => {
-    const q = customPrompt.trim();
-    if (!q) return;
-    setTranscript(q);
-    setIsListening(false);
-    stopSpeechRecognition();
-    const parsed = parseVendorVoiceCommand(q);
-    executeCommand(parsed);
-    setCustomPrompt('');
-  };
-
   // Toggle voice recognition via Google Speech
   const toggleListening = async () => {
     try {
@@ -387,6 +396,9 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
 
     if (isListening) {
       stopSpeechRecognition();
+      try {
+        await stopGoogleSpeech();
+      } catch {}
       setIsListening(false);
       return;
     }
@@ -395,15 +407,13 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     setIsListening(true);
 
     const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
+    const speechPrompt = `Try speaking: "${activeSuggestion.en}"...`;
 
-    // 1. Try Native Android Google Speech Activity first (The real Google Assistant Voice dialog)
+    // 1. Try Native Android Google Speech Module
     try {
       const googleAvailable = await isGoogleSpeechAvailable();
       if (googleAvailable) {
-        const result = await startGoogleSpeech(
-          'DusMint: बोलिए... (e.g. 20 kg aloo add karo)',
-          langCode
-        );
+        const result = await startGoogleSpeech(speechPrompt, langCode);
         setIsListening(false);
         if (result?.transcript && result.transcript.trim().length > 0) {
           const spoken = result.transcript.trim();
@@ -419,7 +429,7 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
         return;
       }
     } catch (err) {
-      console.warn('Native GoogleSpeech error or cancelled:', err);
+      console.warn('GoogleSpeech invocation error or cancelled:', err);
       setIsListening(false);
     }
 
@@ -440,8 +450,7 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
       }
     }
 
-    // 3. Fallback: activate Gboard Google Voice typing focus
-    promptInputRef.current?.focus();
+    setIsListening(false);
   };
 
   // Trigger test chip
@@ -453,20 +462,28 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
     executeCommand(parsed);
   };
 
-  // Auto-listen when modal opens
+  // Reset state when modal opens/closes without auto-firing jarring speech intents
   useEffect(() => {
     if (visible) {
       setTranscript('');
       setLastExecutedCommand(null);
+      setPendingConfirmation(null);
       setUndoState(null);
-      toggleListening();
+      // We do not auto-invoke toggleListening() on mount
+      // So the user sees the pure white Google drawer card immediately
     } else {
       stopSpeechRecognition();
+      try {
+        stopGoogleSpeech();
+      } catch {}
       setIsListening(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => {
       stopSpeechRecognition();
+      try {
+        stopGoogleSpeech();
+      } catch {}
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [visible]);
@@ -483,7 +500,7 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
           {/* Top Sheet Drag Handle */}
           <View style={styles.sheetHandle} />
 
-          {/* Minimal Clean Header: Title + Close Icon */}
+          {/* Minimal Clean Header: Title + Language Pill + Close Icon */}
           <View style={styles.voiceHeaderRow}>
             <View style={styles.titleRow}>
               <View style={styles.googleDotsMiniRow}>
@@ -492,21 +509,27 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
                 <View style={[styles.googleDotMini, { backgroundColor: '#FBBC05' }]} />
                 <View style={[styles.googleDotMini, { backgroundColor: '#34A853' }]} />
               </View>
-              <Text style={styles.voiceTitle}>Google Mic</Text>
+              <Text style={styles.voiceTitle}>Google</Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={onClose}
-              activeOpacity={0.7}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons name="close" size={20} color="#64748B" />
-            </TouchableOpacity>
+            <View style={styles.headerRightRow}>
+              <View style={styles.langPill}>
+                <Text style={styles.langPillText}>हिंदी + Hinglish</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={onClose}
+                activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Centerpiece: Clean Google Mic with 4-Color Waveform */}
-          <View style={styles.visualizerSection}>
+          {/* Pure Crisp White Google Voice Card */}
+          <View style={styles.googleWhiteCard}>
+            {/* Centerpiece: Clean Google Mic with Animated Halo */}
             <View style={styles.micCircleWrapper}>
               <Animated.View
                 style={[
@@ -527,17 +550,40 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
                 onPress={toggleListening}
                 activeOpacity={0.85}
               >
-                <GoogleMicIcon size={44} />
+                <GoogleMicIcon size={42} />
               </TouchableOpacity>
             </View>
 
             {/* Authentic Google 4-Color Animated Bouncing Dots */}
-            <GoogleVoiceWaveform isListening={isListening} size="large" />
+            <View style={styles.waveformContainer}>
+              <GoogleVoiceWaveform isListening={isListening} size="large" />
+            </View>
 
-            {/* Direct Status Text */}
-            <Text style={styles.statusDirectText}>
-              {isListening ? 'बोलिए... (Listening)' : 'बोलने के लिए माइक दबाएं'}
-            </Text>
+            {/* Direct Spoken Prompt: Rotating Mandi Examples */}
+            <View style={styles.promptContainer}>
+              <Text style={styles.promptLabel}>
+                {isListening ? 'बोलिए... (Listening)' : 'Try speaking:'}
+              </Text>
+              <Text style={styles.promptQuote} numberOfLines={2}>
+                "{activeSuggestion.en}"
+              </Text>
+              <Text style={styles.promptSubHi} numberOfLines={1}>
+                बोलकर देखें: {activeSuggestion.hi}
+              </Text>
+            </View>
+
+            {/* Footer of Google Card: Hindi (India) with 4 dots */}
+            <View style={styles.cardFooterRow}>
+              <View style={styles.googleDotsMicroRow}>
+                <View style={[styles.googleDotMicro, { backgroundColor: '#4285F4' }]} />
+                <View style={[styles.googleDotMicro, { backgroundColor: '#EA4335' }]} />
+                <View style={[styles.googleDotMicro, { backgroundColor: '#FBBC05' }]} />
+                <View style={[styles.googleDotMicro, { backgroundColor: '#34A853' }]} />
+              </View>
+              <Text style={styles.cardFooterText}>
+                {isListening ? 'आवाज़ पहचानी जा रही है...' : 'माइक दबाकर बोलें • Hindi / English'}
+              </Text>
+            </View>
           </View>
 
           {/* Direct Spoken & Action Feedback */}
@@ -636,6 +682,7 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
 
           {/* Quick Direct Voice Chips */}
           <View style={styles.chipsSection}>
+            <Text style={styles.chipsLabel}>QUICK COMMANDS / तुरंत आज़माएँ</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScrollDirect}>
               {[
                 { label: '+ 20 kg आलू', text: '20 kilo Aloo add karo' },
@@ -693,7 +740,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   titleRow: {
     flexDirection: 'row',
@@ -701,9 +748,28 @@ const styles = StyleSheet.create({
   },
   voiceTitle: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#202124',
+    letterSpacing: -0.3,
+  },
+  headerRightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  langPill: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  langPillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#475569',
   },
   closeBtn: {
     width: 32,
@@ -713,67 +779,120 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  visualizerSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 4,
-  },
-  micCircleWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 86,
-    height: 86,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(66, 133, 244, 0.22)',
-  },
   googleDotsMiniRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginRight: 6,
+    marginRight: 8,
   },
   googleDotMini: {
     width: 7,
     height: 7,
     borderRadius: 3.5,
   },
-  googleDotMicro: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+  googleWhiteCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E8EAED',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#4285F4',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  micCircleWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+  },
+  pulseRing: {
+    position: 'absolute',
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: 'rgba(66, 133, 244, 0.22)',
   },
   googleMicBigButton: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#4285F4',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#4285F4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
   },
   googleMicBigButtonActive: {
     borderColor: '#EA4335',
     shadowColor: '#EA4335',
   },
-  statusDirectText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 13,
+  waveformContainer: {
+    marginVertical: 4,
+  },
+  promptContainer: {
+    alignItems: 'center',
+    marginVertical: 4,
+    paddingHorizontal: 8,
+  },
+  promptLabel: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#64748B',
-    marginTop: -2,
-    marginBottom: 8,
+    color: '#5F6368',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  promptQuote: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16.5,
+    fontWeight: '800',
+    color: '#1A73E8',
+    textAlign: 'center',
+    marginBottom: 3,
+  },
+  promptSubHi: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#5F6368',
+    textAlign: 'center',
+  },
+  cardFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F3F4',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  googleDotsMicroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  googleDotMicro: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  cardFooterText: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#70757A',
   },
   executionCardDirect: {
     backgroundColor: '#F0FDF4',
@@ -945,6 +1064,13 @@ const styles = StyleSheet.create({
   chipsSection: {
     marginTop: 2,
     paddingBottom: 2,
+  },
+  chipsLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+    marginBottom: 6,
   },
   sampleScrollDirect: {
     gap: 8,
