@@ -253,82 +253,11 @@ function CustomVendorTabBar({ state, descriptors, navigation, insets }: BottomTa
         </View>
       </View>
 
-      {/* DusMint Voice Assistant Preview Modal */}
-      <Modal
+      {/* Real-time Multilingual Google Voice Assistant Modal */}
+      <VendorVoiceModal
         visible={isVoiceModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsVoiceModalOpen(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <TouchableOpacity
-            style={StyleSheet.absoluteFill}
-            activeOpacity={1}
-            onPress={() => setIsVoiceModalOpen(false)}
-          />
-          <View style={styles.voiceSheet}>
-            {/* Sheet Handle */}
-            <View style={styles.sheetHandle} />
-
-            {/* Header */}
-            <View style={styles.voiceHeader}>
-              <Text style={styles.voiceTitle}>Speak to Store Assistant</Text>
-              <Text style={styles.voiceSubtitle}>
-                Speak your store commands in Hindi or English
-              </Text>
-            </View>
-
-            {/* Pulsing Mic Visualizer */}
-            <View style={styles.visualizerContainer}>
-              <Animated.View
-                style={[
-                  styles.pulseRing,
-                  {
-                    transform: [{ scale: pulseAnim }],
-                    opacity: pulseAnim.interpolate({
-                      inputRange: [1, 1.25],
-                      outputRange: [0.6, 0],
-                    }),
-                  },
-                ]}
-              />
-              <View style={styles.micCircleBig}>
-                <Ionicons name="mic" size={32} color="#047A36" />
-              </View>
-            </View>
-
-            {/* Listening State */}
-            <View style={styles.listeningBadge}>
-              <View style={styles.listeningDot} />
-              <Text style={styles.listeningText}>Listening for voice commands...</Text>
-            </View>
-
-            {/* Example Prompt Chips */}
-            <Text style={styles.examplesLabel}>TRY SAYING</Text>
-            <View style={styles.exampleChipsRow}>
-              {[
-                'Add 5 kg Fresh Desi Tomato',
-                'Check today payout balance',
-                'Pack order #DM-8821',
-                'Mark store closed for lunch',
-              ].map((cmd, idx) => (
-                <View key={idx} style={styles.exampleChip}>
-                  <Text style={styles.exampleChipText}>"{cmd}"</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Close Button */}
-            <TouchableOpacity
-              style={styles.closeVoiceBtn}
-              onPress={() => setIsVoiceModalOpen(false)}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.closeVoiceBtnText}>Close Assistant</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setIsVoiceModalOpen(false)}
+      />
     </>
   );
 }

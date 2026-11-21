@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
+import { useVendorStockStore } from '../../state/useVendorStockStore';
 
 // Categories Filter - Limited strictly to Vegetables, Fruits, Meat, Dairy
 const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Meat', 'Dairy'] as const;
@@ -576,7 +577,8 @@ const StockInventoryCard: React.FC<{
 
 export const VendorStockScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const [items, setItems] = useState<VendorStockItem[]>(INITIAL_STORE_STOCK);
+  const items = useVendorStockStore((s) => s.items);
+  const setItems = useVendorStockStore((s) => s.setItems);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>('All');
