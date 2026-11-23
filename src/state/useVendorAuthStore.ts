@@ -24,6 +24,7 @@ interface VendorAuthState {
   isHydrated: boolean;
   pendingOrdersCount: number;
   isStoreOpen: boolean;
+  breakUntil: number | null;
 
   // Actions
   setHydrated: (val: boolean) => void;
@@ -33,6 +34,7 @@ interface VendorAuthState {
   setActiveVendor: (vendor: VendorProfileInfo | null) => void;
   setHasActiveVendor: (val: boolean) => void;
   setStoreOpen: (isOpen: boolean) => void;
+  setStoreBreak: (durationMinutes: number | null) => void;
   setAuth: (token: string, user: any, hasActiveVendor?: boolean, vendor?: any) => void;
   logout: () => void;
 }
@@ -103,6 +105,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
       isHydrated: !hasNativeAsyncStorage,
       pendingOrdersCount: 2,
       isStoreOpen: true,
+      breakUntil: null,
 
       setHydrated: (val: boolean) => set({ isHydrated: val }),
       setPendingOrdersCount: (count: number) => set({ pendingOrdersCount: count }),
@@ -113,6 +116,12 @@ export const useVendorAuthStore = create<VendorAuthState>()(
 
       setStorePhotoUri: (uri: string | null) => {
         set({ storePhotoUri: uri });
+      },
+
+      setStoreBreak: (durationMinutes: number | null) => {
+        set({
+          breakUntil: durationMinutes ? Date.now() + durationMinutes * 60 * 1000 : null,
+        });
       },
 
       setActiveVendor: (vendor: VendorProfileInfo | null) => {
@@ -191,6 +200,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
         isAuthenticated: state.isAuthenticated,
         hasActiveVendor: state.hasActiveVendor,
         isStoreOpen: state.isStoreOpen,
+        breakUntil: state.breakUntil,
       }),
     }
   )

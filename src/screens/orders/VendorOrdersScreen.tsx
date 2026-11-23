@@ -10,6 +10,7 @@ import {
   Vibration,
   Animated,
   StatusBar,
+  Modal,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -17,6 +18,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { dusmintApi } from '../../api-client/client';
 import { VendorOrderPart, VendorProfileInfo } from '../../api-client/types';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
+
+// Format real-time date and time without seconds (e.g. "Mon 23 Nov, 6:54 pm")
+const formatCurrentDateTime = (date: Date): string => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dayName = days[date.getDay()];
+  const dayNum = date.getDate();
+  const monthName = months[date.getMonth()];
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const minuteStr = minutes < 10 ? '0' + minutes : minutes;
+  return `${dayName} ${dayNum} ${monthName}, ${hours}:${minuteStr} ${ampm}`;
+};
 
 // Realistic Rich Fallback Vendors for Gupta Traders
 const FALLBACK_VENDORS: VendorProfileInfo[] = [
@@ -113,12 +130,32 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
   const insets = useSafeAreaInsets();
   const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
   const setStoreOpen = useVendorAuthStore((s) => s.setStoreOpen);
+  const breakUntil = useVendorAuthStore((s) => s.breakUntil);
+  const setStoreBreak = useVendorAuthStore((s) => s.setStoreBreak);
+
   const [activeTab, setActiveTab] = useState<'to_pack' | 'ready' | 'delivered'>('to_pack');
   const [vendors, setVendors] = useState<VendorProfileInfo[]>(FALLBACK_VENDORS);
   const [selectedVendorId, setSelectedVendorId] = useState<string>('vendor-1');
   const [orders, setOrders] = useState<VendorOrderPart[]>(FALLBACK_ORDERS);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [todayIncome, setTodayIncome] = useState<number>(1240);
+  const [showBreakModal, setShowBreakModal] = useState<boolean>(false);
+  const [currentDateTime, setCurrentDateTime] = useState<string>(() => formatCurrentDateTime(new Date()));
   const previousOrderCountRef = useRef<number>(0);
+
+  // Check store break status
+  const isOnBreak = Boolean(breakUntil && Date.now() < breakUntil);
+  const breakMinutesLeft = breakUntil
+    ? Math.max(1, Math.round((breakUntil - Date.now()) / 60000))
+    : 0;
+
+  // Real-time clock updating every 20s (no seconds shown, practically 0 CPU usage)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(formatCurrentDateTime(new Date()));
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Animated sliding indicator for 3 status tabs (0: to_pack, 1: ready, 2: delivered)
   const tabAnim = useRef(new Animated.Value(0)).current;
@@ -139,7 +176,7 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     loadVendors();
   }, []);
 
-  // 2. Fetch vendor orders
+  // 2. Fetch vendor orders & sync earnings
   const fetchOrders = useCallback(async (isPolling = false) => {
     try {
       const data = await dusmintApi.getVendorOrders(selectedVendorId || undefined);
@@ -155,8 +192,21 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         }
         previousOrderCountRef.current = pendingCount;
       }
+
+      // Sync Today's Income precisely with VendorEarningsScreen
+      try {
+        const earnings = await dusmintApi.getVendorEarnings(selectedVendorId || undefined);
+        if (earnings?.todaySalesPaise && earnings.todaySalesPaise > 0) {
+          setTodayIncome(Math.round(earnings.todaySalesPaise / 100));
+        } else {
+          setTodayIncome(1240);
+        }
+      } catch {
+        setTodayIncome(1240);
+      }
     } catch {
-      // Retain fallback orders
+      // Retain fallback orders and earnings
+      setTodayIncome(1240);
     } finally {
       setRefreshing(false);
     }
@@ -191,6 +241,23 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     }
   };
 
+  // Break handlers
+  const handleApplyBreak = (minutes: number) => {
+    try {
+      Vibration.vibrate(25);
+    } catch {}
+    setStoreBreak(minutes);
+    setShowBreakModal(false);
+  };
+
+  const handleEndBreak = () => {
+    try {
+      Vibration.vibrate(25);
+    } catch {}
+    setStoreBreak(null);
+    setShowBreakModal(false);
+  };
+
   // Tab selection with spring animation (0: to_pack, 1: ready, 2: delivered)
   const handleSelectTab = (tabKey: 'to_pack' | 'ready' | 'delivered', idx: number) => {
     setActiveTab(tabKey);
@@ -217,17 +284,24 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       ? readyOrders
       : deliveredOrders;
 
-  // Shopkeeper High-Value Context Metrics
-  const todayIncome = orders.reduce((sum, o) => sum + Math.round((o.subtotalPaise * 0.9) / 100), 0);
+  // Total orders count
   const totalOrdersCount = orders.length;
-  // Earliest pickup slot time among pending orders
-  const nextSlotTime = toPackOrders[0]?.slotTime?.replace(/^Morning Slot\s*•?\s*/i, '') || '08:30 AM';
 
   // Shortage alert action
   const handleReportShortage = (order: VendorOrderPart) => {
     Alert.alert(
       'Report Item Shortage',
       `Mark an item unavailable for ${order.orderCode}? Customer and rider will be alerted immediately.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Confirm Shortage',
+          style: 'destructive',
+          onPress: () => Alert.alert('Shortage Reported', 'Operations and rider have been informed.'),
+        },
+      ]
+    );
+  };
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -261,31 +335,54 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
       >
-        {/* Screen Header - Identical Alignment & Typography to Earnings & Menu */}
+        {/* Screen Header - Simple and Bold with Real-Time Clock */}
         <View style={styles.headerRow}>
-          <Text style={styles.screenTitle}>Orders</Text>
+          <View>
+            <Text style={styles.screenTitle}>Orders</Text>
+            <Text style={styles.currentDateTimeText}>{currentDateTime}</Text>
+          </View>
 
           {/* Clean 1-Tap Store Open/Closed Toggle */}
           <TouchableOpacity
-            style={[styles.statusTogglePill, isStoreOpen ? styles.statusToggleOpen : styles.statusToggleClosed]}
+            style={[
+              styles.statusTogglePill,
+              isOnBreak
+                ? styles.statusToggleBreak
+                : isStoreOpen
+                ? styles.statusToggleOpen
+                : styles.statusToggleClosed,
+            ]}
             onPress={handleToggleStoreStatus}
             activeOpacity={0.8}
           >
-            <View style={[styles.statusDot, isStoreOpen ? styles.statusDotOpen : styles.statusDotClosed]} />
+            <View
+              style={[
+                styles.statusDot,
+                isOnBreak
+                  ? styles.statusDotBreak
+                  : isStoreOpen
+                  ? styles.statusDotOpen
+                  : styles.statusDotClosed,
+              ]}
+            />
             <Text
               style={[
                 styles.statusToggleText,
-                isStoreOpen ? styles.statusToggleTextOpen : styles.statusToggleTextClosed,
+                isOnBreak
+                  ? styles.statusToggleTextBreak
+                  : isStoreOpen
+                  ? styles.statusToggleTextOpen
+                  : styles.statusToggleTextClosed,
               ]}
             >
-              {isStoreOpen ? 'STORE OPEN' : 'CLOSED'}
+              {isOnBreak ? 'ON BREAK' : isStoreOpen ? 'STORE OPEN' : 'CLOSED'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* 1. Minimal High-Value Shopkeeper Overview */}
         <View style={styles.dailyContextCard}>
-          {/* Top Row: Today's Income & Settlement Note */}
+          {/* Top Row: Today's Income & Minimalist Break Button (Replaces Auto-settles 10 PM) */}
           <View style={styles.contextHeroRow}>
             <View>
               <Text style={styles.contextHeroLabel}>TODAY'S INCOME</Text>
@@ -297,16 +394,28 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
               </View>
             </View>
 
-            <View style={styles.settlePill}>
-              <Ionicons name="checkmark-done" size={13} color="#047A36" style={{ marginRight: 4 }} />
-              <Text style={styles.settlePillText}>Auto-settles 10 PM</Text>
-            </View>
+            {/* Minimalist Break Action Button */}
+            <TouchableOpacity
+              style={[styles.breakBtnPill, isOnBreak && styles.breakBtnPillActive]}
+              onPress={() => setShowBreakModal(true)}
+              activeOpacity={0.75}
+            >
+              <Ionicons
+                name={isOnBreak ? 'cafe' : 'pause-circle-outline'}
+                size={13}
+                color={isOnBreak ? '#B45309' : '#475569'}
+                style={{ marginRight: 4 }}
+              />
+              <Text style={[styles.breakBtnText, isOnBreak && styles.breakBtnTextActive]}>
+                {isOnBreak ? `On Break (${breakMinutesLeft}m)` : 'Take Break'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Subtle Divider */}
           <View style={styles.contextDivider} />
 
-          {/* Bottom Row: 3 Quick Essentials */}
+          {/* Bottom Row: 3 Quick Essentials (Total Orders | To Pack | Total Deliveries) */}
           <View style={styles.contextMetricsRow}>
             {/* Metric 1: Total Orders */}
             <View style={styles.contextMetricItem}>
@@ -346,14 +455,18 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
 
             <View style={styles.contextMetricDivider} />
 
-            {/* Metric 3: Next Pickup */}
-            <View style={styles.contextMetricItem}>
-              <Text style={styles.contextMetricLabel}>Next Pickup</Text>
+            {/* Metric 3: Total Deliveries (Replaces Next Pickup) */}
+            <TouchableOpacity
+              style={styles.contextMetricItem}
+              onPress={() => handleSelectTab('delivered', 2)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.contextMetricLabel}>Total Deliveries</Text>
               <View style={styles.contextMetricValueRow}>
-                <Ionicons name="time-outline" size={14} color="#64748B" style={{ marginRight: 5 }} />
-                <Text style={styles.contextMetricVal}>{nextSlotTime}</Text>
+                <Ionicons name="bicycle-outline" size={15} color="#047A36" style={{ marginRight: 5 }} />
+                <Text style={styles.contextMetricVal}>{deliveredOrders.length}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -562,6 +675,87 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           <Text style={styles.quickStockLinkText}>Update Store Stock →</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Minimal Store Break Selection Modal */}
+      <Modal
+        visible={showBreakModal}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setShowBreakModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setShowBreakModal(false)}
+          />
+          <View style={styles.breakSheet}>
+            <View style={styles.breakSheetHandle} />
+            <View style={styles.breakHeaderRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.breakSheetTitle}>Store Break</Text>
+                <Text style={styles.breakSheetSub}>
+                  Temporarily pause pickups while you are away from store
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowBreakModal(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            {isOnBreak && (
+              <View style={styles.activeBreakBanner}>
+                <Ionicons name="cafe" size={22} color="#D97706" style={{ marginRight: 10 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.activeBreakTitle}>Store Currently on Break</Text>
+                  <Text style={styles.activeBreakSub}>
+                    Break ends in ~{breakMinutesLeft} minutes.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <Text style={styles.breakDurationLabel}>
+              {isOnBreak ? 'EXTEND BREAK DURATION' : 'SELECT BREAK DURATION'}
+            </Text>
+
+            <View style={styles.breakOptionsRow}>
+              {[
+                { mins: 15, label: '15 m', sub: 'Quick tea' },
+                { mins: 30, label: '30 m', sub: 'Lunch break' },
+                { mins: 60, label: '1 hr', sub: 'Mandi run' },
+                { mins: 120, label: '2 hr', sub: 'Stock trip' },
+              ].map((opt) => (
+                <TouchableOpacity
+                  key={opt.mins}
+                  style={styles.breakOptionBtn}
+                  onPress={() => handleApplyBreak(opt.mins)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.breakOptionMins}>{opt.label}</Text>
+                  <Text style={styles.breakOptionDesc}>{opt.sub}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {isOnBreak && (
+              <TouchableOpacity
+                style={styles.resumeStoreBtn}
+                onPress={handleEndBreak}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="play" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.resumeStoreBtnText}>End Break & Resume Store</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
