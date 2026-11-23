@@ -113,14 +113,14 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
   const insets = useSafeAreaInsets();
   const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
   const setStoreOpen = useVendorAuthStore((s) => s.setStoreOpen);
-  const [activeTab, setActiveTab] = useState<'new' | 'packing' | 'ready' | 'done'>('new');
+  const [activeTab, setActiveTab] = useState<'to_pack' | 'ready' | 'delivered'>('to_pack');
   const [vendors, setVendors] = useState<VendorProfileInfo[]>(FALLBACK_VENDORS);
   const [selectedVendorId, setSelectedVendorId] = useState<string>('vendor-1');
   const [orders, setOrders] = useState<VendorOrderPart[]>(FALLBACK_ORDERS);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const previousOrderCountRef = useRef<number>(0);
 
-  // Animated sliding indicator for status tabs (0: new, 1: packing, 2: ready, 3: done)
+  // Animated sliding indicator for 3 status tabs (0: to_pack, 1: ready, 2: delivered)
   const tabAnim = useRef(new Animated.Value(0)).current;
 
   // 1. Fetch vendor list
@@ -146,8 +146,8 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       if (data && data.length > 0) {
         setOrders(data);
 
-        // Alert on new incoming orders
-        const pendingCount = data.filter((o) => o.status === 'pending').length;
+        // Alert on new incoming orders needing packing
+        const pendingCount = data.filter((o) => o.status === 'pending' || o.status === 'packing').length;
         useVendorAuthStore.getState().setPendingOrdersCount(pendingCount);
         if (previousOrderCountRef.current > 0 && pendingCount > previousOrderCountRef.current) {
           Vibration.vibrate([0, 500, 200, 500]);
@@ -191,8 +191,8 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     }
   };
 
-  // Tab selection with spring animation
-  const handleSelectTab = (tabKey: 'new' | 'packing' | 'ready' | 'done', idx: number) => {
+  // Tab selection with spring animation (0: to_pack, 1: ready, 2: delivered)
+  const handleSelectTab = (tabKey: 'to_pack' | 'ready' | 'delivered', idx: number) => {
     setActiveTab(tabKey);
     Animated.spring(tabAnim, {
       toValue: idx,
@@ -202,20 +202,26 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
     }).start();
   };
 
-  // Filter orders by status
-  const newOrders = orders.filter((o) => o.status === 'pending' || o.status === 'accepted');
-  const packingOrders = orders.filter((o) => o.status === 'packing');
+  // 3-Stage Pipeline:
+  // 1. To Pack: Orders needing merchant action (pending, accepted, packing)
+  const toPackOrders = orders.filter((o) => o.status === 'pending' || o.status === 'accepted' || o.status === 'packing');
+  // 2. Ready: Packed & sealed with QR code, awaiting rider pickup
   const readyOrders = orders.filter((o) => o.status === 'ready');
-  const doneOrders = orders.filter((o) => o.status === 'picked_up' || o.status === 'delivered');
+  // 3. Delivered: Completed handovers
+  const deliveredOrders = orders.filter((o) => o.status === 'picked_up' || o.status === 'delivered');
 
   const displayedOrders =
-    activeTab === 'new'
-      ? newOrders
-      : activeTab === 'packing'
-      ? packingOrders
+    activeTab === 'to_pack'
+      ? toPackOrders
       : activeTab === 'ready'
       ? readyOrders
-      : doneOrders;
+      : deliveredOrders;
+
+  // Shopkeeper High-Value Context Metrics
+  const todayIncome = orders.reduce((sum, o) => sum + Math.round((o.subtotalPaise * 0.9) / 100), 0);
+  const totalOrdersCount = orders.length;
+  // Earliest pickup slot time among pending orders
+  const nextSlotTime = toPackOrders[0]?.slotTime?.replace(/^Morning Slot\s*•?\s*/i, '') || '08:30 AM';
 
   // Shortage alert action
   const handleReportShortage = (order: VendorOrderPart) => {
@@ -277,75 +283,98 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           </TouchableOpacity>
         </View>
 
-        {/* 1. Today's Pulse Metrics - The 3 Essential Numbers for the Merchant */}
-        <View style={styles.pulseRow}>
-          {/* Card 1: To Pack */}
-          <TouchableOpacity
-            style={styles.pulseCard}
-            onPress={() => handleSelectTab('new', 0)}
-            activeOpacity={0.85}
-          >
-            <View style={styles.pulseCardTop}>
-              <View style={styles.pulseIconCircle}>
-                <Ionicons name="cube-outline" size={17} color="#0F172A" />
+        {/* 1. Minimal High-Value Shopkeeper Overview */}
+        <View style={styles.dailyContextCard}>
+          {/* Top Row: Today's Income & Settlement Note */}
+          <View style={styles.contextHeroRow}>
+            <View>
+              <Text style={styles.contextHeroLabel}>TODAY'S INCOME</Text>
+              <View style={styles.contextIncomeRow}>
+                <Text style={styles.contextIncomeSymbol}>₹</Text>
+                <Text style={styles.contextIncomeValue}>
+                  {todayIncome.toLocaleString('en-IN')}
+                </Text>
               </View>
-              <Text style={styles.pulseVal}>{newOrders.length}</Text>
             </View>
-            <Text style={styles.pulseLabel}>To Pack</Text>
-          </TouchableOpacity>
 
-          {/* Card 2: In Progress (Packing / Ready) */}
-          <TouchableOpacity
-            style={styles.pulseCard}
-            onPress={() => handleSelectTab('packing', 1)}
-            activeOpacity={0.85}
-          >
-            <View style={styles.pulseCardTop}>
-              <View style={styles.pulseIconCircle}>
-                <Ionicons name="time-outline" size={17} color="#0F172A" />
-              </View>
-              <Text style={styles.pulseVal}>
-                {packingOrders.length + readyOrders.length}
-              </Text>
+            <View style={styles.settlePill}>
+              <Ionicons name="checkmark-done" size={13} color="#047A36" style={{ marginRight: 4 }} />
+              <Text style={styles.settlePillText}>Auto-settles 10 PM</Text>
             </View>
-            <Text style={styles.pulseLabel}>In Progress</Text>
-          </TouchableOpacity>
+          </View>
 
-          {/* Card 3: Delivered Today */}
-          <TouchableOpacity
-            style={styles.pulseCard}
-            onPress={() => handleSelectTab('done', 3)}
-            activeOpacity={0.85}
-          >
-            <View style={styles.pulseCardTop}>
-              <View style={styles.pulseIconCircle}>
-                <Ionicons name="checkmark-done" size={17} color="#0F172A" />
+          {/* Subtle Divider */}
+          <View style={styles.contextDivider} />
+
+          {/* Bottom Row: 3 Quick Essentials */}
+          <View style={styles.contextMetricsRow}>
+            {/* Metric 1: Total Orders */}
+            <View style={styles.contextMetricItem}>
+              <Text style={styles.contextMetricLabel}>Total Orders</Text>
+              <View style={styles.contextMetricValueRow}>
+                <Ionicons name="receipt-outline" size={14} color="#64748B" style={{ marginRight: 5 }} />
+                <Text style={styles.contextMetricVal}>{totalOrdersCount}</Text>
               </View>
-              <Text style={styles.pulseVal}>{doneOrders.length}</Text>
             </View>
-            <Text style={styles.pulseLabel}>Delivered</Text>
-          </TouchableOpacity>
+
+            <View style={styles.contextMetricDivider} />
+
+            {/* Metric 2: To Pack Action */}
+            <TouchableOpacity
+              style={styles.contextMetricItem}
+              onPress={() => handleSelectTab('to_pack', 0)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.contextMetricLabel}>To Pack</Text>
+              <View style={styles.contextMetricValueRow}>
+                <Ionicons
+                  name="cube-outline"
+                  size={14}
+                  color={toPackOrders.length > 0 ? '#047A36' : '#64748B'}
+                  style={{ marginRight: 5 }}
+                />
+                <Text
+                  style={[
+                    styles.contextMetricVal,
+                    toPackOrders.length > 0 && styles.contextMetricValAlert,
+                  ]}
+                >
+                  {toPackOrders.length > 0 ? `${toPackOrders.length} pending` : 'All done ✓'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.contextMetricDivider} />
+
+            {/* Metric 3: Next Pickup */}
+            <View style={styles.contextMetricItem}>
+              <Text style={styles.contextMetricLabel}>Next Pickup</Text>
+              <View style={styles.contextMetricValueRow}>
+                <Ionicons name="time-outline" size={14} color="#64748B" style={{ marginRight: 5 }} />
+                <Text style={styles.contextMetricVal}>{nextSlotTime}</Text>
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* 2. Filter Tabs Segment with Smooth Animated Sliding Indicator */}
+        {/* 2. Three Clean Pipeline Tabs (To Pack, Ready, Delivered) */}
         <View style={styles.tabsContainer}>
           <Animated.View
             style={[
               styles.tabIndicator,
               {
                 left: tabAnim.interpolate({
-                  inputRange: [0, 1, 2, 3],
-                  outputRange: ['0.8%', '25.6%', '50.4%', '75.2%'],
+                  inputRange: [0, 1, 2],
+                  outputRange: ['0.8%', '34.1%', '67.4%'],
                 }),
               },
             ]}
           />
           {(
             [
-              { key: 'new', label: 'To Pack', count: newOrders.length },
-              { key: 'packing', label: 'Packing', count: packingOrders.length },
+              { key: 'to_pack', label: 'To Pack', count: toPackOrders.length },
               { key: 'ready', label: 'Ready', count: readyOrders.length },
-              { key: 'done', label: 'Delivered', count: doneOrders.length },
+              { key: 'delivered', label: 'Delivered', count: deliveredOrders.length },
             ] as const
           ).map((tab, idx) => {
             const isSelected = activeTab === tab.key;
@@ -378,18 +407,18 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
               <Ionicons name="checkmark-circle-outline" size={32} color="#0F172A" />
             </View>
             <Text style={styles.emptyTitle}>
-              {activeTab === 'new'
+              {activeTab === 'to_pack'
                 ? 'No Pending Orders'
-                : activeTab === 'packing'
-                ? 'No Orders Being Packed'
                 : activeTab === 'ready'
                 ? 'No Orders Waiting for Rider'
                 : 'No Delivered Orders Yet'}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {activeTab === 'new'
+              {activeTab === 'to_pack'
                 ? 'New incoming customer orders will ring and appear here instantly.'
-                : 'Orders in this pipeline will appear here automatically.'}
+                : activeTab === 'ready'
+                ? 'Orders packed and sealed will appear here ready for rider pickup.'
+                : 'Delivered orders will appear here automatically.'}
             </Text>
           </View>
         )}
@@ -601,51 +630,104 @@ const styles = StyleSheet.create({
     color: '#DC2626',
   },
 
-  // Pulse Metrics Row
-  pulseRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
-  },
-  pulseCard: {
-    flex: 1,
+  // Minimal High-Value Shopkeeper Overview Card
+  dailyContextCard: {
     backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    borderRadius: 16,
-    padding: 12,
+    padding: 16,
+    marginBottom: 16,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  pulseCardTop: {
+  contextHeroRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  contextHeroLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  contextIncomeRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  contextIncomeSymbol: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#047A36',
+    marginRight: 2,
+  },
+  contextIncomeValue: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+  },
+  settlePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  pulseIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
     borderColor: '#A7F3D0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
-  pulseVal: {
+  settlePillText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#047A36',
+  },
+  contextDivider: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginBottom: 12,
+  },
+  contextMetricsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  contextMetricItem: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  contextMetricLabel: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 3,
+  },
+  contextMetricValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  contextMetricVal: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 24,
+    fontSize: 14,
     fontWeight: '800',
     color: '#0F172A',
   },
-  pulseLabel: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#334155',
+  contextMetricValAlert: {
+    color: '#047A36',
+  },
+  contextMetricDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: '#E2E8F0',
+    marginHorizontal: 8,
   },
 
   // Segmented Tabs Bar
@@ -662,7 +744,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 3,
     bottom: 3,
-    width: '24%',
+    width: '31.8%',
     backgroundColor: '#FFFFFF',
     borderRadius: 11,
     shadowColor: '#000000',
