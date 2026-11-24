@@ -11,6 +11,7 @@ import {
   Animated,
   StatusBar,
   Modal,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Rect } from 'react-native-svg';
@@ -302,16 +303,6 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       ]
     );
   };
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm Shortage',
-          style: 'destructive',
-          onPress: () => Alert.alert('Shortage Reported', 'Operations and rider have been informed.'),
-        },
-      ]
-    );
-  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -335,49 +326,10 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#047A36']} />}
       >
-        {/* Screen Header - Simple and Bold with Real-Time Clock */}
+        {/* Screen Header - Simple Title on Left, Real-Time Date & Time on Right */}
         <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.screenTitle}>Orders</Text>
-            <Text style={styles.currentDateTimeText}>{currentDateTime}</Text>
-          </View>
-
-          {/* Clean 1-Tap Store Open/Closed Toggle */}
-          <TouchableOpacity
-            style={[
-              styles.statusTogglePill,
-              isOnBreak
-                ? styles.statusToggleBreak
-                : isStoreOpen
-                ? styles.statusToggleOpen
-                : styles.statusToggleClosed,
-            ]}
-            onPress={handleToggleStoreStatus}
-            activeOpacity={0.8}
-          >
-            <View
-              style={[
-                styles.statusDot,
-                isOnBreak
-                  ? styles.statusDotBreak
-                  : isStoreOpen
-                  ? styles.statusDotOpen
-                  : styles.statusDotClosed,
-              ]}
-            />
-            <Text
-              style={[
-                styles.statusToggleText,
-                isOnBreak
-                  ? styles.statusToggleTextBreak
-                  : isStoreOpen
-                  ? styles.statusToggleTextOpen
-                  : styles.statusToggleTextClosed,
-              ]}
-            >
-              {isOnBreak ? 'ON BREAK' : isStoreOpen ? 'STORE OPEN' : 'CLOSED'}
-            </Text>
-          </TouchableOpacity>
+          <Text style={styles.screenTitle}>Orders</Text>
+          <Text style={styles.headerTimeText}>{currentDateTime}</Text>
         </View>
 
         {/* 1. Minimal High-Value Shopkeeper Overview */}
@@ -402,8 +354,8 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
             >
               <Ionicons
                 name={isOnBreak ? 'cafe' : 'pause-circle-outline'}
-                size={13}
-                color={isOnBreak ? '#B45309' : '#475569'}
+                size={14}
+                color={isOnBreak ? '#B45309' : '#000000'}
                 style={{ marginRight: 4 }}
               />
               <Text style={[styles.breakBtnText, isOnBreak && styles.breakBtnTextActive]}>
@@ -415,57 +367,26 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           {/* Subtle Divider */}
           <View style={styles.contextDivider} />
 
-          {/* Bottom Row: 3 Quick Essentials (Total Orders | To Pack | Total Deliveries) */}
+          {/* Bottom Row: 2 Essentials in Single-Line Format (Total Orders aligned with Today's Income | Total Deliveries) */}
           <View style={styles.contextMetricsRow}>
-            {/* Metric 1: Total Orders */}
-            <View style={styles.contextMetricItem}>
-              <Text style={styles.contextMetricLabel}>Total Orders</Text>
-              <View style={styles.contextMetricValueRow}>
-                <Ionicons name="receipt-outline" size={14} color="#64748B" style={{ marginRight: 5 }} />
-                <Text style={styles.contextMetricVal}>{totalOrdersCount}</Text>
-              </View>
+            {/* Metric 1: Total Orders - Left Aligned flush with TODAY'S INCOME */}
+            <View style={styles.singleLineMetricBoxLeft}>
+              <Ionicons name="receipt-outline" size={15} color="#000000" style={{ marginRight: 6 }} />
+              <Text style={styles.singleLineLabel}>Total Orders:</Text>
+              <Text style={styles.singleLineVal}>{totalOrdersCount}</Text>
             </View>
 
             <View style={styles.contextMetricDivider} />
 
-            {/* Metric 2: To Pack Action */}
+            {/* Metric 2: Total Deliveries - Right Aligned */}
             <TouchableOpacity
-              style={styles.contextMetricItem}
-              onPress={() => handleSelectTab('to_pack', 0)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.contextMetricLabel}>To Pack</Text>
-              <View style={styles.contextMetricValueRow}>
-                <Ionicons
-                  name="cube-outline"
-                  size={14}
-                  color={toPackOrders.length > 0 ? '#047A36' : '#64748B'}
-                  style={{ marginRight: 5 }}
-                />
-                <Text
-                  style={[
-                    styles.contextMetricVal,
-                    toPackOrders.length > 0 && styles.contextMetricValAlert,
-                  ]}
-                >
-                  {toPackOrders.length > 0 ? `${toPackOrders.length} pending` : 'All done ✓'}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.contextMetricDivider} />
-
-            {/* Metric 3: Total Deliveries (Replaces Next Pickup) */}
-            <TouchableOpacity
-              style={styles.contextMetricItem}
+              style={styles.singleLineMetricBoxRight}
               onPress={() => handleSelectTab('delivered', 2)}
               activeOpacity={0.7}
             >
-              <Text style={styles.contextMetricLabel}>Total Deliveries</Text>
-              <View style={styles.contextMetricValueRow}>
-                <Ionicons name="bicycle-outline" size={15} color="#047A36" style={{ marginRight: 5 }} />
-                <Text style={styles.contextMetricVal}>{deliveredOrders.length}</Text>
-              </View>
+              <Ionicons name="bicycle-outline" size={16} color="#000000" style={{ marginRight: 6 }} />
+              <Text style={styles.singleLineLabel}>Total Deliveries:</Text>
+              <Text style={styles.singleLineVal}>{deliveredOrders.length}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -783,6 +704,13 @@ const styles = StyleSheet.create({
     color: '#111117',
     letterSpacing: -0.5,
   },
+  headerTimeText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#000000',
+    letterSpacing: -0.2,
+  },
   statusTogglePill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -799,6 +727,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF2F2',
     borderColor: '#FECACA',
   },
+  statusToggleBreak: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
   statusDot: {
     width: 7,
     height: 7,
@@ -811,6 +743,9 @@ const styles = StyleSheet.create({
   statusDotClosed: {
     backgroundColor: '#DC2626',
   },
+  statusDotBreak: {
+    backgroundColor: '#D97706',
+  },
   statusToggleText: {
     fontFamily: 'Metropolis-Bold',
     fontSize: 11,
@@ -822,6 +757,9 @@ const styles = StyleSheet.create({
   },
   statusToggleTextClosed: {
     color: '#DC2626',
+  },
+  statusToggleTextBreak: {
+    color: '#B45309',
   },
 
   // Minimal High-Value Shopkeeper Overview Card
@@ -845,9 +783,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contextHeroLabel: {
-    fontSize: 11,
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#000000',
     letterSpacing: 0.6,
     marginBottom: 2,
   },
@@ -857,36 +796,44 @@ const styles = StyleSheet.create({
   },
   contextIncomeSymbol: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#047A36',
+    color: '#000000',
     marginRight: 2,
   },
   contextIncomeValue: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
     letterSpacing: -0.5,
   },
-  settlePill: {
+  breakBtnPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 9,
-    paddingVertical: 5,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 12,
   },
-  settlePillText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#047A36',
+  breakBtnPillActive: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
+  breakBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#000000',
+  },
+  breakBtnTextActive: {
+    color: '#B45309',
   },
   contextDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#E2E8F0',
     marginBottom: 12,
   },
   contextMetricsRow: {
@@ -894,33 +841,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  contextMetricItem: {
+  singleLineMetricBoxLeft: {
     flex: 1,
-    alignItems: 'flex-start',
-  },
-  contextMetricLabel: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 3,
-  },
-  contextMetricValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingVertical: 2,
   },
-  contextMetricVal: {
+  singleLineMetricBoxRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingVertical: 2,
+  },
+  singleLineMetricBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 2,
+  },
+  singleLineLabel: {
     fontFamily: 'Metropolis-Bold',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#000000',
+    marginRight: 4,
   },
-  contextMetricValAlert: {
-    color: '#047A36',
+  singleLineVal: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#000000',
   },
   contextMetricDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#E2E8F0',
+    width: 1.5,
+    height: 20,
+    backgroundColor: '#CBD5E1',
     marginHorizontal: 8,
   },
 
@@ -1275,5 +1233,128 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
     color: '#047A36',
+  },
+
+  // Break Modal Styles
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'flex-end',
+  },
+  breakSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 10,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  breakSheetHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E2E8F0',
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  breakHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  breakSheetTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  breakSheetSub: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  activeBreakBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 16,
+  },
+  activeBreakTitle: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  activeBreakSub: {
+    fontSize: 12,
+    color: '#B45309',
+    marginTop: 1,
+  },
+  breakDurationLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  breakOptionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  breakOptionBtn: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  breakOptionMins: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  breakOptionDesc: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  resumeStoreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#047A36',
+    borderRadius: 14,
+    height: 48,
+    marginTop: 4,
+  },
+  resumeStoreBtnText: {
+    fontFamily: 'Metropolis-Bold',
+    fontSize: 14.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 });

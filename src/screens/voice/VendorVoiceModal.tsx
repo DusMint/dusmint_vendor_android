@@ -10,6 +10,7 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  PermissionsAndroid,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -357,10 +358,43 @@ export const VendorVoiceModal: React.FC<Props> = ({ visible, onClose }) => {
       Vibration.vibrate(30);
     } catch {}
 
-    const langCode = selectedLanguage === 'mr' ? 'mr-IN' : selectedLanguage === 'gu' ? 'gu-IN' : 'hi-IN';
+    // Ensure RECORD_AUDIO permission is requested and granted
+    if (Platform.OS === 'android') {
+      try {
+        const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+        if (!hasPermission) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            {
+              title: 'Microphone Permission',
+              message: 'Dusmint Partner needs microphone access to listen to voice commands.',
+              buttonPositive: 'Allow',
+              buttonNegative: 'Cancel',
+            }
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            if (!hasResult) {
+              onClose();
+            }
+            return;
+          }
+        }
+      } catch (permErr) {
+        console.warn('Microphone permission request error:', permErr);
+      }
+    }
+
+    const langCode =
+      selectedLanguage === 'en'
+        ? 'en-IN'
+        : selectedLanguage === 'mr'
+        ? 'mr-IN'
+        : selectedLanguage === 'gu'
+        ? 'gu-IN'
+        : 'hi-IN';
     const speechPrompt = 'Try speaking: "20 kilo aloo add karo"...';
 
-    // 1. Try Native Android Google Speech Module
+    // 1. Try Native Android Google Speech Module (activates official Google Voice Dialogue Box)
     try {
       const googleAvailable = await isGoogleSpeechAvailable();
       if (googleAvailable) {
