@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -88,10 +88,24 @@ export const VendorPayoutScreen: React.FC<Props> = ({
   onSettlementRequested,
 }) => {
   const insets = useSafeAreaInsets();
-  const [balance, setBalance] = useState(remainingSettlement > 0 ? remainingSettlement : 3825.0);
-  const [settlementList, setSettlementList] = useState<SettlementRecord[]>(INITIAL_SETTLEMENTS);
+  const user = useVendorAuthStore((s) => s.user);
+  const activeVendor = useVendorAuthStore((s) => s.activeVendor);
+  const isDemoVendor = Boolean(
+    (user?.phone || activeVendor?.owner_phone || '').replace(/\D/g, '').endsWith('9876543210')
+  );
+
+  const [balance, setBalance] = useState(
+    remainingSettlement > 0 ? remainingSettlement : isDemoVendor ? 3825.0 : 0
+  );
+  const [settlementList, setSettlementList] = useState<SettlementRecord[]>(
+    isDemoVendor ? INITIAL_SETTLEMENTS : []
+  );
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    setBalance(remainingSettlement > 0 ? remainingSettlement : isDemoVendor ? 3825.0 : 0);
+  }, [remainingSettlement, isDemoVendor]);
 
   const handleRequestPayoutPress = () => {
     try {
@@ -162,7 +176,7 @@ export const VendorPayoutScreen: React.FC<Props> = ({
           {/* Card 1: Available Remaining Settlement Card */}
           <View style={styles.balanceCard}>
             <View style={styles.balanceTopRow}>
-              <Text style={styles.balanceLabel}>REMAINING SETTLEMENT BALANCE</Text>
+              <Text style={styles.balanceLabel}>BALANCE</Text>
               <View style={styles.verifiedTag}>
                 <Ionicons name="checkmark-circle" size={12} color="#047A36" style={{ marginRight: 4 }} />
                 <Text style={styles.verifiedTagText}>Verified UPI</Text>
@@ -171,39 +185,35 @@ export const VendorPayoutScreen: React.FC<Props> = ({
 
             <Text style={styles.balanceAmountText}>{formatRupee(balance)}</Text>
             <Text style={styles.balanceSubText}>
-              Ready for direct transfer to {payoutUpi || 'sumit@hdfc'}
+              {payoutUpi || 'Not configured'}
             </Text>
 
-            {/* Standard Daily Batch Settlement Notice */}
+            {/* Concise Auto-Settlement Notice */}
             <View style={styles.infoBanner}>
-              <Ionicons name="time-outline" size={16} color="#0F172A" style={{ marginRight: 8, marginTop: 1 }} />
+              <Ionicons name="time-outline" size={15} color="#0F172A" style={{ marginRight: 6 }} />
               <Text style={styles.infoBannerText}>
-                Daily settlement triggers automatically every evening at 09:30 PM to your linked UPI.
+                Auto-settles daily at 09:30 PM
               </Text>
             </View>
           </View>
 
-          {/* Card 2: Instant Payout Action */}
-          <View style={styles.actionCard}>
-            <Text style={styles.actionTitle}>Need Instant Settlement?</Text>
+          {/* Instant Payout Action */}
+          <TouchableOpacity
+            style={[styles.instantPayoutBtn, { marginBottom: 20 }, balance <= 0 && styles.instantPayoutBtnDisabled]}
+            onPress={handleRequestPayoutPress}
+            disabled={balance <= 0}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="flash" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.instantPayoutBtnText}>
+              {balance > 0 ? `Instant Payout (${formatRupee(balance)})` : 'All Settled'}
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.instantPayoutBtn, balance <= 0 && styles.instantPayoutBtnDisabled]}
-              onPress={handleRequestPayoutPress}
-              disabled={balance <= 0}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="flash" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.instantPayoutBtnText}>
-                {balance > 0 ? `Request Instant Payout (${formatRupee(balance)})` : 'All Earnings Settled'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Card 3: Settlement History Ledger - Clean and Direct for Tier 3/4 Vendors */}
+          {/* Card 3: Settlement History */}
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Settlement History</Text>
-            <Text style={styles.sectionCountText}>Showing {settlementList.length} settlements</Text>
+            <Text style={styles.sectionTitle}>Settlements</Text>
+            <Text style={styles.sectionCountText}>{settlementList.length} total</Text>
           </View>
 
           <View style={styles.unifiedCard}>

@@ -729,10 +729,35 @@ export const VendorStockScreen: React.FC = () => {
     [showToast]
   );
 
-  // Add new item from Master Catalogue Database
-  const handleAddItemFromCatalogue = (newItem: VendorStockItem) => {
+  // Add new item from Master Catalogue Database and persist to riksho_backend
+  const handleAddItemFromCatalogue = async (newItem: VendorStockItem) => {
+    const tempId = newItem.id;
     setItems((prev) => [newItem, ...prev]);
     showToast(`${newItem.nameEn} added (${formatTotalStockBadge(newItem.stockKg ?? 0, newItem.stockGrams ?? 0, newItem.unit)})`);
+
+    if (activeVendor?.id) {
+      try {
+        const res = await dusmintApi.addVendorStock(activeVendor.id, {
+          nameEn: newItem.nameEn,
+          nameHi: newItem.nameHi,
+          category: newItem.category,
+          unit: newItem.unit,
+          pricePaise: newItem.pricePaise,
+          mrpPaise: newItem.mrpPaise,
+          isInStock: newItem.isInStock,
+          photoUrl: newItem.photoUrl,
+          stockKg: newItem.stockKg,
+          stockGrams: newItem.stockGrams,
+        });
+        if (res?.item?.id) {
+          setItems((prev) =>
+            prev.map((it) => (it.id === tempId ? { ...it, id: res.item!.id } : it))
+          );
+        }
+      } catch {
+        // Optimistic UI remains intact
+      }
+    }
   };
 
   // Category filter + Auto-sorted alphabetically from A to Z
@@ -866,7 +891,7 @@ export const VendorStockScreen: React.FC = () => {
         ) : filteredItems.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Ionicons name="basket-outline" size={30} color="#047A36" />
+              <Ionicons name="basket-outline" size={30} color="#0F172A" />
             </View>
             <Text style={styles.emptyTitle}>
               {selectedCategory === 'All'
@@ -1329,6 +1354,44 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 12,
     color: '#64748B',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 44,
+    paddingHorizontal: 24,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyTitle: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 16,
+    color: '#111117',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontFamily: 'PlusJakartaSans-Regular',
+    fontSize: 12.5,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   toastContainer: {
     position: 'absolute',
