@@ -48,8 +48,8 @@ export class DusmintApiClient {
       },
       (error) => {
         if (!error.response) {
-          // Network/connection failure (no server response)
-          useVendorNetworkStore.getState().setOffline(true);
+          // Verify connectivity (requires 2 consecutive failures) instead of flashing on a 1-off hiccup
+          useVendorNetworkStore.getState().checkConnectivity();
         }
         return Promise.reject(error);
       }

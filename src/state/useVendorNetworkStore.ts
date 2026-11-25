@@ -55,8 +55,10 @@ export const useVendorNetworkStore = create<VendorNetworkState>((set, get) => ({
       return isOnline;
     } catch {
       const failures = get().consecutiveFailures + 1;
+      // Require 2 consecutive failures so minor 1-off hiccups don't flash the banner
+      const shouldFlagOffline = failures >= 2;
       set({
-        isOffline: failures >= 1,
+        isOffline: shouldFlagOffline ? true : get().isOffline,
         isChecking: false,
         consecutiveFailures: failures,
       });
