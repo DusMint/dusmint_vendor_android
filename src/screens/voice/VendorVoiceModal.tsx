@@ -699,14 +699,14 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   resultTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   resultSubTitle: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
     marginTop: 1,
   },
@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -739,9 +739,9 @@ const styles = StyleSheet.create({
   },
   askedQuoteText: {
     flex: 1,
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     fontStyle: 'italic',
   },
@@ -760,14 +760,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   doneActionTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   doneActionEn: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
     marginTop: 2,
   },
@@ -783,9 +783,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   undoBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 11.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   progressBarBg: {
@@ -812,14 +812,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   confirmTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#92400E',
   },
   confirmPrompt: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     marginBottom: 10,
     lineHeight: 20,
@@ -839,9 +839,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelConfirmBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   acceptConfirmBtn: {
@@ -853,9 +853,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   acceptConfirmBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   optionsList: {
@@ -873,7 +873,7 @@ const styles = StyleSheet.create({
   },
   optionBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#166534',
   },
   cancelBtnWide: {
@@ -886,7 +886,7 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
   },
   chipsSectionResult: {
@@ -894,7 +894,7 @@ const styles = StyleSheet.create({
   },
   chipsSectionLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#94A3B8',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -912,9 +912,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   chipText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   bottomActionRow: {
@@ -933,9 +933,9 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   speakAgainBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   doneDismissBtn: {
@@ -947,9 +947,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   doneDismissBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

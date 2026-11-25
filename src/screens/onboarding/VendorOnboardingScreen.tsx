@@ -733,14 +733,14 @@ const styles = StyleSheet.create({
   },
   hubTitle: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.5,
   },
   hubSubtitle: {
     fontSize: 15,
     color: '#334155',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
     marginTop: 4,
   },
   exitBtn: {
@@ -769,14 +769,14 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
     letterSpacing: 0.5,
   },
   progressFraction: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   progressBarTrack: {
@@ -826,16 +826,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 3,
   },
   cardSub: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   checkCircle: {
     width: 26,
@@ -871,14 +871,14 @@ const styles = StyleSheet.create({
   submitBtnText: {
     color: '#FFFFFF',
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
   submitHint: {
     fontSize: 13,
     color: '#64748B',
     marginTop: 10,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
 
   // Sub-step layout styles
@@ -909,7 +909,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.4,
   },
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
     marginBottom: 8,
     letterSpacing: 0.5,
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: '#0F172A',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   textArea: {
     height: 88,
@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
   fetchAddressLargeBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.3,
   },
   lockedAddressBox: {
@@ -969,7 +969,7 @@ const styles = StyleSheet.create({
   lockedAddressInput: {
     fontSize: 16,
     color: '#0F172A',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     lineHeight: 22,
     padding: 0,
   },
@@ -984,9 +984,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   lockedPhoneText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     flex: 1,
   },
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
   },
   verifiedTagText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#15803D',
   },
   photoPreviewCard: {
@@ -1024,7 +1024,7 @@ const styles = StyleSheet.create({
   },
   retakeBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   removeBtn: {
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   },
   removeBtnText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#EF4444',
   },
   photoUploadPlaceholder: {
@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
   },
   uploadPromptTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 4,
   },
@@ -1084,7 +1084,7 @@ const styles = StyleSheet.create({
   uploadBtnPrimaryText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   uploadBtnSecondary: {
     backgroundColor: '#FFFFFF',
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
   uploadBtnSecondaryText: {
     color: '#0F172A',
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   saveBtn: {
     backgroundColor: '#047A36',
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
   saveBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
   btnDisabled: {

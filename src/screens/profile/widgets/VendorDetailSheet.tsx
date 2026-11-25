@@ -285,7 +285,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Daily Settlement UPI ID</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   {vendor?.bank_or_upi || 'Not linked'}
                 </Text>
               </View>
@@ -386,7 +386,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Order Alert</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '700' }]}>Active</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>Active</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
@@ -544,7 +544,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Commission Rate</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   {vendor?.commission_pct ?? 10}% Flat Rate
                 </Text>
               </View>
@@ -649,9 +649,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.4,
     flex: 1,
@@ -685,25 +685,25 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14.5,
     color: '#334155',
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   infoValue: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     maxWidth: '55%',
     textAlign: 'right',
   },
   phoneHighlightValue: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     textAlign: 'right',
   },
   addressValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     marginTop: 4,
     lineHeight: 22,
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: 14,
     color: '#047A36',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     flex: 1,
     lineHeight: 20,
   },
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
     color: '#334155',
     marginTop: 14,
     lineHeight: 20,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   actionBtn: {
     backgroundColor: '#047A36',
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   slotCard: {
     backgroundColor: '#F8FAFC',
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   },
   slotBadgeMorning: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
   },
   slotBadgeEvening: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
@@ -799,16 +799,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   slotTiming: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   slotSub: {
     fontSize: 14.5,
     color: '#334155',
     lineHeight: 20,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   langOptionCard: {
     flexDirection: 'row',
@@ -826,14 +826,14 @@ const styles = StyleSheet.create({
   },
   langOptionTitle: {
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 2,
   },
   langOptionSub: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   radioEmpty: {
     width: 20,

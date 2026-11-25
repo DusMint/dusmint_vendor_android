@@ -124,7 +124,7 @@ export const EarningsDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Active UPI ID</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   {payoutUpi}
                 </Text>
               </View>
@@ -248,7 +248,7 @@ export const EarningsDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Platform Commission</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   0% Launch Offer
                 </Text>
               </View>
@@ -265,7 +265,7 @@ export const EarningsDetailSheet: React.FC<Props> = ({
               <View style={styles.divider} />
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Merchant Payout Share</Text>
-                <Text style={[styles.infoValue, { color: '#059669', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#059669', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   100% of Product Value
                 </Text>
               </View>
@@ -349,7 +349,7 @@ export const EarningsDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Toll-Free Helpline</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontWeight: '800' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
                   1800-889-6468
                 </Text>
               </View>
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.3,
   },
@@ -507,11 +507,11 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 12.5,
     color: '#64748B',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   infoValue: {
     fontSize: 13.5,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     maxWidth: '60%',
     textAlign: 'right',
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: 12,
     color: '#15803D',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     flex: 1,
     lineHeight: 17,
   },
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
   },
   stepNumberText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   stepContent: {
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 2,
   },
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.2,
   },
 });

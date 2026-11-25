@@ -18,14 +18,14 @@ if (Text.defaultProps == null) Text.defaultProps = {};
 // @ts-ignore
 Text.defaultProps.maxFontSizeMultiplier = 1.15;
 // @ts-ignore
-Text.defaultProps.style = { fontFamily: 'Inter-Regular' };
+Text.defaultProps.style = { fontFamily: 'PlusJakartaSans-Regular' };
 
 // @ts-ignore
 if (TextInput.defaultProps == null) TextInput.defaultProps = {};
 // @ts-ignore
 TextInput.defaultProps.maxFontSizeMultiplier = 1.15;
 // @ts-ignore
-TextInput.defaultProps.style = { fontFamily: 'Inter-Regular' };
+TextInput.defaultProps.style = { fontFamily: 'PlusJakartaSans-Regular' };
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -312,6 +312,10 @@ function VendorTabs() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
+    'PlusJakartaSans-Regular': require('./assets/font/PlusJakartaSans-Regular.ttf'),
+    'PlusJakartaSans-Medium': require('./assets/font/PlusJakartaSans-Medium.ttf'),
+    'PlusJakartaSans-SemiBold': require('./assets/font/PlusJakartaSans-SemiBold.ttf'),
+    'PlusJakartaSans-Bold': require('./assets/font/PlusJakartaSans-Bold.ttf'),
     'Inter-Regular': require('./assets/font/PlusJakartaSans-Regular.ttf'),
     'Inter-Medium': require('./assets/font/PlusJakartaSans-Medium.ttf'),
     'Inter-SemiBold': require('./assets/font/PlusJakartaSans-SemiBold.ttf'),
@@ -435,25 +439,24 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   orderBadgeText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 9.5,
-    fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
     lineHeight: 12,
   },
   tabLabel: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 12,
     marginTop: 3,
     letterSpacing: -0.2,
   },
   tabLabelActive: {
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   tabLabelInactive: {
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#475569',
   },
 
@@ -482,9 +485,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   micSubLabel: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontWeight: '800',
     color: '#047A36',
     marginTop: 3,
     letterSpacing: -0.2,
@@ -522,13 +524,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   voiceTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
     color: '#111117',
     marginBottom: 4,
   },
   voiceSubtitle: {
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 13,
     color: '#64748B',
     textAlign: 'center',
@@ -581,14 +583,13 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   listeningText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontWeight: '800',
     color: '#047A36',
   },
   examplesLabel: {
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 10.5,
-    fontWeight: '800',
     color: '#94A3B8',
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -610,8 +611,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   exampleChipText: {
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 12,
-    fontWeight: '600',
     color: '#334155',
   },
   closeVoiceBtn: {
@@ -623,9 +624,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   closeVoiceBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13.5,
-    fontWeight: '800',
     color: '#475569',
   },
 });

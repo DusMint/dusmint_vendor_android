@@ -698,13 +698,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenTitle: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 25,
     color: '#111117',
     letterSpacing: -0.4,
   },
   headerTimeText: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 13.5,
     color: '#334155',
     letterSpacing: -0.1,
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D97706',
   },
   statusToggleText: {
-    fontFamily: 'Inter-SemiBold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 11,
     letterSpacing: 0.3,
   },
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contextHeroLabel: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 11.5,
     color: '#64748B',
     letterSpacing: 0.6,
@@ -791,13 +791,13 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   contextIncomeSymbol: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 21,
     color: '#0F172A',
     marginRight: 2,
   },
   contextIncomeValue: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 31,
     color: '#0F172A',
     letterSpacing: -0.5,
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   breakBtnText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 12,
     color: '#1E293B',
   },
@@ -856,13 +856,13 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   singleLineLabel: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 13,
     color: '#334155',
     marginRight: 4,
   },
   singleLineVal: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14.5,
     color: '#0F172A',
   },
@@ -905,12 +905,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   tabLabel: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#475569',
   },
   tabLabelActive: {
-    fontFamily: 'Inter-SemiBold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   tabCountBadge: {
@@ -924,7 +924,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
   },
   tabCountText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 11.5,
     color: '#1E293B',
   },
@@ -957,7 +957,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   emptyTitle: {
-    fontFamily: 'Inter-SemiBold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
     color: '#111117',
     marginBottom: 4,
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   orderCodeText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 19,
     color: '#0F172A',
     letterSpacing: -0.3,
@@ -1009,7 +1009,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   slotText: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 13,
     color: '#475569',
   },
@@ -1017,13 +1017,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   payoutAmountText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 21,
     color: '#047A36',
     letterSpacing: -0.3,
   },
   payoutSubText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 11.5,
     color: '#15803D',
     marginTop: 1,
@@ -1060,7 +1060,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   itemName: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 15,
     color: '#0F172A',
   },
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   itemWeightText: {
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 14.5,
     color: '#334155',
   },
@@ -1096,7 +1096,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   missingItemBtnText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14,
     color: '#DC2626',
   },
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryPackBtnText: {
-    fontFamily: 'Inter-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14.5,
     color: '#FFFFFF',
     letterSpacing: -0.1,
@@ -1151,9 +1151,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   readyStatusTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   readyStatusSub: {
@@ -1171,7 +1171,7 @@ const styles = StyleSheet.create({
   },
   riderPillText: {
     fontSize: 10.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   deliveredStatusStrip: {
@@ -1191,12 +1191,12 @@ const styles = StyleSheet.create({
   },
   deliveredText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   settledText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
 
@@ -1214,9 +1214,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   quickStockLinkText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
 
@@ -1254,9 +1254,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   breakSheetTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   breakSheetSub: {
@@ -1284,9 +1284,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   activeBreakTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#92400E',
   },
   activeBreakSub: {
@@ -1296,7 +1296,7 @@ const styles = StyleSheet.create({
   },
   breakDurationLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -1316,15 +1316,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   breakOptionMins: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 2,
   },
   breakOptionDesc: {
     fontSize: 10.5,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
   },
   resumeStoreBtn: {
@@ -1337,9 +1337,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resumeStoreBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

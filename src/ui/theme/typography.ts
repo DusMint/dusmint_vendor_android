@@ -1,14 +1,30 @@
 /**
- * Dusmint Design System - Typography
- * Poppins for headings, Noto Sans for clean multilingual body copy.
+ * DusMint Partner Design System — Android-Safe Typography Hierarchy
+ *
+ * IMPORTANT FOR ANDROID:
+ * Never combine `fontWeight: '700' | '800' | 'bold'` with a static `.ttf` `fontFamily`.
+ * Android synthesizes fake double-bolding or falls back to the OEM system font.
+ * Instead, always pick the exact static `fontFamily` weight below with NO `fontWeight`.
+ *
+ * Hierarchy:
+ * - Regular  (`PlusJakartaSans-Regular`)  -> Body text, dates, subtitles, item names, labels
+ * - Medium   (`PlusJakartaSans-Medium`)   -> Tabs, filter chips, secondary metrics, buttons
+ * - SemiBold (`PlusJakartaSans-SemiBold`) -> Screen headers, section headers, card titles, prices
+ * - Bold     (`PlusJakartaSans-Bold`)     -> Hero display numbers only
  */
 export const Typography = {
   fontFamily: {
-    heading: 'Poppins-SemiBold',
-    headingBold: 'Poppins-Bold',
-    body: 'NotoSans-Regular',
-    bodyMedium: 'NotoSans-Medium',
-    bodyBold: 'NotoSans-Bold',
+    regular: 'PlusJakartaSans-Regular',
+    medium: 'PlusJakartaSans-Medium',
+    semiBold: 'PlusJakartaSans-SemiBold',
+    bold: 'PlusJakartaSans-Bold',
+
+    // Semantic aliases
+    heading: 'PlusJakartaSans-SemiBold',
+    headingBold: 'PlusJakartaSans-SemiBold',
+    body: 'PlusJakartaSans-Regular',
+    bodyMedium: 'PlusJakartaSans-Medium',
+    bodyBold: 'PlusJakartaSans-SemiBold',
   },
   fontSize: {
     xs: 11,

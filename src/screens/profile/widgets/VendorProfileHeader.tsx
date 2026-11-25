@@ -220,7 +220,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
                   activeOpacity={0.7}
                 >
                   <Ionicons name="create-outline" size={18} color="#22C55E" style={{ marginRight: 10 }} />
-                  <Text style={[styles.menuItemText, { color: '#22C55E', fontWeight: '600' }]}>Edit Profile</Text>
+                  <Text style={[styles.menuItemText, { color: '#22C55E', fontFamily: 'PlusJakartaSans-Medium' }]}>Edit Profile</Text>
                 </TouchableOpacity>
 
                 <View style={styles.menuDivider} />
@@ -293,9 +293,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   screenTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   langText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
   },
   moreButton: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   placeholderLabel: {
     fontSize: 8,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     marginTop: 1,
   },
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     flexShrink: 1,
   },
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 10,
     color: '#15803D',
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
   ownerText: {
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   ownerBold: {
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   metaRow: {
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   verifiedMiniText: {
     fontSize: 12,
     color: '#047A36',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   photoModalBackdrop: {
     flex: 1,
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   photoShopTitle: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: -0.3,
   },
   photoSub: {
@@ -506,13 +506,13 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   logoutText: {
     fontSize: 15,
     color: '#DC2626',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   menuDivider: {
     height: 1,

@@ -319,9 +319,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
   },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     letterSpacing: 0.8,
   },
@@ -374,20 +374,20 @@ const styles = StyleSheet.create({
   },
   verifiedTagText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   balanceAmountText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 36,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -1,
   },
   balanceSubText: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     marginTop: 6,
     marginBottom: 16,
   },
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     color: '#047A36',
     lineHeight: 18,
     flex: 1,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   actionCard: {
     backgroundColor: '#FFFFFF',
@@ -420,9 +420,9 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   actionTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 12,
   },
@@ -445,9 +445,9 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   instantPayoutBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   sectionHeaderRow: {
@@ -457,15 +457,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.2,
   },
   sectionCountText: {
     fontSize: 11.5,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#9CA3AF',
   },
   unifiedCard: {
@@ -497,13 +497,13 @@ const styles = StyleSheet.create({
   },
   txDate: {
     fontSize: 13.5,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#334155',
   },
   txAmount: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   txBottomRow: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   txUpiText: {
     fontSize: 13.5,
     color: '#0F172A',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   txStatusPill: {
     backgroundColor: '#ECFDF5',
@@ -547,12 +547,12 @@ const styles = StyleSheet.create({
   },
   txStatusText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   txStatusTextProcessing: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#B45309',
   },
   toastContainer: {
@@ -576,7 +576,7 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     flex: 1,
   },
   // Modal Confirmation Styles
@@ -613,9 +613,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   modalTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 6,
   },
@@ -646,20 +646,20 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   modalSummaryVal: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   modalSummaryValUpi: {
     fontSize: 12.5,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   modalSummaryFree: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#059669',
   },
   modalActionsRow: {
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   },
   modalCancelText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
   },
   modalConfirmBtn: {
@@ -689,9 +689,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalConfirmText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

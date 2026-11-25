@@ -29,6 +29,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 11,
     color: '#94A3B8',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
 });

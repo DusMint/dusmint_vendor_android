@@ -465,9 +465,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.4,
   },
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     color: '#DC2626',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     flex: 1,
   },
   scrollContent: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
     marginBottom: 6,
     letterSpacing: 0.5,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     fontSize: 16,
     color: '#0F172A',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   fieldHint: {
     fontSize: 13,
@@ -544,12 +544,12 @@ const styles = StyleSheet.create({
   },
   catChipText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   catChipTextActive: {
     color: '#047A36',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   photoPreviewBox: {
     borderRadius: 14,
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   photoActionText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   noPhotoBox: {
@@ -602,7 +602,7 @@ const styles = StyleSheet.create({
   attachBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   attachBtnSecondary: {
     backgroundColor: '#FFFFFF',
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   attachBtnSecondaryText: {
     color: '#0F172A',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   saveBtn: {
     backgroundColor: '#047A36',
@@ -633,6 +633,6 @@ const styles = StyleSheet.create({
   saveBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
 });

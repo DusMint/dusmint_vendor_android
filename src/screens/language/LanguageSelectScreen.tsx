@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 8,
     textAlign: 'center',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 16,
     lineHeight: 20,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   gridContainer: {
     position: 'relative',
@@ -306,24 +306,23 @@ const styles = StyleSheet.create({
   },
   langName: {
     fontSize: 16,
-    fontFamily: 'Metropolis-Bold',
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
     marginBottom: 2,
   },
   langNameSelected: {
     color: '#047A36',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   langLocalName: {
     fontSize: 13,
-    fontFamily: 'Metropolis-Medium',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#94A3B8',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   langLocalNameSelected: {
     color: '#059669',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   bottomBar: {
     paddingHorizontal: 24,
@@ -346,9 +345,9 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     color: '#FFFFFF',
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 17,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
 });

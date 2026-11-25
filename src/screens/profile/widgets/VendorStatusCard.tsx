@@ -161,13 +161,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.2,
   },
   subtext: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     marginTop: 2,
   },
   statusDot: {

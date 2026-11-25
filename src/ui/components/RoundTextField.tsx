@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: Colors.primaryText,
   },
   errorText: {

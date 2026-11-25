@@ -285,14 +285,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 15,
     color: '#334155',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -304,11 +304,11 @@ const styles = StyleSheet.create({
   phoneHighlight: {
     fontSize: 16,
     color: '#0F172A',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   editText: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   otpBoxWrapper: {
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#EF4444',
     flex: 1,
   },
@@ -339,15 +339,15 @@ const styles = StyleSheet.create({
   resendTimerText: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '500',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   timerBold: {
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   resendActionText: {
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   verifyButton: {
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   verifyButtonText: {
     color: '#FFFFFF',
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
 });

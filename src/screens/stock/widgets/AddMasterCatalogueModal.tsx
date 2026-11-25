@@ -694,9 +694,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
     flex: 1,
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
   },
   categoryNavWrapper: {
@@ -768,14 +768,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   categoryPillText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   categoryPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   loadingContainer: {
     flex: 1,
@@ -784,9 +784,9 @@ const styles = StyleSheet.create({
     paddingVertical: 100,
   },
   loadingText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
     marginTop: 14,
   },
@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
   },
   resultsCount: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
     marginBottom: 12,
   },
@@ -827,15 +827,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   itemNameText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   itemCategoryText: {
     fontSize: 13,
     color: '#64748B',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     marginTop: 2,
   },
   addBtn: {
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
   },
   addBtnText: {
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   addBtnTextDone: {
@@ -886,9 +886,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   dialogTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogCloseBtn: {
@@ -915,15 +915,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   dialogItemName: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogItemMeta: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     marginTop: 2,
   },
   inputGroup: {
@@ -937,7 +937,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   textInputBox: {
@@ -952,16 +952,16 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   rupeePrefix: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     marginRight: 6,
   },
   modalTextInput: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   simpleStockRow: {
@@ -988,9 +988,9 @@ const styles = StyleSheet.create({
     borderColor: '#A7F3D0',
     borderRadius: 12,
     textAlign: 'center',
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   stockUnitBadge: {
@@ -1004,9 +1004,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stockUnitText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   quickPresetRow: {
@@ -1030,14 +1030,14 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   presetChipText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#475569',
   },
   presetChipTextActive: {
     color: '#047A36',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   confirmBtn: {
     backgroundColor: '#047A36',
@@ -1053,9 +1053,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   confirmBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

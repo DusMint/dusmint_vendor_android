@@ -235,15 +235,15 @@ const styles = StyleSheet.create({
     height: 22,
   },
   headerTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   subText: {
     fontSize: 14,
     color: '#334155',
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     marginTop: 1,
   },
   scroll: {
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   stepNum: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#475569',
     letterSpacing: 0.5,
   },
@@ -292,13 +292,13 @@ const styles = StyleSheet.create({
   },
   bleText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   cardHeading: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 4,
   },
@@ -316,15 +316,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   scaleValue: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 44,
-    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#34D399',
     letterSpacing: 1,
   },
   scaleUnit: {
     fontSize: 11,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#94A3B8',
     letterSpacing: 1.5,
     marginTop: 2,
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   weightAdjustText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   weightTolerance: {
@@ -381,13 +381,13 @@ const styles = StyleSheet.create({
   },
   ctaLabel: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     flex: 1,
   },
   ctaLabelDone: {
     color: '#047A36',
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
   },
   bottomBar: {
     position: 'absolute',
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   readyBtnText: {
     color: '#FFFFFF',
     fontSize: 16.5,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.3,
   },
 });

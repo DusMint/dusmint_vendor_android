@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   text: {
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
     textAlign: 'center',
   },
 });

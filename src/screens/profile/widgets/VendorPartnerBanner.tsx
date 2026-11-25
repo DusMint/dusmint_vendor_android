@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   partnerBrand: {
     color: '#047A36',
-    fontWeight: '900',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 22,
     fontStyle: 'italic',
     letterSpacing: -0.5,
@@ -90,12 +90,12 @@ const styles = StyleSheet.create({
   joinBadgeText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '800',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.6,
   },
   title: {
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 3,
     letterSpacing: -0.2,
@@ -103,6 +103,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
     color: '#64748B',
-    fontWeight: '400',
+    fontFamily: 'PlusJakartaSans-Regular',
   },
 });

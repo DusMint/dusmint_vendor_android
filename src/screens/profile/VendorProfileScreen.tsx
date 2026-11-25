@@ -397,6 +397,6 @@ const styles = StyleSheet.create({
   toastText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
 });
