@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   Text,
   TextInput,
-  ActivityIndicator,
+  Image,
   Modal,
   Vibration,
+  useWindowDimensions,
 } from 'react-native';
 
 // Enforce Inter-Regular as global default font & cap OS font scaling so every Android phone renders identically
@@ -344,6 +345,33 @@ export default function App() {
   const isAuthenticated = useVendorAuthStore((s) => s.isAuthenticated);
   const hasActiveVendor = useVendorAuthStore((s) => s.hasActiveVendor);
   const isHydrated = useVendorAuthStore((s) => s.isHydrated);
+  const { width: screenWidth } = useWindowDimensions();
+  const logoWidth = Math.min(280, Math.max(200, screenWidth * 0.6));
+
+  const [showSplash, setShowSplash] = useState(true);
+  const splashFade = useRef(new Animated.Value(0)).current;
+  const splashExitOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.timing(splashFade, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [splashFade]);
+
+  useEffect(() => {
+    if (fontsLoaded && isHydrated) {
+      const timer = setTimeout(() => {
+        Animated.timing(splashExitOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }).start(() => setShowSplash(false));
+      }, 1100);
+      return () => clearTimeout(timer);
+    }
+  }, [fontsLoaded, isHydrated, splashExitOpacity]);
 
   useEffect(() => {
     const cleanup = initVendorNetworkMonitoring();
@@ -353,7 +381,14 @@ export default function App() {
   if (!fontsLoaded || !isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <ActivityIndicator size="large" color="#047A36" />
+        <StatusBar style="dark" />
+        <Animated.View style={{ opacity: splashFade }}>
+          <Image
+            source={require('./assets/adaptive-icon.png')}
+            style={{ width: logoWidth, height: logoWidth }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </View>
     );
   }
@@ -379,6 +414,30 @@ export default function App() {
           <Stack.Screen name="VendorPack" component={VendorPackScreen} />
         </Stack.Navigator>
         <OfflineTopBanner />
+        {showSplash && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: '#FFFFFF',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 999999,
+                elevation: 99,
+                opacity: splashExitOpacity,
+              },
+            ]}
+          >
+            <Animated.View style={{ opacity: splashFade }}>
+              <Image
+                source={require('./assets/adaptive-icon.png')}
+                style={{ width: logoWidth, height: logoWidth }}
+                resizeMode="contain"
+              />
+            </Animated.View>
+          </Animated.View>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );

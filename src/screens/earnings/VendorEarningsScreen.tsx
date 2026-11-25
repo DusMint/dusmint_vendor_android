@@ -297,8 +297,17 @@ export const VendorEarningsScreen: React.FC = () => {
     loadData();
   };
 
-  // Filter completed orders based on selected range
+  const isDemoVendor = Boolean(
+    (user?.phone || activeVendor?.owner_phone || persistedVendor?.owner_phone || '')
+      .replace(/\D/g, '')
+      .endsWith('9876543210')
+  );
+
+  // Filter completed orders based on selected range (demo orders only for 9876543210)
   const filteredOrders = useMemo(() => {
+    if (!isDemoVendor) {
+      return [];
+    }
     const now = new Date();
     if (range === 'today') {
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -311,13 +320,24 @@ export const VendorEarningsScreen: React.FC = () => {
       return ALL_COMPLETED_ORDERS.filter((o) => o.timestamp >= monthAgo);
     }
     return ALL_COMPLETED_ORDERS;
-  }, [range]);
+  }, [range, isDemoVendor]);
 
   // Aggregated metrics for selected range
   const rangeMetrics = useMemo(() => {
+    const liveToday = earningsData ? earningsData.todaySalesPaise / 100 : 0;
+    const livePending = earningsData ? earningsData.netPayoutPendingPaise / 100 : 0;
+
+    if (!isDemoVendor) {
+      return {
+        amount: liveToday,
+        orderCount: 0,
+        remainingSettlement: livePending,
+        label: range === 'today' ? 'Today' : range === 'week' ? 'This Week' : 'This Month',
+      };
+    }
+
     if (range === 'today') {
-      const todayLive = earningsData ? earningsData.todaySalesPaise / 100 : 0;
-      const amount = todayLive > 0 ? todayLive : 1240.0;
+      const amount = liveToday > 0 ? liveToday : 1240.0;
       const orderCount = filteredOrders.length > 0 ? filteredOrders.length : 2;
       return {
         amount,
@@ -344,7 +364,7 @@ export const VendorEarningsScreen: React.FC = () => {
         label: 'This Month',
       };
     }
-  }, [range, earningsData, filteredOrders]);
+  }, [range, earningsData, filteredOrders, isDemoVendor]);
 
   // Comforting smooth rolling numbers (Zero blink)
   const animatedAmount = useAnimatedNumber(rangeMetrics.amount, 320);

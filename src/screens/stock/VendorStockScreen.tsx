@@ -23,6 +23,7 @@ import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 import { useVendorStockStore } from '../../state/useVendorStockStore';
+import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
 // Categories Filter - Limited strictly to Vegetables, Fruits, Meat, Dairy
 const CATEGORIES = ['All', 'Vegetables', 'Fruits', 'Meat', 'Dairy'] as const;
@@ -628,12 +629,18 @@ export const VendorStockScreen: React.FC = () => {
     }, 2400);
   }, [toastAnim, toastOpacity]);
 
-  // Load Vendor Stock
+  // Load Vendor Stock — only seed demo stock for test number 9876543210
+  const user = useVendorAuthStore((s) => s.user);
+  const activeVendor = useVendorAuthStore((s) => s.activeVendor);
+  const isDemoVendor = Boolean(
+    (user?.phone || activeVendor?.owner_phone || '').replace(/\D/g, '').endsWith('9876543210')
+  );
+
   const loadStock = useCallback(async () => {
     try {
-      const data = await dusmintApi.getVendorStock();
+      const vendorId = activeVendor?.id;
+      const data = vendorId ? await dusmintApi.getVendorStock(vendorId) : [];
       if (data && data.length > 0) {
-        // Merge server data with our rich local stockKg, stockGrams and photoUrl fields
         const merged = data.map((serverItem) => {
           const match = INITIAL_STORE_STOCK.find((d) => d.nameEn.toLowerCase() === serverItem.nameEn.toLowerCase());
           return {
@@ -645,15 +652,15 @@ export const VendorStockScreen: React.FC = () => {
         });
         setItems(merged);
       } else {
-        setItems(INITIAL_STORE_STOCK);
+        setItems(isDemoVendor ? INITIAL_STORE_STOCK : []);
       }
     } catch {
-      setItems(INITIAL_STORE_STOCK);
+      setItems(isDemoVendor ? INITIAL_STORE_STOCK : []);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [activeVendor?.id, isDemoVendor, setItems]);
 
   useEffect(() => {
     loadStock();

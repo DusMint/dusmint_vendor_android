@@ -127,19 +127,30 @@ const FALLBACK_ORDERS: VendorOrderPart[] = [
   },
 ];
 
+export const isDemoTestVendor = (phone?: string | null): boolean =>
+  Boolean(phone && phone.replace(/\D/g, '').endsWith('9876543210'));
+
 export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const user = useVendorAuthStore((s) => s.user);
+  const activeVendor = useVendorAuthStore((s) => s.activeVendor);
   const isStoreOpen = useVendorAuthStore((s) => s.isStoreOpen);
   const setStoreOpen = useVendorAuthStore((s) => s.setStoreOpen);
   const breakUntil = useVendorAuthStore((s) => s.breakUntil);
   const setStoreBreak = useVendorAuthStore((s) => s.setStoreBreak);
 
+  const isDemoVendor = isDemoTestVendor(user?.phone || activeVendor?.owner_phone);
+
   const [activeTab, setActiveTab] = useState<'to_pack' | 'ready' | 'delivered'>('to_pack');
-  const [vendors, setVendors] = useState<VendorProfileInfo[]>(FALLBACK_VENDORS);
-  const [selectedVendorId, setSelectedVendorId] = useState<string>('vendor-1');
-  const [orders, setOrders] = useState<VendorOrderPart[]>(FALLBACK_ORDERS);
+  const [vendors, setVendors] = useState<VendorProfileInfo[]>(
+    activeVendor ? [activeVendor] : isDemoVendor ? FALLBACK_VENDORS : []
+  );
+  const [selectedVendorId, setSelectedVendorId] = useState<string>(
+    activeVendor?.id || (isDemoVendor ? 'vendor-1' : '')
+  );
+  const [orders, setOrders] = useState<VendorOrderPart[]>(isDemoVendor ? FALLBACK_ORDERS : []);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [todayIncome, setTodayIncome] = useState<number>(1240);
+  const [todayIncome, setTodayIncome] = useState<number>(isDemoVendor ? 1240 : 0);
   const [showBreakModal, setShowBreakModal] = useState<boolean>(false);
   const [currentDateTime, setCurrentDateTime] = useState<string>(() => formatCurrentDateTime(new Date()));
   const previousOrderCountRef = useRef<number>(0);
@@ -161,26 +172,50 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
   // Animated sliding indicator for 3 status tabs (0: to_pack, 1: ready, 2: delivered)
   const tabAnim = useRef(new Animated.Value(0)).current;
 
-  // 1. Fetch vendor list
+  // 1. Bind strictly to the logged-in user's own shop (never another vendor's shop)
   useEffect(() => {
-    async function loadVendors() {
-      try {
-        const list = await dusmintApi.getVendorList();
-        if (list && list.length > 0) {
-          setVendors(list);
-          setSelectedVendorId(list[0].id);
-        }
-      } catch {
-        // Fallback vendor already set
-      }
+    if (activeVendor?.id) {
+      setVendors([activeVendor]);
+      setSelectedVendorId(activeVendor.id);
+      return;
     }
-    loadVendors();
-  }, []);
+    const cleanPhone = (user?.phone || '').replace(/\D/g, '').slice(-10);
+    if (!cleanPhone) return;
+
+    dusmintApi
+      .getMyVendorProfile(cleanPhone)
+      .then((profile) => {
+        if (profile) {
+          useVendorAuthStore.getState().setActiveVendor(profile);
+          setVendors([profile]);
+          setSelectedVendorId(profile.id);
+        }
+      })
+      .catch(() => {});
+  }, [activeVendor, user?.phone]);
 
   // 2. Fetch vendor orders & sync earnings
   const fetchOrders = useCallback(async (isPolling = false) => {
     try {
-      const data = await dusmintApi.getVendorOrders(selectedVendorId || undefined);
+      const targetVendorId = activeVendor?.id || selectedVendorId;
+      if (!targetVendorId && !isDemoVendor) {
+        setOrders([]);
+        setTodayIncome(0);
+        useVendorAuthStore.getState().setPendingOrdersCount(0);
+        return;
+      }
+
+      const [data, earnings] = await Promise.all([
+        dusmintApi.getVendorOrders(targetVendorId || undefined),
+        targetVendorId ? dusmintApi.getVendorEarnings(targetVendorId).catch(() => null) : Promise.resolve(null),
+      ]);
+
+      if (earnings && typeof earnings.todaySalesPaise === 'number') {
+        setTodayIncome(Math.round(earnings.todaySalesPaise / 100));
+      } else if (!isDemoVendor) {
+        setTodayIncome(0);
+      }
+
       if (data && data.length > 0) {
         setOrders(data);
 
@@ -192,6 +227,9 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
           Alert.alert('New Order Received', 'A customer order has arrived. Please pack the items.');
         }
         previousOrderCountRef.current = pendingCount;
+      } else if (!isDemoVendor) {
+        setOrders([]);
+        useVendorAuthStore.getState().setPendingOrdersCount(0);
       }
 
       // Sync Today's Income precisely with VendorEarningsScreen
