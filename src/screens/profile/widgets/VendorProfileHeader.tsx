@@ -295,7 +295,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
   },

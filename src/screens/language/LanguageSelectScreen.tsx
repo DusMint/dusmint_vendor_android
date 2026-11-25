@@ -318,7 +318,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'PlusJakartaSans-Medium',
     color: '#94A3B8',
-    fontFamily: 'PlusJakartaSans-Medium',
   },
   langLocalNameSelected: {
     color: '#059669',
@@ -347,7 +346,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 17,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     letterSpacing: 0.5,
   },
 });

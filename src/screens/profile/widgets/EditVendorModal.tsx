@@ -467,7 +467,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.4,
   },

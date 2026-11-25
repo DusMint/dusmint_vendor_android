@@ -696,7 +696,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     marginTop: 16,
     marginBottom: 16,
@@ -733,7 +732,6 @@ const styles = StyleSheet.create({
   rangeTabText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   rangeTabTextActive: {
@@ -772,7 +770,6 @@ const styles = StyleSheet.create({
   heroAmountText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 36,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -1,
   },
@@ -820,7 +817,6 @@ const styles = StyleSheet.create({
   metricValue: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 24,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   payoutActionCard: {
@@ -857,7 +853,6 @@ const styles = StyleSheet.create({
   payoutActionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginLeft: 14,
   },
@@ -886,7 +881,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.2,
   },
@@ -948,7 +942,6 @@ const styles = StyleSheet.create({
   orderDate: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 4,
   },
@@ -966,7 +959,6 @@ const styles = StyleSheet.create({
   orderAmount: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   orderAmountZero: {
@@ -1010,7 +1002,6 @@ const styles = StyleSheet.create({
   dialogOrderCode: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogStatusBadge: {
@@ -1071,7 +1062,6 @@ const styles = StyleSheet.create({
   dialogItemTotal: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogItemSub: {
@@ -1094,13 +1084,11 @@ const styles = StyleSheet.create({
   dialogTotalLabel: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogTotalAmount: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 22,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   dialogDoneBtn: {
@@ -1118,7 +1106,6 @@ const styles = StyleSheet.create({
   dialogDoneBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   paginationRow: {

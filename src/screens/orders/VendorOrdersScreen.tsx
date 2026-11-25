@@ -1153,7 +1153,6 @@ const styles = StyleSheet.create({
   readyStatusTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   readyStatusSub: {
@@ -1216,7 +1215,6 @@ const styles = StyleSheet.create({
   quickStockLinkText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
 
@@ -1256,7 +1254,6 @@ const styles = StyleSheet.create({
   breakSheetTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   breakSheetSub: {
@@ -1286,7 +1283,6 @@ const styles = StyleSheet.create({
   activeBreakTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#92400E',
   },
   activeBreakSub: {
@@ -1318,7 +1314,6 @@ const styles = StyleSheet.create({
   breakOptionMins: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 2,
   },
@@ -1339,7 +1334,6 @@ const styles = StyleSheet.create({
   resumeStoreBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

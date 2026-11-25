@@ -776,7 +776,6 @@ const styles = StyleSheet.create({
   progressFraction: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   progressBarTrack: {
@@ -828,7 +827,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 3,
   },
@@ -986,7 +984,6 @@ const styles = StyleSheet.create({
   lockedPhoneText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     flex: 1,
   },

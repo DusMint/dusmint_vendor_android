@@ -701,7 +701,6 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   resultSubTitle: {
@@ -741,7 +740,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     fontStyle: 'italic',
   },
@@ -762,7 +760,6 @@ const styles = StyleSheet.create({
   doneActionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   doneActionEn: {
@@ -785,7 +782,6 @@ const styles = StyleSheet.create({
   undoBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 11.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   progressBarBg: {
@@ -814,7 +810,6 @@ const styles = StyleSheet.create({
   confirmTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#92400E',
   },
   confirmPrompt: {
@@ -841,7 +836,6 @@ const styles = StyleSheet.create({
   cancelConfirmBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   acceptConfirmBtn: {
@@ -855,7 +849,6 @@ const styles = StyleSheet.create({
   acceptConfirmBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   optionsList: {
@@ -914,7 +907,6 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   bottomActionRow: {
@@ -935,7 +927,6 @@ const styles = StyleSheet.create({
   speakAgainBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   doneDismissBtn: {
@@ -949,7 +940,6 @@ const styles = StyleSheet.create({
   doneDismissBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

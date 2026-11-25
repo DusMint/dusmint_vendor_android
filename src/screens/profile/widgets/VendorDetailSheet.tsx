@@ -651,7 +651,6 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.4,
     flex: 1,
@@ -697,7 +696,6 @@ const styles = StyleSheet.create({
   phoneHighlightValue: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     textAlign: 'right',
   },
@@ -801,7 +799,6 @@ const styles = StyleSheet.create({
   slotTiming: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   slotSub: {

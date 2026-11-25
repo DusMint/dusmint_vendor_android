@@ -919,7 +919,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     marginTop: 16,
     marginBottom: 16,
@@ -995,13 +994,11 @@ const styles = StyleSheet.create({
   metricValActive: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   metricValOut: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   metricLabelActive: {
@@ -1033,7 +1030,6 @@ const styles = StyleSheet.create({
   addProduceBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
     letterSpacing: -0.2,
   },
@@ -1067,7 +1063,6 @@ const styles = StyleSheet.create({
   categoryPillText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#1E293B',
   },
   categoryPillTextActive: {
@@ -1083,7 +1078,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.2,
   },
@@ -1139,7 +1133,6 @@ const styles = StyleSheet.create({
   itemName: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -0.2,
   },
@@ -1152,7 +1145,6 @@ const styles = StyleSheet.create({
   priceText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     marginTop: 3,
   },
@@ -1180,7 +1172,6 @@ const styles = StyleSheet.create({
   totalStockBadgeText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#15803D',
     letterSpacing: -0.2,
   },
@@ -1262,7 +1253,6 @@ const styles = StyleSheet.create({
   stepperNum: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   stepperNumOut: {
@@ -1371,7 +1361,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   modalSubtitle: {
@@ -1413,7 +1402,6 @@ const styles = StyleSheet.create({
   modalItemName: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   modalItemCat: {
@@ -1438,7 +1426,6 @@ const styles = StyleSheet.create({
   modalLiveBadgeVal: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     marginTop: 1,
   },
@@ -1468,7 +1455,6 @@ const styles = StyleSheet.create({
   modalDeductChipText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   modalAddChip: {
@@ -1483,7 +1469,6 @@ const styles = StyleSheet.create({
   modalAddChipText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   modalAddChipHighlight: {
@@ -1522,7 +1507,6 @@ const styles = StyleSheet.create({
   modalDeductActionText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#DC2626',
   },
   modalAddActionBtn: {
@@ -1536,7 +1520,6 @@ const styles = StyleSheet.create({
   modalAddActionText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   modalDoneBtn: {
@@ -1554,7 +1537,6 @@ const styles = StyleSheet.create({
   modalDoneBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

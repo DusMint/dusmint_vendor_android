@@ -291,7 +291,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'PlusJakartaSans-Medium',
     color: '#EF4444',
-    fontFamily: 'PlusJakartaSans-Medium',
   },
   continueBtn: {
     height: 54,

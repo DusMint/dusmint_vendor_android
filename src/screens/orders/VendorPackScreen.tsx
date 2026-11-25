@@ -237,7 +237,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   subText: {
@@ -298,7 +297,6 @@ const styles = StyleSheet.create({
   cardHeading: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 4,
   },
@@ -318,7 +316,6 @@ const styles = StyleSheet.create({
   scaleValue: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 44,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#34D399',
     letterSpacing: 1,
   },

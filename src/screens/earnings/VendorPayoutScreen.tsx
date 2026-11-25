@@ -321,7 +321,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
   },
@@ -380,7 +379,6 @@ const styles = StyleSheet.create({
   balanceAmountText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 36,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     letterSpacing: -1,
   },
@@ -422,7 +420,6 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 12,
   },
@@ -447,7 +444,6 @@ const styles = StyleSheet.create({
   instantPayoutBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
   sectionHeaderRow: {
@@ -459,7 +455,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.2,
   },
@@ -503,7 +498,6 @@ const styles = StyleSheet.create({
   txAmount: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
   },
   txBottomRow: {
@@ -615,7 +609,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
     marginBottom: 6,
   },
@@ -648,7 +641,6 @@ const styles = StyleSheet.create({
   modalSummaryVal: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   modalSummaryValUpi: {
@@ -659,7 +651,6 @@ const styles = StyleSheet.create({
   modalSummaryFree: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#059669',
   },
   modalActionsRow: {
@@ -691,7 +682,6 @@ const styles = StyleSheet.create({
   modalConfirmText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });

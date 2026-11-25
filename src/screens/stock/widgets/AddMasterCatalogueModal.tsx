@@ -696,7 +696,6 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 26,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#111117',
     letterSpacing: -0.5,
     flex: 1,
@@ -770,7 +769,6 @@ const styles = StyleSheet.create({
   categoryPillText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#334155',
   },
   categoryPillTextActive: {
@@ -786,7 +784,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#64748B',
     marginTop: 14,
   },
@@ -829,7 +826,6 @@ const styles = StyleSheet.create({
   itemNameText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   itemCategoryText: {
@@ -888,7 +884,6 @@ const styles = StyleSheet.create({
   dialogTitle: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogCloseBtn: {
@@ -917,7 +912,6 @@ const styles = StyleSheet.create({
   dialogItemName: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   dialogItemMeta: {
@@ -954,7 +948,6 @@ const styles = StyleSheet.create({
   rupeePrefix: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#047A36',
     marginRight: 6,
   },
@@ -990,7 +983,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   stockUnitBadge: {
@@ -1006,7 +998,6 @@ const styles = StyleSheet.create({
   stockUnitText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#0F172A',
   },
   quickPresetRow: {
@@ -1032,7 +1023,6 @@ const styles = StyleSheet.create({
   presetChipText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 12.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#475569',
   },
   presetChipTextActive: {
@@ -1055,7 +1045,6 @@ const styles = StyleSheet.create({
   confirmBtnText: {
     fontFamily: 'PlusJakartaSans-SemiBold',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
     color: '#FFFFFF',
   },
 });
