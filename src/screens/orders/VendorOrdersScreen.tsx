@@ -232,24 +232,23 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         useVendorAuthStore.getState().setPendingOrdersCount(0);
       }
 
-      // Sync Today's Income precisely with VendorEarningsScreen
+      // Sync Today's Income from backend (demo ₹1,240 fallback ONLY for test number 9876543210)
       try {
-        const earnings = await dusmintApi.getVendorEarnings(selectedVendorId || undefined);
-        if (earnings?.todaySalesPaise && earnings.todaySalesPaise > 0) {
+        const earnings = await dusmintApi.getVendorEarnings(targetVendorId || undefined);
+        if (earnings && typeof earnings.todaySalesPaise === 'number' && earnings.todaySalesPaise > 0) {
           setTodayIncome(Math.round(earnings.todaySalesPaise / 100));
         } else {
-          setTodayIncome(1240);
+          setTodayIncome(isDemoVendor ? 1240 : 0);
         }
       } catch {
-        setTodayIncome(1240);
+        setTodayIncome(isDemoVendor ? 1240 : 0);
       }
     } catch {
-      // Retain fallback orders and earnings
-      setTodayIncome(1240);
+      setTodayIncome(isDemoVendor ? 1240 : 0);
     } finally {
       setRefreshing(false);
     }
-  }, [selectedVendorId]);
+  }, [activeVendor?.id, selectedVendorId, isDemoVendor]);
 
   useEffect(() => {
     fetchOrders();

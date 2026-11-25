@@ -863,6 +863,22 @@ export const VendorStockScreen: React.FC = () => {
             <ActivityIndicator size="large" color="#047A36" />
             <Text style={styles.loadingText}>Loading inventory...</Text>
           </View>
+        ) : filteredItems.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons name="basket-outline" size={30} color="#047A36" />
+            </View>
+            <Text style={styles.emptyTitle}>
+              {selectedCategory === 'All'
+                ? 'No Stock Items Listed Yet'
+                : `No ${selectedCategory} in Stock`}
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              {selectedCategory === 'All'
+                ? "Tap '+ Add Vegetable, Fruit, Meat, Dairy' above to add items to your store."
+                : `Add ${selectedCategory.toLowerCase()} from the master catalogue or switch back to All.`}
+            </Text>
+          </View>
         ) : (
           filteredItems.map((item) => (
             <StockInventoryCard

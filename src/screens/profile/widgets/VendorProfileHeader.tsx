@@ -219,39 +219,8 @@ export const VendorProfileHeader: React.FC<Props> = ({
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="create-outline" size={18} color="#22C55E" style={{ marginRight: 10 }} />
-                  <Text style={[styles.menuItemText, { color: '#22C55E', fontFamily: 'PlusJakartaSans-Medium' }]}>Edit Profile</Text>
-                </TouchableOpacity>
-
-                <View style={styles.menuDivider} />
-
-                {onSwitchStore && (
-                  <>
-                    <TouchableOpacity
-                      style={styles.menuItem}
-                      onPress={() => {
-                        setMenuVisible(false);
-                        onSwitchStore();
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="swap-horizontal-outline" size={18} color="#0284C7" style={{ marginRight: 10 }} />
-                      <Text style={styles.menuItemText}>Switch Dukaan</Text>
-                    </TouchableOpacity>
-                    <View style={styles.menuDivider} />
-                  </>
-                )}
-
-                <TouchableOpacity
-                  style={styles.menuItem}
-                  onPress={() => {
-                    setMenuVisible(false);
-                    onHelpPress();
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="headset-outline" size={18} color="#0F172A" style={{ marginRight: 10 }} />
-                  <Text style={styles.menuItemText}>Partner Helpline</Text>
+                  <Ionicons name="create-outline" size={18} color="#0F172A" style={{ marginRight: 10 }} />
+                  <Text style={styles.menuItemText}>Edit Profile</Text>
                 </TouchableOpacity>
 
                 <View style={styles.menuDivider} />
@@ -264,8 +233,8 @@ export const VendorProfileHeader: React.FC<Props> = ({
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="log-out-outline" size={18} color="#D32F2F" style={{ marginRight: 10 }} />
-                  <Text style={styles.logoutText}>Log Out</Text>
+                  <Ionicons name="log-out-outline" size={18} color="#DC2626" style={{ marginRight: 10 }} />
+                  <Text style={styles.menuItemText}>Log Out</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
