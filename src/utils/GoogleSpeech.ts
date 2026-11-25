@@ -10,7 +10,10 @@ export interface GoogleSpeechResult {
   error?: string;
 }
 
-const speechEmitter = Platform.OS === 'android' && GoogleSpeech ? new NativeEventEmitter(GoogleSpeech) : null;
+const speechEmitter =
+  Platform.OS === 'android' && GoogleSpeech && typeof (GoogleSpeech as any).addListener === 'function'
+    ? new NativeEventEmitter(GoogleSpeech)
+    : null;
 
 /**
  * Returns true if the native Google Speech Recognition service is available on this device
