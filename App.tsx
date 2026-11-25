@@ -46,6 +46,8 @@ import { VendorOtpScreen } from './src/screens/auth/VendorOtpScreen';
 import { VendorOnboardingScreen } from './src/screens/onboarding/VendorOnboardingScreen';
 import { VendorVoiceModal } from './src/screens/voice/VendorVoiceModal';
 import { useVendorAuthStore } from './src/state/useVendorAuthStore';
+import { initVendorNetworkMonitoring } from './src/state/useVendorNetworkStore';
+import { OfflineTopBanner } from './src/ui/components/OfflineTopBanner';
 
 // Suppress dev-mode LogBox banners to prevent bottom navigation occlusion
 LogBox.ignoreAllLogs(true);
@@ -343,6 +345,11 @@ export default function App() {
   const hasActiveVendor = useVendorAuthStore((s) => s.hasActiveVendor);
   const isHydrated = useVendorAuthStore((s) => s.isHydrated);
 
+  useEffect(() => {
+    const cleanup = initVendorNetworkMonitoring();
+    return () => cleanup?.();
+  }, []);
+
   if (!fontsLoaded || !isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
@@ -371,6 +378,7 @@ export default function App() {
           <Stack.Screen name="Tabs" component={VendorTabs} />
           <Stack.Screen name="VendorPack" component={VendorPackScreen} />
         </Stack.Navigator>
+        <OfflineTopBanner />
       </NavigationContainer>
     </SafeAreaProvider>
   );

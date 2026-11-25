@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { useVendorNetworkStore } from '../state/useVendorNetworkStore';
 import {
   UserProfile,
   Address,
@@ -39,6 +40,20 @@ export class DusmintApiClient {
       }
       return config;
     });
+
+    this.client.interceptors.response.use(
+      (response) => {
+        useVendorNetworkStore.getState().setOffline(false);
+        return response;
+      },
+      (error) => {
+        if (!error.response) {
+          // Network/connection failure (no server response)
+          useVendorNetworkStore.getState().setOffline(true);
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   public setAuthToken(token: string | null) {
