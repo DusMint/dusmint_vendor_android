@@ -917,12 +917,12 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   screenTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 26,
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 25,
     color: '#111117',
     marginTop: 16,
     marginBottom: 16,
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   metricsRow: {
     flexDirection: 'row',
@@ -992,24 +992,24 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   metricValActive: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 20,
     color: '#047A36',
   },
   metricValOut: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 20,
     color: '#DC2626',
   },
   metricLabelActive: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#1F2937',
     flexShrink: 1,
   },
   metricLabelOut: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#6B7280',
     flexShrink: 1,
   },
@@ -1028,10 +1028,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   addProduceBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 15,
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 14.5,
     color: '#FFFFFF',
-    letterSpacing: -0.2,
+    letterSpacing: -0.1,
   },
   categoryNavWrapper: {
     paddingVertical: 2,
@@ -1061,13 +1061,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   categoryPillText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 14,
-    color: '#1E293B',
+    fontFamily: 'PlusJakartaSans-Regular',
+    fontSize: 13.5,
+    color: '#334155',
   },
   categoryPillTextActive: {
     color: '#FFFFFF',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -1076,14 +1076,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 16,
     color: '#111117',
     letterSpacing: -0.2,
   },
   sectionCountText: {
     fontSize: 11.5,
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#9CA3AF',
   },
   card: {
@@ -1131,27 +1131,27 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   itemName: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 16.5,
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 15.5,
     color: '#0F172A',
     letterSpacing: -0.2,
   },
   itemCategoryUnit: {
-    fontSize: 13.5,
-    color: '#334155',
+    fontSize: 13,
+    color: '#475569',
     marginTop: 2,
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   priceText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 20,
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 19,
     color: '#047A36',
     marginTop: 3,
   },
   priceUnitText: {
-    fontSize: 13,
-    color: '#334155',
-    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 12.5,
+    color: '#475569',
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   totalStockBadge: {
     backgroundColor: '#F0FDF4',
@@ -1170,10 +1170,10 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
   totalStockBadgeText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    fontSize: 13,
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 12.5,
     color: '#15803D',
-    letterSpacing: -0.2,
+    letterSpacing: -0.1,
   },
   totalStockBadgeTextOut: {
     color: '#DC2626',
@@ -1197,11 +1197,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stepperColLabel: {
-    fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: '#334155',
+    fontSize: 11.5,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#64748B',
     marginBottom: 5,
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   gramsLabelRow: {
@@ -1212,7 +1212,7 @@ const styles = StyleSheet.create({
   },
   quickModalLink: {
     fontSize: 11,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
     textDecorationLine: 'underline',
   },
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
     minHeight: 28,
   },
   stepperNum: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 18,
     color: '#0F172A',
   },
@@ -1260,7 +1260,7 @@ const styles = StyleSheet.create({
   },
   stepperUnitLabel: {
     fontSize: 8.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#64748B',
     textTransform: 'uppercase',
   },
@@ -1280,7 +1280,7 @@ const styles = StyleSheet.create({
   },
   quickChipText: {
     fontSize: 10.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Regular',
     color: '#334155',
   },
   quickChipHighlightBtn: {
@@ -1295,7 +1295,7 @@ const styles = StyleSheet.create({
   },
   quickChipHighlightText: {
     fontSize: 10.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
   },
   loadingContainer: {

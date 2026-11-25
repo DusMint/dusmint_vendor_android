@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   resultTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 18,
     color: '#0F172A',
   },
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderLabel: {
     fontSize: 11,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   },
   askedQuoteText: {
     flex: 1,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 15,
     color: '#0F172A',
     fontStyle: 'italic',
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   doneActionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14.5,
     color: '#0F172A',
   },
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   undoBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 11.5,
     color: '#DC2626',
   },
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   confirmTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14,
     color: '#92400E',
   },
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelConfirmBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#DC2626',
   },
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   acceptConfirmBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#FFFFFF',
   },
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
   },
   optionBtnText: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#166534',
   },
   cancelBtnWide: {
@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: {
     fontSize: 12.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
   },
   chipsSectionResult: {
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
   },
   chipsSectionLabel: {
     fontSize: 11,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#94A3B8',
     letterSpacing: 0.5,
     marginBottom: 6,
@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   chipText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 12,
     color: '#334155',
   },
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   speakAgainBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#047A36',
   },
@@ -938,7 +938,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   doneDismissBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#FFFFFF',
   },

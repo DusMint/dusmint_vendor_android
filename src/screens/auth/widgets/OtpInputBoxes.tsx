@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   },
   digitText: {
     fontSize: 22,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     textAlign: 'center',
   },

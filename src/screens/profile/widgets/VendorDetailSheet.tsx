@@ -285,7 +285,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Daily Settlement UPI ID</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-Medium' }]}>
                   {vendor?.bank_or_upi || 'Not linked'}
                 </Text>
               </View>
@@ -386,7 +386,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Order Alert</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>Active</Text>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-Medium' }]}>Active</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.infoRow}>
@@ -544,7 +544,7 @@ export const VendorDetailSheet: React.FC<Props> = ({
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Commission Rate</Text>
-                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-SemiBold' }]}>
+                <Text style={[styles.infoValue, { color: '#047A36', fontFamily: 'PlusJakartaSans-Medium' }]}>
                   {vendor?.commission_pct ?? 10}% Flat Rate
                 </Text>
               </View>
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 20,
     color: '#0F172A',
     letterSpacing: -0.4,
@@ -684,17 +684,17 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14.5,
     color: '#334155',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   infoValue: {
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     maxWidth: '55%',
     textAlign: 'right',
   },
   phoneHighlightValue: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 20,
     color: '#047A36',
     textAlign: 'right',
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   slotCard: {
     backgroundColor: '#F8FAFC',
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   },
   slotBadgeMorning: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
   },
   slotBadgeEvening: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
     backgroundColor: '#ECFDF5',
     borderWidth: 1,
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   slotTiming: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 18,
     color: '#0F172A',
   },
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
   },
   langOptionTitle: {
     fontSize: 16.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     marginBottom: 2,
   },

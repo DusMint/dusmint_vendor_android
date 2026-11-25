@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   screenTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 26,
     color: '#111117',
     letterSpacing: -0.5,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   placeholderLabel: {
     fontSize: 8,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
     marginTop: 1,
   },
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     flexShrink: 1,
   },
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 10,
     color: '#15803D',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     letterSpacing: 0.5,
   },
   ownerText: {
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   ownerBold: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
   },
   metaRow: {
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   verifiedMiniText: {
     fontSize: 12,
     color: '#047A36',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   photoModalBackdrop: {
     flex: 1,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   photoShopTitle: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     letterSpacing: -0.3,
   },
   photoSub: {
@@ -505,13 +505,13 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
   },
   logoutText: {
     fontSize: 15,
     color: '#DC2626',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   menuDivider: {
     height: 1,

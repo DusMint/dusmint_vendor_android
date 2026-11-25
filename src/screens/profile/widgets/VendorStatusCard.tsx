@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 15,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     letterSpacing: -0.2,
   },

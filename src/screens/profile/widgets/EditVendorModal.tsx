@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 20,
     color: '#0F172A',
     letterSpacing: -0.4,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#334155',
     marginBottom: 6,
     letterSpacing: 0.5,
@@ -543,12 +543,12 @@ const styles = StyleSheet.create({
   },
   catChipText: {
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#334155',
   },
   catChipTextActive: {
     color: '#047A36',
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   photoPreviewBox: {
     borderRadius: 14,
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
   },
   photoActionText: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
   },
   noPhotoBox: {
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
   attachBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   attachBtnSecondary: {
     backgroundColor: '#FFFFFF',
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
   attachBtnSecondaryText: {
     color: '#0F172A',
     fontSize: 14,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   saveBtn: {
     backgroundColor: '#047A36',
@@ -632,6 +632,6 @@ const styles = StyleSheet.create({
   saveBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
   },
 });

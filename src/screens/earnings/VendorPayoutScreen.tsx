@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 26,
     color: '#111117',
     letterSpacing: -0.5,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
     letterSpacing: 0.8,
   },
@@ -373,11 +373,11 @@ const styles = StyleSheet.create({
   },
   verifiedTagText: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
   },
   balanceAmountText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 36,
     color: '#0F172A',
     letterSpacing: -1,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   actionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 15,
     color: '#0F172A',
     marginBottom: 12,
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   instantPayoutBtnText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13.5,
     color: '#FFFFFF',
   },
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 16,
     color: '#111117',
     letterSpacing: -0.2,
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   txAmount: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 20,
     color: '#047A36',
   },
@@ -541,12 +541,12 @@ const styles = StyleSheet.create({
   },
   txStatusText: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
   },
   txStatusTextProcessing: {
     fontSize: 12,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#B45309',
   },
   toastContainer: {
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   modalTitle: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 18,
     color: '#0F172A',
     marginBottom: 6,
@@ -639,17 +639,17 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   modalSummaryVal: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 14,
     color: '#0F172A',
   },
   modalSummaryValUpi: {
     fontSize: 12.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#047A36',
   },
   modalSummaryFree: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 12,
     color: '#059669',
   },
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   },
   modalCancelText: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#64748B',
   },
   modalConfirmBtn: {
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalConfirmText: {
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     fontSize: 13,
     color: '#FFFFFF',
   },

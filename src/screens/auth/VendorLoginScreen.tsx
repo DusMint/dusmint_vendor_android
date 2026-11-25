@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   brandWordLogo: {
     fontSize: 27,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     letterSpacing: -0.6,
   },
   brandDus: {
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   inputCaption: {
     fontSize: 13,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     letterSpacing: 0.8,
     color: '#334155',
     marginTop: 20,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   countryCode: {
     fontSize: 18,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     marginLeft: 8,
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 20,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     color: '#0F172A',
     padding: 0,
   },
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   continueBtnText: {
     color: '#FFFFFF',
     fontSize: 16.5,
-    fontFamily: 'PlusJakartaSans-SemiBold',
+    fontFamily: 'PlusJakartaSans-Medium',
     letterSpacing: 1,
   },
   termsNote: {
