@@ -698,18 +698,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   screenTitle: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 26,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontSize: 25,
     color: '#111117',
-    letterSpacing: -0.5,
+    letterSpacing: -0.4,
   },
   headerTimeText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#000000',
-    letterSpacing: -0.2,
+    fontFamily: 'Inter-Regular',
+    fontSize: 13.5,
+    color: '#334155',
+    letterSpacing: -0.1,
   },
   statusTogglePill: {
     flexDirection: 'row',
@@ -747,9 +745,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#D97706',
   },
   statusToggleText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'Inter-SemiBold',
     fontSize: 11,
-    fontWeight: '800',
     letterSpacing: 0.3,
   },
   statusToggleTextOpen: {
@@ -783,10 +780,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   contextHeroLabel: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#000000',
+    fontFamily: 'Inter-Medium',
+    fontSize: 11.5,
+    color: '#64748B',
     letterSpacing: 0.6,
     marginBottom: 2,
   },
@@ -795,17 +791,15 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   contextIncomeSymbol: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#000000',
+    fontFamily: 'Inter-Regular',
+    fontSize: 21,
+    color: '#0F172A',
     marginRight: 2,
   },
   contextIncomeValue: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#000000',
+    fontFamily: 'Inter-Regular',
+    fontSize: 31,
+    color: '#0F172A',
     letterSpacing: -0.5,
   },
   breakBtnPill: {
@@ -823,10 +817,9 @@ const styles = StyleSheet.create({
     borderColor: '#FDE68A',
   },
   breakBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'Inter-Medium',
     fontSize: 12,
-    fontWeight: '800',
-    color: '#000000',
+    color: '#1E293B',
   },
   breakBtnTextActive: {
     color: '#B45309',
@@ -863,17 +856,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   singleLineLabel: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'Inter-Regular',
     fontSize: 13,
-    fontWeight: '800',
-    color: '#000000',
+    color: '#334155',
     marginRight: 4,
   },
   singleLineVal: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#000000',
+    fontFamily: 'Inter-Medium',
+    fontSize: 14.5,
+    color: '#0F172A',
   },
   contextMetricDivider: {
     width: 1.5,
@@ -914,13 +905,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   tabLabel: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#334155',
+    fontFamily: 'Inter-Medium',
+    fontSize: 13,
+    color: '#475569',
   },
   tabLabelActive: {
+    fontFamily: 'Inter-SemiBold',
     color: '#047A36',
-    fontWeight: '800',
   },
   tabCountBadge: {
     backgroundColor: '#E2E8F0',
@@ -933,8 +924,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
   },
   tabCountText: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontSize: 11.5,
     color: '#1E293B',
   },
   tabCountTextActive: {
@@ -966,9 +957,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   emptyTitle: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'Inter-SemiBold',
     fontSize: 16,
-    fontWeight: '800',
     color: '#111117',
     marginBottom: 4,
     textAlign: 'center',
@@ -1008,9 +998,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   orderCodeText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 20,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontSize: 19,
     color: '#0F172A',
     letterSpacing: -0.3,
   },
@@ -1020,23 +1009,22 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   slotText: {
-    fontSize: 13.5,
-    color: '#334155',
-    fontWeight: '600',
+    fontFamily: 'Inter-Regular',
+    fontSize: 13,
+    color: '#475569',
   },
   payoutBox: {
     alignItems: 'flex-end',
   },
   payoutAmountText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 22,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontSize: 21,
     color: '#047A36',
     letterSpacing: -0.3,
   },
   payoutSubText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'Inter-Medium',
+    fontSize: 11.5,
     color: '#15803D',
     marginTop: 1,
   },
@@ -1072,8 +1060,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   itemName: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'Inter-Regular',
+    fontSize: 15,
     color: '#0F172A',
   },
   itemWeightBadge: {
@@ -1085,10 +1073,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   itemWeightText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontFamily: 'Inter-Regular',
+    fontSize: 14.5,
+    color: '#334155',
   },
 
   // Action Buttons
@@ -1109,9 +1096,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   missingItemBtnText: {
-    fontFamily: 'Metropolis-Bold',
+    fontFamily: 'Inter-Medium',
     fontSize: 14,
-    fontWeight: '800',
     color: '#DC2626',
   },
   primaryPackBtn: {
@@ -1142,11 +1128,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryPackBtnText: {
-    fontFamily: 'Metropolis-Bold',
-    fontSize: 15,
-    fontWeight: '800',
+    fontFamily: 'Inter-Medium',
+    fontSize: 14.5,
     color: '#FFFFFF',
-    letterSpacing: -0.2,
+    letterSpacing: -0.1,
   },
 
   // Ready & Delivered Status Strips

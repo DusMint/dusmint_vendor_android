@@ -6,10 +6,26 @@ import {
   Animated,
   TouchableOpacity,
   Text,
+  TextInput,
   ActivityIndicator,
   Modal,
   Vibration,
 } from 'react-native';
+
+// Enforce Inter-Regular as global default font & cap OS font scaling so every Android phone renders identically
+// @ts-ignore
+if (Text.defaultProps == null) Text.defaultProps = {};
+// @ts-ignore
+Text.defaultProps.maxFontSizeMultiplier = 1.15;
+// @ts-ignore
+Text.defaultProps.style = { fontFamily: 'Inter-Regular' };
+
+// @ts-ignore
+if (TextInput.defaultProps == null) TextInput.defaultProps = {};
+// @ts-ignore
+TextInput.defaultProps.maxFontSizeMultiplier = 1.15;
+// @ts-ignore
+TextInput.defaultProps.style = { fontFamily: 'Inter-Regular' };
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -296,22 +312,26 @@ function VendorTabs() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'Metropolis-Regular': require('./assets/font/Metropolis-Regular.otf'),
-    'Metropolis-Medium': require('./assets/font/Metropolis-Medium.otf'),
-    'Metropolis-SemiBold': require('./assets/font/Metropolis-SemiBold.otf'),
-    'Metropolis-Bold': require('./assets/font/Metropolis-Bold.otf'),
-    'Metropolis-ExtraBold': require('./assets/font/Metropolis-ExtraBold.otf'),
-    'Poppins-Regular': require('./assets/font/Metropolis-Regular.otf'),
-    'Poppins-Medium': require('./assets/font/Metropolis-Medium.otf'),
-    'Poppins-SemiBold': require('./assets/font/Metropolis-SemiBold.otf'),
-    'Poppins-Bold': require('./assets/font/Metropolis-Bold.otf'),
-    'Poppins_400Regular': require('./assets/font/Metropolis-Regular.otf'),
-    'Poppins_500Medium': require('./assets/font/Metropolis-Medium.otf'),
-    'Poppins_600SemiBold': require('./assets/font/Metropolis-SemiBold.otf'),
-    'Poppins_700Bold': require('./assets/font/Metropolis-Bold.otf'),
-    'NotoSans-Regular': require('./assets/font/Metropolis-Regular.otf'),
-    'NotoSans-Medium': require('./assets/font/Metropolis-Medium.otf'),
-    'NotoSans-Bold': require('./assets/font/Metropolis-Bold.otf'),
+    'Inter-Regular': require('./assets/font/Inter-Regular.ttf'),
+    'Inter-Medium': require('./assets/font/Inter-Medium.ttf'),
+    'Inter-SemiBold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Inter-Bold': require('./assets/font/Inter-Bold.ttf'),
+    'Metropolis-Regular': require('./assets/font/Inter-Regular.ttf'),
+    'Metropolis-Medium': require('./assets/font/Inter-Medium.ttf'),
+    'Metropolis-SemiBold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Metropolis-Bold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Metropolis-ExtraBold': require('./assets/font/Inter-Bold.ttf'),
+    'Poppins-Regular': require('./assets/font/Inter-Regular.ttf'),
+    'Poppins-Medium': require('./assets/font/Inter-Medium.ttf'),
+    'Poppins-SemiBold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Poppins-Bold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Poppins_400Regular': require('./assets/font/Inter-Regular.ttf'),
+    'Poppins_500Medium': require('./assets/font/Inter-Medium.ttf'),
+    'Poppins_600SemiBold': require('./assets/font/Inter-SemiBold.ttf'),
+    'Poppins_700Bold': require('./assets/font/Inter-SemiBold.ttf'),
+    'NotoSans-Regular': require('./assets/font/Inter-Regular.ttf'),
+    'NotoSans-Medium': require('./assets/font/Inter-Medium.ttf'),
+    'NotoSans-Bold': require('./assets/font/Inter-SemiBold.ttf'),
   });
 
   const selectedLanguage = useVendorAuthStore((s) => s.selectedLanguage);
