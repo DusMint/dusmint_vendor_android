@@ -117,8 +117,9 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       // 5. Merge matched data with local state so no rich fields (address/photo) are wiped
+      const currentPersisted = useVendorAuthStore.getState().activeVendor;
       if (matched) {
-        const base = useVendorAuthStore.getState().activeVendor || persistedVendor;
+        const base = currentPersisted;
         const merged: VendorProfileInfo = {
           ...base,
           ...matched,
@@ -135,14 +136,17 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         if (merged.shop_photo_urls && merged.shop_photo_urls.length > 0) {
           useVendorAuthStore.getState().setStorePhotoUri(merged.shop_photo_urls[0]);
         }
-        if (merged.is_open !== undefined) {
+        if (merged.is_open !== undefined && useVendorAuthStore.getState().isStoreOpen !== merged.is_open) {
           setStoreOpen(merged.is_open);
         }
-      } else if (persistedVendor) {
+      } else if (currentPersisted) {
         // Keep persisted vendor if server list doesn't match
-        setActiveVendor(persistedVendor);
-        if (persistedVendor.is_open !== undefined) {
-          setStoreOpen(persistedVendor.is_open);
+        setActiveVendor(currentPersisted);
+        if (
+          currentPersisted.is_open !== undefined &&
+          useVendorAuthStore.getState().isStoreOpen !== currentPersisted.is_open
+        ) {
+          setStoreOpen(currentPersisted.is_open);
         }
       }
     } catch (err) {
@@ -150,7 +154,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [user?.phone, user?.id, persistedVendor, setActiveVendorInStore, setStoreOpen]);
+  }, [user?.phone, user?.id, setActiveVendorInStore, setStoreOpen]);
 
   useEffect(() => {
     loadVendorProfile();

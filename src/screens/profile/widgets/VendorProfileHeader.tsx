@@ -159,10 +159,11 @@ export const VendorProfileHeader: React.FC<Props> = ({
             </Text>
           </View>
 
-          <Text style={styles.ownerText} numberOfLines={1}>
-            Owner: <Text style={styles.ownerBold}>{vendor?.owner_name || 'Partner'}</Text>
-            {Boolean(cleanPhone) && ` • ${cleanPhone}`}
-          </Text>
+          {Boolean(cleanPhone) && (
+            <Text style={styles.ownerText} numberOfLines={1}>
+              {cleanPhone}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
 

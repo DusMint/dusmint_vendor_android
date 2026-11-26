@@ -47,6 +47,7 @@ export const EditVendorModal: React.FC<Props> = ({
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
 
   const [showModal, setShowModal] = useState(visible);
+  const wasVisibleRef = useRef(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(600)).current;
 
@@ -60,7 +61,8 @@ export const EditVendorModal: React.FC<Props> = ({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (visible) {
+    if (visible && !wasVisibleRef.current) {
+      wasVisibleRef.current = true;
       setShowModal(true);
       fadeAnim.setValue(0);
       slideAnim.setValue(600);
@@ -93,7 +95,8 @@ export const EditVendorModal: React.FC<Props> = ({
         setPhotoUri(existingPhoto);
         setError('');
       }
-    } else {
+    } else if (!visible && wasVisibleRef.current) {
+      wasVisibleRef.current = false;
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
