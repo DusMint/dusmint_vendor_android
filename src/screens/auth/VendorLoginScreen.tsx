@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
   Keyboard,
-  KeyboardAvoidingView,
+  Animated,
+  useWindowDimensions,
+  LayoutChangeEvent,
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -22,10 +24,50 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const [containerHeight, setContainerHeight] = useState(windowHeight);
+  const keyboardOffsetAnim = useRef(new Animated.Value(0)).current;
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+
+  const onLayout = useCallback((e: LayoutChangeEvent) => {
+    setContainerHeight(e.nativeEvent.layout.height);
+  }, []);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      const kbHeight = e.endCoordinates.height;
+      const isNativeResized =
+        Platform.OS === 'android' && windowHeight - containerHeight > 100;
+      const targetOffset = isNativeResized
+        ? 0
+        : kbHeight + (Platform.OS === 'android' ? 6 : 0);
+
+      Animated.timing(keyboardOffsetAnim, {
+        toValue: targetOffset,
+        duration: Platform.OS === 'ios' ? (e.duration || 250) : 200,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    const hideSub = Keyboard.addListener(hideEvent, (e) => {
+      Animated.timing(keyboardOffsetAnim, {
+        toValue: 0,
+        duration: Platform.OS === 'ios' ? (e.duration || 200) : 160,
+        useNativeDriver: true,
+      }).start();
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [containerHeight, keyboardOffsetAnim, windowHeight]);
 
   const submitPhone = async (phoneDigits: string) => {
     if (phoneDigits.length < 10 || loading) return;
@@ -68,16 +110,13 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
   // when lifted smoothly above the software keyboard
   const bottomSheetPadding =
     Platform.OS === 'ios'
-      ? insets.bottom || 24
+      ? Math.max(insets.bottom, 24)
       : insets.bottom > 0
-      ? insets.bottom + 8
-      : 20;
+      ? insets.bottom + 14
+      : 24;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.keyboardAvoidRoot}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.keyboardAvoidRoot} onLayout={onLayout}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.screenContainer}>
           <StatusBar style="dark" />
@@ -93,10 +132,12 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
           <View style={styles.topSpacer} />
 
           {/* 3. Bottom Sheet Drawer Pinned Above Keypad */}
-          <View
+          <Animated.View
             style={[
               styles.sheetCard,
               {
+                paddingBottom: bottomSheetPadding,
+                transform: [{ translateY: Animated.multiply(keyboardOffsetAnim, -1) }],
               },
             ]}
           >
@@ -172,10 +213,10 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
             <Text style={styles.termsNote}>
               By continuing, you agree to DusMint's Partner Terms of Agreement
             </Text>
-          </View>
+          </Animated.View>
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
