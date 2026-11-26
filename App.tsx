@@ -13,18 +13,22 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-// Enforce Inter-Regular as global default font & cap OS font scaling so every Android phone renders identically
+// Enforce PlusJakartaSans-Regular as global default font & disable OS font scaling so every Android phone renders identically
 // @ts-ignore
 if (Text.defaultProps == null) Text.defaultProps = {};
 // @ts-ignore
-Text.defaultProps.maxFontSizeMultiplier = 1.15;
+Text.defaultProps.allowFontScaling = false;
+// @ts-ignore
+Text.defaultProps.maxFontSizeMultiplier = 1;
 // @ts-ignore
 Text.defaultProps.style = { fontFamily: 'PlusJakartaSans-Regular' };
 
 // @ts-ignore
 if (TextInput.defaultProps == null) TextInput.defaultProps = {};
 // @ts-ignore
-TextInput.defaultProps.maxFontSizeMultiplier = 1.15;
+TextInput.defaultProps.allowFontScaling = false;
+// @ts-ignore
+TextInput.defaultProps.maxFontSizeMultiplier = 1;
 // @ts-ignore
 TextInput.defaultProps.style = { fontFamily: 'PlusJakartaSans-Regular' };
 import { StatusBar } from 'expo-status-bar';

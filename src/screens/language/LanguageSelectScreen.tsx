@@ -226,7 +226,7 @@ export const LanguageSelectScreen: React.FC<{ navigation: any }> = ({ navigation
           onPress={handleContinue}
           style={styles.continueButton}
         >
-          <Text style={styles.continueButtonText}>{t.continue}</Text>
+          <Text style={styles.continueButtonText}>{t.continue.toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -331,21 +331,21 @@ const styles = StyleSheet.create({
     borderTopColor: '#F8FAFC',
   },
   continueButton: {
-    backgroundColor: '#22C55E',
-    paddingVertical: 16,
-    borderRadius: 18,
+    height: 54,
+    backgroundColor: '#047A36',
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#22C55E',
+    shadowColor: '#047A36',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowRadius: 8,
+    elevation: 3,
   },
   continueButtonText: {
     color: '#FFFFFF',
     fontFamily: 'PlusJakartaSans-Medium',
-    fontSize: 17,
-    letterSpacing: 0.5,
+    fontSize: 16.5,
+    letterSpacing: 1,
   },
 });
