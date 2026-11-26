@@ -160,12 +160,13 @@ Total Core Screens: **5 Operational Screens**
 ## 4. Typography Scale & Font Hierarchy
 
 ### Current Font Setup
-The app officially loads **Metropolis** fonts via `expo-font` in `App.tsx`:
-- `Metropolis-Regular` (400)
-- `Metropolis-Medium` (500)
-- `Metropolis-SemiBold` (600)
-- `Metropolis-Bold` (700)
-- `Metropolis-ExtraBold` (800)
+The app officially loads **Plus Jakarta Sans** (`assets/font/PlusJakartaSans-*.ttf`) in `App.tsx` via `expo-font`, and sets `PlusJakartaSans-Regular` as the global default on `Text` and `TextInput` (with `maxFontSizeMultiplier = 1.15`) so all Android devices render identically:
+- `PlusJakartaSans-Regular` (400) — Dates, subtitles, item names, quantities, stepper numbers, labels
+- `PlusJakartaSans-Medium` (500) — Screen headers (`Orders`, `Stock`), card titles (`#DM-8821`, item titles), prices, buttons
+- `PlusJakartaSans-SemiBold` (600) — Active tab / status pill emphasis only
+- `PlusJakartaSans-Bold` (700) — Hero display numbers only
+
+> **Android Rule:** Never combine `fontWeight: '700' | '800' | 'bold'` with a static `.ttf` `fontFamily`. Always pick the exact static `PlusJakartaSans-*` family with **no `fontWeight`** so Android never synthesizes fake double-bolding.
 
 ---
 
@@ -194,15 +195,14 @@ In a warehouse / store setting where the vendor needs to read orders from 2-3 fe
 
 #### Detailed Specification Table
 
-| Level | Size (`fontSize`) | Weight (`fontWeight`) | Font Family | Line Height | Usage in Seller App |
-|---|---|---|---|---|---|
-| **Metric Display** | `44px` | `900` / `800` | `Metropolis-Bold` | `48px` | Live scale weight readout on dark background |
-| **Hero Rupee** | `34px` | `800` (ExtraBold) | `Metropolis-Bold` | `38px` | Today's Net Earnings on dark navy card |
-| **Screen Title** | `20px` | `800` (Bold) | `Metropolis-Bold` | `26px` | Screen Top Titles |
-| **Card Heading** | `16px` | `700` (Bold) | `Metropolis-Bold` | `22px` | Shop Name, Order ID `#DM-20261102-YPYV` |
-| **Body Primary** | `13px` - `14px`| `600` / `700` | `Metropolis-Medium` | `18px` | Item names, Item prices, Button labels |
-| **Body Secondary**| `12px` | `500` (Medium) | `Metropolis-Regular`| `16px` | Cluster info, Hindi translations, Mandi rates |
-| **Micro Badge** | `10px` - `11px`| `800` (Bold) | `Metropolis-Bold` | `14px` | `ACTION REQUIRED`, `SEALED & READY`, Qty `1x` |
+| Level | Size (`fontSize`) | Font Family (No `fontWeight`) | Line Height | Usage in Seller App |
+|---|---|---|---|---|
+| **Hero Rupee** | `31px` | `PlusJakartaSans-Regular` | `36px` | Today's Income (`₹1,240`) on Orders & Earnings |
+| **Screen Title** | `25px` | `PlusJakartaSans-Medium` | `30px` | Screen Top Titles (`Orders`, `Stock`, `Earnings`, `Profile`) |
+| **Card Heading / Price** | `16px - 20px` | `PlusJakartaSans-Medium` | `22px` | Order ID `#DM-8821`, Item Name (`Farm Fresh White Eggs`), Prices (`₹48`) |
+| **Body Primary** | `13px - 15px` | `PlusJakartaSans-Regular` | `18px` | Order items (`Nashik Red Onion`), `3 kg`, `Total Orders:`, Dates |
+| **Buttons / Active Tabs** | `13px - 14.5px` | `PlusJakartaSans-Medium` | `18px` | `Start Packing`, `Add Vegetable...`, Active tab labels |
+| **Micro Badge** | `10.5px - 12px` | `PlusJakartaSans-Regular` | `14px` | Quick chips (`-1`, `+1`), `PCS`/`KG`, `TODAY'S INCOME` |
 
 ---
 

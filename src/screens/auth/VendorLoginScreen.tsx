@@ -71,12 +71,12 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
       ? insets.bottom || 24
       : insets.bottom > 0
       ? insets.bottom + 8
-      : 16) + 120;
+      : 20;
 
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidRoot}
-      behavior="padding"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.screenContainer}>
