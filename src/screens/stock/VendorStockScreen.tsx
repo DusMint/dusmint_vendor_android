@@ -23,6 +23,7 @@ import { dusmintApi } from '../../api-client/client';
 import { VendorStockItem } from '../../api-client/types';
 import { AddMasterCatalogueModal } from './widgets/AddMasterCatalogueModal';
 import { useVendorStockStore } from '../../state/useVendorStockStore';
+import { subscribeVendorInventory } from '../../services/realtimeInventory';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
 
 // Categories Filter - Limited strictly to Vegetables, Fruits, Meat, Dairy
@@ -666,10 +667,76 @@ export const VendorStockScreen: React.FC = () => {
     loadStock();
   }, [loadStock]);
 
+  // Real-time stock sync (zero polling): reflects order stock decrements or multi-device edits
+  useEffect(() => {
+    if (!activeVendor?.id) return;
+    return subscribeVendorInventory(
+      activeVendor.id,
+      ({ action, item }) => {
+        if (!item?.id) return;
+        setItems((prev) => {
+          if (action === 'deleted') {
+            return prev.filter((i) => i.id !== item.id);
+          }
+          const exists = prev.some((i) => i.id === item.id);
+          if (exists) {
+            return prev.map((i) => (i.id === item.id ? { ...i, ...item } : i));
+          }
+          if (action === 'added') {
+            return [item as VendorStockItem, ...prev];
+          }
+          return prev;
+        });
+      },
+      () => {
+        loadStock();
+      }
+    );
+  }, [activeVendor?.id, loadStock, setItems]);
+
   const onRefresh = () => {
     setRefreshing(true);
     loadStock();
   };
+
+  // Debounce rapid +/- stock taps per item (350ms) to cut redundant API calls & battery use
+  const stockSyncTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const pendingStockPayloadRef = useRef<
+    Record<string, { stockKg?: number; stockGrams?: number; inStock: boolean }>
+  >({});
+
+  const scheduleStockSync = useCallback(
+    (itemId: string, payload: { stockKg?: number; stockGrams?: number; inStock: boolean }) => {
+      pendingStockPayloadRef.current[itemId] = payload;
+      if (stockSyncTimersRef.current[itemId]) {
+        clearTimeout(stockSyncTimersRef.current[itemId]);
+      }
+      stockSyncTimersRef.current[itemId] = setTimeout(() => {
+        const finalPayload = pendingStockPayloadRef.current[itemId];
+        delete stockSyncTimersRef.current[itemId];
+        delete pendingStockPayloadRef.current[itemId];
+        if (finalPayload) {
+          dusmintApi.updateVendorStock(itemId, finalPayload).catch(() => {});
+        }
+      }, 350);
+    },
+    []
+  );
+
+  // Flush any pending debounced stock updates on unmount
+  useEffect(() => {
+    return () => {
+      Object.entries(stockSyncTimersRef.current).forEach(([id, timer]) => {
+        clearTimeout(timer);
+        const finalPayload = pendingStockPayloadRef.current[id];
+        if (finalPayload) {
+          dusmintApi.updateVendorStock(id, finalPayload).catch(() => {});
+        }
+      });
+      stockSyncTimersRef.current = {};
+      pendingStockPayloadRef.current = {};
+    };
+  }, []);
 
   // Adjust Weight with 1000g Rollover Math
   // Formula: totalGrams = curKg * 1000 + curGrams + deltaKg * 1000 + deltaGrams;
@@ -692,7 +759,7 @@ export const VendorStockScreen: React.FC = () => {
               const inStock = nextVal > 0;
               const unitLabel = item.unit.includes('dozen') ? 'dozen' : 'pcs';
               updatedSummary = `${item.nameEn}: ${nextVal} ${unitLabel}`;
-              dusmintApi.updateVendorStock(itemId, { stockKg: nextVal, inStock }).catch(() => {});
+              scheduleStockSync(itemId, { stockKg: nextVal, inStock });
               return {
                 ...item,
                 stockKg: nextVal,
@@ -709,7 +776,7 @@ export const VendorStockScreen: React.FC = () => {
             const inStock = nextKg > 0 || nextG > 0;
 
             updatedSummary = `${item.nameEn}: ${formatTotalStockBadge(nextKg, nextG, item.unit)}`;
-            dusmintApi.updateVendorStock(itemId, { stockKg: nextKg, stockGrams: nextG, inStock }).catch(() => {});
+            scheduleStockSync(itemId, { stockKg: nextKg, stockGrams: nextG, inStock });
 
             return {
               ...item,
@@ -726,7 +793,7 @@ export const VendorStockScreen: React.FC = () => {
         showToast(updatedSummary);
       }
     },
-    [showToast]
+    [showToast, scheduleStockSync]
   );
 
   // Add new item from Master Catalogue Database and persist to riksho_backend
