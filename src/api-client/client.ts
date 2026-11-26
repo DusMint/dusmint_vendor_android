@@ -277,13 +277,32 @@ export class DusmintApiClient {
       shopPhotoUrls?: string[];
     }
   ): Promise<{ success: boolean; vendor: any }> {
-    let result: any = null;
+    let backendError: any = null;
     try {
-      const res = await this.client.patch('/vendor/profile', { vendorId, ...payload });
-      result = res.data;
-    } catch {}
+      const res = await this.client.patch(
+        '/vendor/profile',
+        { vendorId, ...payload },
+        { timeout: 30000 }
+      );
+      if (res.data && res.data.success) {
+        return res.data;
+      }
+    } catch (err: any) {
+      backendError = err;
+    }
 
-    // Direct Supabase update fallback so database updates immediately
+    const hasInlineOrLocalPhoto = Boolean(
+      payload.shopPhotoUrls?.some((u) => u.startsWith('data:') || u.startsWith('file:'))
+    );
+    if (hasInlineOrLocalPhoto) {
+      throw new Error(
+        backendError?.response?.data?.message ||
+          backendError?.message ||
+          'Failed to upload shop photo to server. Please check connection and try again.'
+      );
+    }
+
+    // Direct Supabase fallback only when there is no inline/local photo upload needed
     try {
       const dbPayload: any = {};
       if (payload.shopName) dbPayload.name = payload.shopName;
@@ -312,7 +331,11 @@ export class DusmintApiClient {
       console.warn('Direct Supabase vendor patch error:', err);
     }
 
-    return result || { success: true, vendor: payload };
+    throw new Error(
+      backendError?.response?.data?.message ||
+        backendError?.message ||
+        'Could not save profile changes to server'
+    );
   }
 
   async getVendorOrders(vendorId?: string): Promise<VendorOrderPart[]> {

@@ -138,7 +138,7 @@ export const EditVendorModal: React.FC<Props> = ({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 0.6,
+        quality: 0.35,
         base64: true,
       };
 
@@ -340,7 +340,12 @@ export const EditVendorModal: React.FC<Props> = ({
                 <Text style={styles.label}>Shop Picture</Text>
                 {photoUri ? (
                   <View style={styles.photoPreviewBox}>
-                    <Image source={{ uri: photoUri }} style={styles.editPhotoPreview} resizeMode="cover" />
+                    <Image
+                      source={{ uri: photoUri }}
+                      style={styles.editPhotoPreview}
+                      resizeMode="cover"
+                      onError={() => setPhotoUri(null)}
+                    />
                     <View style={styles.photoBtnRow}>
                       <TouchableOpacity
                         style={styles.photoActionBtn}

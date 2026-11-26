@@ -130,7 +130,8 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 0.8,
+        quality: 0.35,
+        base64: true,
       };
 
       let result;
@@ -151,7 +152,10 @@ export const VendorOnboardingScreen: React.FC<VendorOnboardingProps> = ({
       }
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const pickedUri = result.assets[0].uri;
+        const asset = result.assets[0];
+        const pickedUri = asset.base64
+          ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`
+          : asset.uri;
         setShopPhotoUri(pickedUri);
         useVendorAuthStore.getState().setStorePhotoUri(pickedUri);
       }

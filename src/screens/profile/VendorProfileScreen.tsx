@@ -345,6 +345,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         onClose={() => setIsEditModalOpen(false)}
         onProfileUpdated={(updated) => {
           setActiveVendor(updated);
+          setActiveVendorInStore(updated);
           showToast('Dukaan profile updated successfully');
         }}
       />
