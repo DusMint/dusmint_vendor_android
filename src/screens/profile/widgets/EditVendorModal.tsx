@@ -44,7 +44,7 @@ export const EditVendorModal: React.FC<Props> = ({
   onProfileUpdated,
 }) => {
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 24 : 16);
+  const bottomInset = Math.max(insets.bottom + 12, Platform.OS === 'android' ? 28 : 20);
 
   const [showModal, setShowModal] = useState(visible);
   const wasVisibleRef = useRef(false);
@@ -138,7 +138,8 @@ export const EditVendorModal: React.FC<Props> = ({
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 0.85,
+        quality: 0.6,
+        base64: true,
       };
 
       let result;
@@ -159,7 +160,10 @@ export const EditVendorModal: React.FC<Props> = ({
       }
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const picked = result.assets[0].uri;
+        const asset = result.assets[0];
+        const picked = asset.base64
+          ? `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`
+          : asset.uri;
         setPhotoUri(picked);
       }
     } catch {
@@ -198,8 +202,15 @@ export const EditVendorModal: React.FC<Props> = ({
         shopPhotoUrls: photoUri ? [photoUri] : undefined,
       });
 
-      if (photoUri) {
-        useVendorAuthStore.getState().setStorePhotoUri(photoUri);
+      const persistedPhotos =
+        res.vendor?.shop_photo_urls && res.vendor.shop_photo_urls.length > 0
+          ? res.vendor.shop_photo_urls
+          : photoUri
+          ? [photoUri]
+          : vendor.shop_photo_urls;
+
+      if (persistedPhotos && persistedPhotos.length > 0) {
+        useVendorAuthStore.getState().setStorePhotoUri(persistedPhotos[0]);
       }
 
       const updatedVendor: VendorProfileInfo = {
@@ -210,7 +221,7 @@ export const EditVendorModal: React.FC<Props> = ({
         bank_or_upi: bankOrUpi.trim(),
         category,
         address: address.trim() || vendor.address,
-        shop_photo_urls: photoUri ? [photoUri] : vendor.shop_photo_urls,
+        shop_photo_urls: persistedPhotos,
       };
 
       onProfileUpdated(updatedVendor);
@@ -250,6 +261,7 @@ export const EditVendorModal: React.FC<Props> = ({
           ]}
         >
           <KeyboardAvoidingView
+            style={{ maxHeight: '100%', flexShrink: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
             {/* Header */}
@@ -272,6 +284,7 @@ export const EditVendorModal: React.FC<Props> = ({
             ) : null}
 
             <ScrollView
+              style={{ flexShrink: 1 }}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
@@ -320,36 +333,6 @@ export const EditVendorModal: React.FC<Props> = ({
                   placeholderTextColor="#94A3B8"
                   multiline
                 />
-              </View>
-
-              {/* Category Pills */}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Category</Text>
-                <View style={styles.categoryRow}>
-                  {CATEGORIES.map((cat) => {
-                    const isSelected = category.toLowerCase() === cat.id;
-                    return (
-                      <TouchableOpacity
-                        key={cat.id}
-                        style={[
-                          styles.catChip,
-                          isSelected && styles.catChipActive,
-                        ]}
-                        onPress={() => setCategory(cat.id)}
-                        activeOpacity={0.8}
-                      >
-                        <Text
-                          style={[
-                            styles.catChipText,
-                            isSelected && styles.catChipTextActive,
-                          ]}
-                        >
-                          {cat.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
               </View>
 
               {/* Shop Picture */}
@@ -418,7 +401,10 @@ export const EditVendorModal: React.FC<Props> = ({
                 </Text>
               </View>
 
-              {/* Save Button */}
+            </ScrollView>
+
+            {/* Fixed Footer Save Button */}
+            <View style={{ paddingTop: 12 }}>
               <TouchableOpacity
                 style={[styles.saveBtn, isSaving && styles.saveBtnDisabled]}
                 onPress={handleSave}
@@ -431,7 +417,7 @@ export const EditVendorModal: React.FC<Props> = ({
                   <Text style={styles.saveBtnText}>Save Changes</Text>
                 )}
               </TouchableOpacity>
-            </ScrollView>
+            </View>
           </KeyboardAvoidingView>
         </Animated.View>
       </View>
