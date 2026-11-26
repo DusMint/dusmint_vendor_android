@@ -210,10 +210,10 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
         targetVendorId ? dusmintApi.getVendorEarnings(targetVendorId).catch(() => null) : Promise.resolve(null),
       ]);
 
-      if (earnings && typeof earnings.todaySalesPaise === 'number') {
+      if (earnings && typeof earnings.todaySalesPaise === 'number' && earnings.todaySalesPaise > 0) {
         setTodayIncome(Math.round(earnings.todaySalesPaise / 100));
-      } else if (!isDemoVendor) {
-        setTodayIncome(0);
+      } else {
+        setTodayIncome(isDemoVendor ? 1240 : 0);
       }
 
       if (data && data.length > 0) {
@@ -230,18 +230,6 @@ export const VendorOrdersScreen: React.FC<{ navigation: any }> = ({ navigation }
       } else if (!isDemoVendor) {
         setOrders([]);
         useVendorAuthStore.getState().setPendingOrdersCount(0);
-      }
-
-      // Sync Today's Income from backend (demo ₹1,240 fallback ONLY for test number 9876543210)
-      try {
-        const earnings = await dusmintApi.getVendorEarnings(targetVendorId || undefined);
-        if (earnings && typeof earnings.todaySalesPaise === 'number' && earnings.todaySalesPaise > 0) {
-          setTodayIncome(Math.round(earnings.todaySalesPaise / 100));
-        } else {
-          setTodayIncome(isDemoVendor ? 1240 : 0);
-        }
-      } catch {
-        setTodayIncome(isDemoVendor ? 1240 : 0);
       }
     } catch {
       setTodayIncome(isDemoVendor ? 1240 : 0);

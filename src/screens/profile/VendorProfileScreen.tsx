@@ -217,7 +217,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
     if (navigation?.reset) {
       navigation.reset({
         index: 0,
-        routes: [{ name: 'VendorLogin' }],
+        routes: [{ name: 'LanguageSelect' }],
       });
     }
   };

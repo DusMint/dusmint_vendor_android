@@ -177,6 +177,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
           user: null,
           activeVendor: null,
           storePhotoUri: null,
+          selectedLanguage: null,
           isAuthenticated: false,
           hasActiveVendor: false,
         });
