@@ -141,12 +141,19 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
               },
             ]}
           >
-            {/* 1. DusMint Word Logo */}
+            {/* 1. DusMint Word Logo + Change Language Quick Link */}
             <View style={styles.wordLogoRow}>
               <Text style={styles.brandWordLogo}>
                 <Text style={styles.brandDus}>dus</Text>
                 <Text style={styles.brandMint}>mint</Text>
               </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('LanguageSelect')}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.changeLangLink}>Change Language</Text>
+              </TouchableOpacity>
             </View>
 
             {/* 2. Unbolded single-line subtext */}
@@ -252,7 +259,16 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   wordLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
+  },
+  changeLangLink: {
+    fontSize: 13,
+    fontFamily: 'PlusJakartaSans-Medium',
+    color: '#047A36',
+    textDecorationLine: 'underline',
   },
   brandWordLogo: {
     fontSize: 27,

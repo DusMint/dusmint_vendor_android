@@ -157,6 +157,7 @@ export const VendorProfileHeader: React.FC<Props> = ({
             <Text style={styles.userName} numberOfLines={1}>
               {vendor?.name || 'My Dukaan'}
             </Text>
+            <Ionicons name="pencil-outline" size={16} color="#047A36" style={{ marginLeft: 8 }} />
           </View>
 
           {Boolean(cleanPhone) && (

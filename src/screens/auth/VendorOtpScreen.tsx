@@ -205,7 +205,10 @@ export const VendorOtpScreen: React.FC<{ route: any; navigation: any }> = ({ rou
               <OtpInputBoxes
                 length={6}
                 value={otp}
-                onChange={setOtp}
+                onChange={(val) => {
+                  setOtp(val);
+                  if (error) setError('');
+                }}
                 hasError={Boolean(error)}
                 onComplete={handleVerify}
                 autoFocus={true}
