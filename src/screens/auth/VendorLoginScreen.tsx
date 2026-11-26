@@ -67,7 +67,7 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
   // Riksho-style bottom padding with negative margin to ensure continuous backdrop
   // when lifted smoothly above the software keyboard
   const bottomSheetPadding =
-    (Platform.OS === 'ios'
+    Platform.OS === 'ios'
       ? insets.bottom || 24
       : insets.bottom > 0
       ? insets.bottom + 8
@@ -97,8 +97,6 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
             style={[
               styles.sheetCard,
               {
-                paddingBottom: bottomSheetPadding,
-                marginBottom: -120,
               },
             ]}
           >

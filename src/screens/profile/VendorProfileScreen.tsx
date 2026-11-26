@@ -8,6 +8,8 @@ import {
   RefreshControl,
   Alert,
   Animated,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useVendorAuthStore } from '../../state/useVendorAuthStore';
@@ -40,6 +42,7 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
   const [activeVendor, setActiveVendor] = useState<VendorProfileInfo | null>(persistedVendor);
   const [refreshing, setRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
   // Detail Sheet State (opened when menu option is pressed)
@@ -205,26 +208,18 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   // Log Out Confirmation
   const handleLogout = () => {
-    Alert.alert(
-      'Log Out from Terminal',
-      'Are you sure you want to log out of DusMint Partner Terminal?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: () => {
-            logout();
-            if (navigation?.reset) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'VendorLogin' }],
-              });
-            }
-          },
-        },
-      ]
-    );
+    setIsLogoutModalOpen(true);
+  };
+
+  const confirmLogout = () => {
+    setIsLogoutModalOpen(false);
+    logout();
+    if (navigation?.reset) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'VendorLogin' }],
+      });
+    }
   };
 
   // Clean, straightforward menu items in plain English
@@ -350,6 +345,42 @@ export const VendorProfileScreen: React.FC<Props> = ({ navigation }) => {
         }}
       />
 
+      {/* Custom Branded Log Out Modal */}
+      <Modal
+        visible={isLogoutModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsLogoutModalOpen(false)}
+      >
+        <View style={styles.logoutBackdrop}>
+          <View style={styles.logoutCard}>
+            <View style={styles.logoutIconCircle}>
+              <Ionicons name="log-out-outline" size={24} color="#DC2626" />
+            </View>
+            <Text style={styles.logoutTitle}>Log out?</Text>
+            <Text style={styles.logoutSubtitle}>
+              You can sign back in anytime with your mobile number.
+            </Text>
+            <View style={styles.logoutActionsRow}>
+              <TouchableOpacity
+                style={styles.logoutCancelBtn}
+                onPress={() => setIsLogoutModalOpen(false)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.logoutCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.logoutConfirmBtn}
+                onPress={confirmLogout}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.logoutConfirmText}>Log Out</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Sleek Floating Toast Pill */}
       {toastMessage && (
         <Animated.View
@@ -398,5 +429,80 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontFamily: 'PlusJakartaSans-Medium',
+  },
+  logoutBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.48)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 28,
+  },
+  logoutCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.14,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  logoutIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  logoutTitle: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 18,
+    color: '#0F172A',
+    marginBottom: 6,
+  },
+  logoutSubtitle: {
+    fontFamily: 'PlusJakartaSans-Regular',
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 22,
+  },
+  logoutActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  logoutCancelBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutCancelText: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 14,
+    color: '#0F172A',
+  },
+  logoutConfirmBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#DC2626',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutConfirmText: {
+    fontFamily: 'PlusJakartaSans-Medium',
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 });
