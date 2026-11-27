@@ -112,8 +112,8 @@ export const VendorLoginScreen: React.FC<{ navigation: any }> = ({ navigation })
     Platform.OS === 'ios'
       ? Math.max(insets.bottom, 24)
       : insets.bottom > 0
-      ? insets.bottom + 14
-      : 24;
+        ? insets.bottom + 14
+        : 24;
 
   return (
     <View style={styles.keyboardAvoidRoot} onLayout={onLayout}>

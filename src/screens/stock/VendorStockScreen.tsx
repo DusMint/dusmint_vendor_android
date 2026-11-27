@@ -652,8 +652,31 @@ export const VendorStockScreen: React.FC = () => {
           };
         });
         setItems(merged);
+      } else if (isDemoVendor && vendorId) {
+        // Seed demo vendor's initial stock into Supabase items table once so Customer App stays 100% synced
+        const seededResults = await Promise.all(
+          INITIAL_STORE_STOCK.map((seedItem) =>
+            dusmintApi
+              .addVendorStock(vendorId, {
+                nameEn: seedItem.nameEn,
+                nameHi: seedItem.nameHi,
+                category: seedItem.category,
+                unit: seedItem.unit,
+                pricePaise: seedItem.pricePaise,
+                mrpPaise: seedItem.mrpPaise,
+                isInStock: seedItem.isInStock,
+                photoUrl: seedItem.photoUrl,
+                stockKg: seedItem.stockKg,
+                stockGrams: seedItem.stockGrams,
+              })
+              .then((res) => (res?.item ? res.item : null))
+              .catch(() => null)
+          )
+        );
+        const validSeeded = seededResults.filter((x): x is VendorStockItem => Boolean(x?.id));
+        setItems(validSeeded.length > 0 ? validSeeded : INITIAL_STORE_STOCK);
       } else {
-        setItems(isDemoVendor ? INITIAL_STORE_STOCK : []);
+        setItems([]);
       }
     } catch {
       setItems(isDemoVendor ? INITIAL_STORE_STOCK : []);
@@ -818,11 +841,12 @@ export const VendorStockScreen: React.FC = () => {
         });
         if (res?.item?.id) {
           setItems((prev) =>
-            prev.map((it) => (it.id === tempId ? { ...it, id: res.item!.id } : it))
+            prev.map((it) => (it.id === tempId ? { ...it, ...res.item!, id: res.item!.id } : it))
           );
         }
       } catch {
-        // Optimistic UI remains intact
+        setItems((prev) => prev.filter((it) => it.id !== tempId));
+        showToast('Could not save item to server. Please try again.');
       }
     }
   };
