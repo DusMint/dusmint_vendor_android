@@ -639,7 +639,15 @@ export const VendorStockScreen: React.FC = () => {
 
   const loadStock = useCallback(async () => {
     try {
-      const vendorId = activeVendor?.id;
+      let vendorId = activeVendor?.id;
+      if (!vendorId && user?.phone) {
+        const cleanPhone = user.phone.replace(/\D/g, '').slice(-10);
+        const profile = await dusmintApi.getMyVendorProfile(cleanPhone).catch(() => null);
+        if (profile?.id) {
+          vendorId = profile.id;
+          useVendorAuthStore.getState().setActiveVendor(profile);
+        }
+      }
       const data = vendorId ? await dusmintApi.getVendorStock(vendorId) : [];
       if (data && data.length > 0) {
         const merged = data.map((serverItem) => {
@@ -825,29 +833,43 @@ export const VendorStockScreen: React.FC = () => {
     setItems((prev) => [newItem, ...prev]);
     showToast(`${newItem.nameEn} added (${formatTotalStockBadge(newItem.stockKg ?? 0, newItem.stockGrams ?? 0, newItem.unit)})`);
 
-    if (activeVendor?.id) {
-      try {
-        const res = await dusmintApi.addVendorStock(activeVendor.id, {
-          nameEn: newItem.nameEn,
-          nameHi: newItem.nameHi,
-          category: newItem.category,
-          unit: newItem.unit,
-          pricePaise: newItem.pricePaise,
-          mrpPaise: newItem.mrpPaise,
-          isInStock: newItem.isInStock,
-          photoUrl: newItem.photoUrl,
-          stockKg: newItem.stockKg,
-          stockGrams: newItem.stockGrams,
-        });
-        if (res?.item?.id) {
-          setItems((prev) =>
-            prev.map((it) => (it.id === tempId ? { ...it, ...res.item!, id: res.item!.id } : it))
-          );
-        }
-      } catch {
-        setItems((prev) => prev.filter((it) => it.id !== tempId));
-        showToast('Could not save item to server. Please try again.');
+    let vendorId = activeVendor?.id;
+    if (!vendorId && user?.phone) {
+      const cleanPhone = user.phone.replace(/\D/g, '').slice(-10);
+      const profile = await dusmintApi.getMyVendorProfile(cleanPhone).catch(() => null);
+      if (profile?.id) {
+        vendorId = profile.id;
+        useVendorAuthStore.getState().setActiveVendor(profile);
       }
+    }
+
+    if (!vendorId) {
+      setItems((prev) => prev.filter((it) => it.id !== tempId));
+      showToast('Shop profile still loading. Please try again in a second.');
+      return;
+    }
+
+    try {
+      const res = await dusmintApi.addVendorStock(vendorId, {
+        nameEn: newItem.nameEn,
+        nameHi: newItem.nameHi,
+        category: newItem.category,
+        unit: newItem.unit,
+        pricePaise: newItem.pricePaise,
+        mrpPaise: newItem.mrpPaise,
+        isInStock: newItem.isInStock,
+        photoUrl: newItem.photoUrl,
+        stockKg: newItem.stockKg,
+        stockGrams: newItem.stockGrams,
+      });
+      if (res?.item?.id) {
+        setItems((prev) =>
+          prev.map((it) => (it.id === tempId ? { ...it, ...res.item!, id: res.item!.id } : it))
+        );
+      }
+    } catch {
+      setItems((prev) => prev.filter((it) => it.id !== tempId));
+      showToast('Could not save item to server. Please try again.');
     }
   };
 

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { NativeModules } from 'react-native';
 import { dusmintApi } from '../api-client/client';
 import { VendorProfileInfo } from '../api-client/types';
+import { useVendorStockStore } from './useVendorStockStore';
 
 export interface VendorUser {
   id: string;
@@ -172,6 +173,7 @@ export const useVendorAuthStore = create<VendorAuthState>()(
 
       logout: () => {
         dusmintApi.setAuthToken(null);
+        useVendorStockStore.getState().setItems([]);
         set({
           token: null,
           user: null,
